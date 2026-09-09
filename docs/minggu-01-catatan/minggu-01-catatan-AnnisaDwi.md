@@ -14,43 +14,47 @@
 
 2. Buka `bootstrap/app.php.` Identifikasi bagian mana yang mengurus route, mana yang mengurus middleware, mana yang mengurus exception.
 
-**Jawaban:** 
+**Jawaban:** ada 3 yaitu:
+* `withRouting`: mengatur route
+* `withMiddleware`: mengatur middleware
+* `withExceptions`: mengatur error
 
 3. Buka `routes/web.php.` Temukan route yang menghasilkan halaman selamat datang. Ubah teksnya, muat ulang browser, pastikan berubah.
 
-**Jawaban:**
+**Jawaban:** Bisa di lihat pada `routes/web.php` dimana terdapat route yang digunain untuk menampilkan halaman welcome, yaitu
+
+```php
+Route::get('/', function () {
+    return view('welcome');
+});
+```
+Dari welcome saya menggantikan menjadi "hallo". Setelah file disimpan dan browser direferesh, terdapat tampilan "hallo"
 
 4. Jalankan `php artisan route:list.` Cocokkan keluarannya dengan isi `routes/web.php.`
 
-**Jawaban:**
+**Jawaban:** 
+
+hasil terminal:
+```text  
+GET|HEAD  / .................. routes/web.php:5
+  GET|HEAD  storage/{path} storage.local › vendo…
+  PUT       storage/{path} storage.local.upload …
+  GET|HEAD  up vendor/laravel/framework/src/Illu…
+```
+routes/web.php:
+```text
+<?php
+
+use Illuminate\Support\Facades\Route;
+
+Route::get('/', function () {
+    return view('welcome');
+});
+```
 
 ---
 
 ### Break
-[Tulis soal di sini]
-
-**Jawaban:** [isi jawaban]
-
-**Pembahasan:** [opsional]
-
----
-
-## Bagian B — [Nama Sub Bagian, mis. Isian Singkat]
-
-### Soal B1
-[Tulis soal di sini]
-
-**Jawaban:** [isi jawaban]
-
----
-
-### Soal B2
-[Tulis soal di sini]
-
-**Jawaban:** [isi jawaban]
-
----
-
 
 
 
