@@ -70,6 +70,7 @@
     <div class="description-card">
         <h2 class="description-title">📝 Deskripsi Mata Kuliah</h2>
         <p class="description-text">
+            <!-- {!! $course['deskripsi'] !!} -->
             {{ $course['deskripsi'] }}
         </p>
     </div>

@@ -89,17 +89,21 @@
                     </span>
                 </div>
 
-                {{--
-                    Tautan ke halaman detail.
-                    route('courses.show', $course['id']) menghasilkan URL seperti /courses/1
+                {{-- ═══════════════════════════════════════════
+                    DEMO: Perbandingan route() vs Hardcode
+                    URI sudah diubah ke /mata-kuliah/{id} di web.php
+                ═══════════════════════════════════════════ --}}
 
-                    KENAPA route() bukan href="/courses/..."?
-                    → Agar tidak hardcode URL. Jika URI diubah di web.php,
-                      tautan ini otomatis menyesuaikan.
-                --}}
+                {{-- ✅ PAKAI route() — otomatis ikut berubah --}}
                 <a href="{{ route('courses.show', $course['id']) }}" class="course-link">
                     Lihat Detail
                     <span class="course-link-arrow">→</span>
+                </a>
+
+                <!-- {{-- HARDCODE --}}
+                <a href="/courses/{{ $course['id'] }}" class="course-link" style="background:#ef4444; margin-top:6px;">
+                    Hardcode /courses/ → klik ini (broken!)
+                    <span class="course-link-arrow">→</span> -->
                 </a>
             </div>
         @endforeach

@@ -25,5 +25,5 @@ NIM : 10241005
 | Pindahkan `/courses/{course}` ke ATAS `/courses/create`, lalu buka /courses/create |Akan terjadi error | Masuk ke halaman teks putih dengan tulisan "Halaman Form Tambah Mata Kuliah". |
 | Ganti `{{ $nama }}` menjadi `{!! $nama !!}`, isi `$nama` dengan `<script>alert('XSS')</script>` | Muncul peringatan | Muncul notifikasi XSS |
 | Hapus `@vite(...)` dari layout| Tampilan akan menjadi seperti html biasa tanpa hiasan | Muncul error kdoe 500 dan aset tidak dapat dimuat |
-| Hentikan npm run dev lalu muat ulang halaman |aset tidak bisa diakses, muncul error 404 | Baris 7, Data 3 |
-| Baris 7, Data 1 | Baris 7, Data 2 | Baris 7, Data 3 |
+| Hentikan npm run dev lalu muat ulang halaman |aset tidak bisa diakses, muncul error 404 | Halaman error dan menampilkan `ViteManifestNotFoundException`yang menunjukkan bahwa aset tidak dapat dimuat |
+| Panggil `route('courses.show')` tanpa mengirim parameter | Menampilkan error, kode 500 dan `Route [courses.show] not defined`. | Menampilkan error, kode 500 dan `Route [courses.show] not defined`. |
