@@ -35,9 +35,10 @@ Route::get('/tentang', function () {
 Route::get('/courses', [CourseController::class, 'index'])
     ->name('courses.index');
 
+    // Route::get('/courses/create', [CourseController::class, 'create'])
+    // ->name('courses.create');
 // GET /courses/{course} → Detail satu mata kuliah
 // {course} adalah parameter dinamis (ID mata kuliah)
 Route::get('/courses/{course}', [CourseController::class, 'show'])
     ->name('courses.show');
-
 
