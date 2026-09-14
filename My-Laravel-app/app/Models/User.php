@@ -4,13 +4,16 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, SoftDeletes;
 
     /**
      * The attributes that are mass assignable.
@@ -21,6 +24,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'nim_nip',
     ];
 
     /**
@@ -43,6 +47,45 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'deleted_at' => 'datetime',
         ];
+    }
+
+    /* ------------------------------------------------------------------ *
+     |  Relations (§4.3)
+     * ------------------------------------------------------------------ */
+
+    /**
+     * Mata kuliah yang diajar (sebagai dosen).
+     */
+    public function taughtCourses(): HasMany
+    {
+        return $this->hasMany(Course::class, 'lecturer_id');
+    }
+
+    /**
+     * Mata kuliah yang diikuti (sebagai mahasiswa) — pivot course_user.
+     */
+    public function courses(): BelongsToMany
+    {
+        return $this->belongsToMany(Course::class)
+                    ->withPivot('enrolled_at')
+                    ->withTimestamps();
+    }
+
+    /**
+     * Submission tugas yang dikumpulkan.
+     */
+    public function submissions(): HasMany
+    {
+        return $this->hasMany(Submission::class);
+    }
+
+    /**
+     * Nilai yang diberikan (sebagai dosen/grader).
+     */
+    public function gradesGiven(): HasMany
+    {
+        return $this->hasMany(Grade::class, 'graded_by');
     }
 }
