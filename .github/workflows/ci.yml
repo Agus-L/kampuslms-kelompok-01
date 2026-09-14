@@ -1,0 +1,97 @@
+name: CI — KampusLMS
+
+on:
+  push:
+    branches: ["dev", "main", "liberty-1708"]
+  pull_request:
+    branches: ["dev", "main"]
+
+defaults:
+  run:
+    working-directory: My-Laravel-app
+
+jobs:
+  laravel-ci:
+    name: Laravel Tests & Migration Check
+    runs-on: ubuntu-latest
+
+    steps:
+      # ── 1. Checkout ────────────────────────────────────────────
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # ── 2. Pastikan .env TIDAK ter-commit ─────────────────────
+      - name: Check .env not committed
+        working-directory: .
+        run: |
+          if git ls-files --error-unmatch My-Laravel-app/.env 2>/dev/null; then
+            echo "❌ GAGAL: My-Laravel-app/.env ter-commit ke repository!"
+            echo "   Jalankan: git rm --cached My-Laravel-app/.env"
+            exit 1
+          else
+            echo "✅ .env tidak ter-commit (aman)"
+          fi
+
+      # ── 3. Setup PHP ───────────────────────────────────────────
+      - name: Setup PHP 8.3
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.3"
+          extensions: mbstring, xml, ctype, json, bcmath, pdo, pdo_sqlite, sqlite3
+          coverage: none
+
+      # ── 4. Cache Composer dependencies ────────────────────────
+      - name: Cache Composer packages
+        uses: actions/cache@v4
+        with:
+          path: My-Laravel-app/vendor
+          key: composer-${{ hashFiles('My-Laravel-app/composer.lock') }}
+          restore-keys: composer-
+
+      # ── 5. Install Composer dependencies ──────────────────────
+      - name: Install Composer dependencies
+        run: composer install --prefer-dist --no-interaction --no-progress --optimize-autoloader
+
+      # ── 6. Buat .env dari .env.example ────────────────────────
+      - name: Copy .env.example → .env
+        run: cp .env.example .env
+
+      # ── 7. Set database ke SQLite in-memory untuk CI ──────────
+      - name: Configure environment for CI
+        run: |
+          # Gunakan SQLite file sementara agar migrate:fresh bisa jalan
+          echo "APP_ENV=testing" >> .env
+          echo "APP_KEY=" >> .env
+          echo "DB_CONNECTION=sqlite" >> .env
+          echo "DB_DATABASE=$(pwd)/database/ci_test.sqlite" >> .env
+          touch database/ci_test.sqlite
+
+      # ── 8. Generate application key ───────────────────────────
+      - name: Generate app key
+        run: php artisan key:generate
+
+      # ── 9. Tes 1: migrate:fresh --seed ────────────────────────
+      - name: "[Test 1] migrate:fresh --seed"
+        run: |
+          echo "▶ Menjalankan migrate:fresh --seed ..."
+          php artisan migrate:fresh --seed --force
+          echo "✅ migrate:fresh --seed SUKSES"
+
+      # ── 10. Tes 2: migrate:refresh ────────────────────────────
+      - name: "[Test 2] migrate:refresh"
+        run: |
+          echo "▶ Menjalankan migrate:refresh ..."
+          php artisan migrate:refresh --force
+          echo "✅ migrate:refresh SUKSES"
+
+      # ── 11. Tes 3: migrate:refresh --seed (reversibility) ─────
+      - name: "[Test 3] migrate:refresh --seed (reversibility)"
+        run: |
+          echo "▶ Menjalankan migrate:refresh --seed (uji reversibility down()) ..."
+          php artisan migrate:refresh --seed --force
+          echo "✅ Semua migrasi reversible — down() berjalan benar"
+
+      # ── 12. Jalankan PHPUnit tests ────────────────────────────
+      - name: "[Test 4] PHPUnit test suite"
+        run: |
+          php artisan test --stop-on-failure

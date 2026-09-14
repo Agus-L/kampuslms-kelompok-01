@@ -24,6 +24,9 @@ return new class extends Migration
             $table->string('mime_type')->nullable();
             $table->string('external_url')->nullable();
             $table->timestamps();
+
+            // Index wajib sesuai Bagian 4.2: "materials: index course_id"
+            $table->index('course_id');
         });
     }
 
