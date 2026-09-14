@@ -69,8 +69,7 @@
                 </span>
 
                 {{-- Nama mata kuliah --}}
-                <h2 class="course-nama">{{ $course['nama'] }}</h2>
-
+                <h2 class="course-nama">{{$course['nama']}}</h2>
                 {{-- Nama dosen pengampu --}}
                 <p class="course-dosen">
                     👤 {{ $course['dosen'] }}

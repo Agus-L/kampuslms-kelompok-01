@@ -18,3 +18,11 @@
     Dari view('welcome'), halaman yang ditampilkan berasal dari file resources/views/welcome.blade.php. Jadi, saya membuka file tersebut dan mengubah teks “Let's get started” pada baris 55 menjadi “Selamat Datang di Website Saya”. Setelah disimpan dan browser di-refresh, teks pada halaman Welcome berhasil berubah.
 
 4. Perbedaan di antara keduanya adalah routes/web.php hanya berisi rute yang kita tulis atau atur sendiri, contohnya rute / pada baris 5. Sedangkan ketika menjalankan perintah php artisan route:list, terminal akan menampilkan seluruh rute yang aktif di aplikasi. Jadi, hasilnya tidak hanya menampilkan rute yang kita buat sendiri, tetapi juga rute bawaan Laravel, seperti rute health check /up dan rute untuk pengolahan storage.
+
+ ### Break
+| Yang dirusak | Prediksi Sebelum Mencoba | Pesan Error yang sebenarnya |
+| :--- | :--- | :--- |
+| Ganti nama `.env` menjadi `.env.bak` | Aplikasi gagal berjalan karena berkas konfigurasi utama tidak terdeteksi oleh sistem.| `filemtime(): stat failed for C:\Semester_5\Proweb\My-Laravel-app\.env`|
+| Kosongkan nilai `APP_KEY` di `.env`| Tampilan web akan memunculkan halaman error | `Illuminate\Encryption\MissingAppKeyException` , `vendor\laravel\framework\src\Illuminate\Encryption\EncryptionServiceProvider.php:83` |
+| 	Ubah `DB_DATABASE` menjadi nama yang tidak ada | Muncul notifikasi kesalahan akibat nama basis data yang diakses tidak ditemukan pada server. | `Illuminate\Database\QueryException` |
+| Ubah `APP_DEBUG=false`, lalu ulangi nomor 3 | Layanan sesi (session) pengguna akan mengalami kendala dan tidak dapat diproses. | laman web menampilkan error dengan kode 500|

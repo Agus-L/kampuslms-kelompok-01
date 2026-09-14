@@ -24,12 +24,47 @@ class UserFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => fake()->name(),
+            'name' => fake('id_ID')->name(),
             'email' => fake()->unique()->safeEmail(),
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
+            'role' => 'mahasiswa',
+            'nim_nip' => fake()->unique()->numerify('##########'),
             'remember_token' => Str::random(10),
         ];
+    }
+
+    /**
+     * State: admin.
+     */
+    public function admin(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'role' => 'admin',
+            'nim_nip' => 'ADM' . fake()->unique()->numerify('######'),
+        ]);
+    }
+
+    /**
+     * State: dosen (lecturer).
+     */
+    public function dosen(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'role' => 'dosen',
+            'nim_nip' => fake()->unique()->numerify('19########'),
+        ]);
+    }
+
+    /**
+     * State: mahasiswa (student).
+     */
+    public function mahasiswa(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'role' => 'mahasiswa',
+            'nim_nip' => fake()->unique()->numerify('24########'),
+        ]);
     }
 
     /**
