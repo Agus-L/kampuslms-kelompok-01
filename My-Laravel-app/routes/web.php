@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\CourseController;
+use App\Http\Controllers\UserController;
 
 // ──────────────────────────────────────────────────────
 // Halaman Statis
@@ -29,4 +30,21 @@ Route::get('/tentang', function () {
 //   DELETE /courses/{course}     → destroy (hapus MK)
 
 Route::resource('courses', CourseController::class);
+
+// Route::get('/courses/create', [CourseController::class, 'create'])
+//     ->name('courses.create');
+
+// ──────────────────────────────────────────────────────
+// Modul Pengguna (Users)
+// ──────────────────────────────────────────────────────
+//
+// Route::resource() mendaftarkan route RESTful:
+//   GET    /users              → index   (daftar semua pengguna)
+//   GET    /users/create       → create  (form tambah pengguna)
+//   POST   /users              → store   (simpan pengguna baru)
+//   GET    /users/{user}/edit  → edit    (form edit pengguna)
+//   PUT    /users/{user}       → update  (simpan perubahan)
+//   DELETE /users/{user}       → destroy (hapus pengguna)
+
+Route::resource('users', UserController::class)->except(['show']);
 

@@ -62,8 +62,12 @@
                 Digunakan untuk memberi class 'active' secara dinamis.
             --}}
             <a href="{{ route('courses.index') }}"
-               class="nav-link {{ request()->routeIs('courses.index') ? 'active' : '' }}">
+               class="nav-link {{ request()->routeIs('courses.*') ? 'active' : '' }}">
                 Mata Kuliah
+            </a>
+            <a href="{{ route('users.index') }}"
+               class="nav-link {{ request()->routeIs('users.*') ? 'active' : '' }}">
+                Pengguna
             </a>
             <a href="{{ route('tentang') }}"
                 class="nav-link {{ request()->routeIs('tentang') ? 'active' : '' }}">
