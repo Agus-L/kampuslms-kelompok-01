@@ -3,66 +3,77 @@
     Route: GET /courses/{course} → courses.show
     Controller: CourseController@show
 
-    View ini menerima variabel $course (array asosiatif berisi
-    data satu mata kuliah) yang dikirim dari controller.
+    View ini menerima variabel $course (model Course dengan relasi
+    lecturer dan students yang sudah di-eager-load).
 --}}
 
-<x-layout :title="$course['nama'] . ' — Kampus LMS'">
+<x-layout :title="$course->name . ' — Kampus LMS'">
 
-    {{--
-        CSS halaman ini (breadcrumb, detail-header, info-grid, dsb.)
-        sudah dipindahkan ke resources/css/app.css dan dimuat via
-        @vite() di layout.blade.php — tidak perlu <x-slot:head> lagi.
-    --}}
+    {{-- ── Flash Message ── --}}
+    @if (session('success'))
+        <div class="alert alert-success">
+            ✅ {{ session('success') }}
+        </div>
+    @endif
 
     {{-- ── Breadcrumb ── --}}
     <nav class="breadcrumb">
-        {{--
-            Tautan "Mata Kuliah" kembali ke halaman index.
-            KENAPA pakai route('courses.index')?
-            → Konsistensi — semua tautan menggunakan named route.
-        --}}
         <a href="{{ route('courses.index') }}" class="breadcrumb-link">Mata Kuliah</a>
         <span class="breadcrumb-separator">›</span>
-        <span class="breadcrumb-current">{{ $course['nama'] }}</span>
+        <span class="breadcrumb-current">{{ $course->name }}</span>
     </nav>
 
     {{-- ── Header Detail ── --}}
     <div class="detail-header">
-        <span class="detail-badge">
-            📖 {{ $course['kode'] }}
-        </span>
-        {{-- h1 untuk SEO — satu halaman hanya boleh punya satu h1 --}}
-        <h1 class="detail-title">{{ $course['nama'] }}</h1>
-        <p class="detail-dosen">👤 {{ $course['dosen'] }}</p>
+        <div class="detail-header-top">
+            <div>
+                <span class="detail-badge">
+                    📖 {{ $course->code }}
+                </span>
+                <span class="course-status course-status-{{ $course->status }}">
+                    {{ ucfirst($course->status) }}
+                </span>
+            </div>
+            {{-- Tombol Aksi --}}
+            <div class="detail-actions">
+                <a href="{{ route('courses.edit', $course) }}" class="btn btn-edit">
+                    ✏️ Edit
+                </a>
+                <form action="{{ route('courses.destroy', $course) }}" method="POST"
+                      onsubmit="return confirm('Yakin ingin menghapus mata kuliah {{ $course->name }}?')">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="btn btn-delete">
+                        🗑️ Hapus
+                    </button>
+                </form>
+            </div>
+        </div>
+        <h1 class="detail-title">{{ $course->name }}</h1>
+        <p class="detail-dosen">👤 {{ $course->lecturer->name ?? 'Belum ditentukan' }}</p>
     </div>
 
-    {{-- ── Info Cards: Ringkasan data penting ── --}}
+    {{-- ── Info Cards ── --}}
     <div class="info-grid">
+        <div class="info-card">
+            <div class="info-card-icon">📖</div>
+            <div class="info-card-label">Kode MK</div>
+            <div class="info-card-value">{{ $course->code }}</div>
+        </div>
         <div class="info-card">
             <div class="info-card-icon">⏱</div>
             <div class="info-card-label">Bobot SKS</div>
-            <div class="info-card-value">{{ $course['sks'] }} SKS</div>
-        </div>
-        <div class="info-card">
-            <div class="info-card-icon">🎓</div>
-            <div class="info-card-label">Semester</div>
-            <div class="info-card-value">Semester {{ $course['semester'] }}</div>
+            <div class="info-card-value">{{ $course->sks }} SKS</div>
         </div>
         <div class="info-card">
             <div class="info-card-icon">👥</div>
-            <div class="info-card-label">Jumlah Mahasiswa</div>
-            <div class="info-card-value">{{ $course['mahasiswa'] }} Orang</div>
+            <div class="info-card-label">Mahasiswa Terdaftar</div>
+            <div class="info-card-value">{{ $course->students->count() }} Orang</div>
         </div>
         <div class="info-card">
-            <div class="info-card-icon">📍</div>
-            <div class="info-card-label">Ruangan</div>
-            <div class="info-card-value">{{ $course['ruangan'] }}</div>
-        </div>
-        <div class="info-card">
-            <div class="info-card-icon">📅</div>
-            <div class="info-card-label">Jadwal</div>
-            <div class="info-card-value">{{ $course['jadwal'] }}</div>
+            <div class="info-card-icon">📋</div>
+            <div class="info-card-label">Status</div>
+            <div class="info-card-value">{{ ucfirst($course->status) }}</div>
         </div>
     </div>
 
@@ -70,7 +81,7 @@
     <div class="description-card">
         <h2 class="description-title">📝 Deskripsi Mata Kuliah</h2>
         <p class="description-text">
-            {{ $course['deskripsi'] }}
+            {{ $course->description }}
         </p>
     </div>
 
