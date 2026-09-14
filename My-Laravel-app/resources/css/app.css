@@ -37,6 +37,17 @@
     --accent: #06b6d4;
     --success: #10b981;
     --warning: #f59e0b;
+    /* ── Form / CRUD Design Tokens ── */
+    --radius: 0.75rem;
+    --radius-sm: 0.5rem;
+    --border: rgba(255, 255, 255, 0.1);
+    --border-focus: rgba(99, 102, 241, 0.6);
+    --bg: rgba(255, 255, 255, 0.04);
+    --bg-hover: rgba(255, 255, 255, 0.07);
+    --text-primary: #f1f5f9;
+    --text-secondary: #94a3b8;
+    --danger: #ef4444;
+    --danger-glow: rgba(239, 68, 68, 0.2);
 }
 
 /* ── 3. Reset & Typography ── */
@@ -821,28 +832,34 @@ a {
 
 /* ── Flash Messages (Alert) ── */
 .alert {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
     padding: 1rem 1.25rem;
     border-radius: var(--radius);
     margin-bottom: 1.5rem;
     font-weight: 500;
-    font-size: 0.95rem;
-    animation: slideDown 0.3s ease-out;
+    font-size: 0.92rem;
+    animation: slideDown 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    backdrop-filter: blur(8px);
 }
 
 .alert-success {
-    background: rgba(34, 197, 94, 0.12);
-    color: #16a34a;
-    border: 1px solid rgba(34, 197, 94, 0.25);
+    background: rgba(16, 185, 129, 0.1);
+    color: #34d399;
+    border: 1px solid rgba(16, 185, 129, 0.25);
+    box-shadow: 0 0 20px rgba(16, 185, 129, 0.08);
 }
 
 .alert-error {
-    background: rgba(239, 68, 68, 0.12);
-    color: #dc2626;
+    background: rgba(239, 68, 68, 0.1);
+    color: #f87171;
     border: 1px solid rgba(239, 68, 68, 0.25);
+    box-shadow: 0 0 20px rgba(239, 68, 68, 0.08);
 }
 
 @keyframes slideDown {
-    from { opacity: 0; transform: translateY(-0.5rem); }
+    from { opacity: 0; transform: translateY(-0.75rem); }
     to   { opacity: 1; transform: translateY(0); }
 }
 
@@ -855,69 +872,85 @@ a {
     flex-wrap: wrap;
 }
 
-/* ── Buttons ── */
+/* ══════════════════════════════
+   Buttons
+   ══════════════════════════════ */
 .btn {
     display: inline-flex;
     align-items: center;
-    gap: 0.35rem;
-    padding: 0.55rem 1.1rem;
-    border-radius: var(--radius);
+    justify-content: center;
+    gap: 0.4rem;
+    padding: 0.6rem 1.25rem;
+    border-radius: var(--radius-sm);
     font-size: 0.875rem;
     font-weight: 600;
     font-family: inherit;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     text-decoration: none;
-    border: none;
+    border: 1px solid transparent;
     line-height: 1.4;
+    white-space: nowrap;
 }
 
 .btn-create {
-    background: var(--primary);
+    background: linear-gradient(135deg, #4f46e5, #6366f1);
     color: #fff;
+    border-color: rgba(99, 102, 241, 0.4);
+    box-shadow: 0 2px 12px rgba(79, 70, 229, 0.3);
 }
 
 .btn-create:hover {
-    background: var(--primary-hover);
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.35);
+    background: linear-gradient(135deg, #4338ca, #4f46e5);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(79, 70, 229, 0.45);
+}
+
+.btn-create:active {
+    transform: translateY(0);
 }
 
 .btn-edit {
-    background: rgba(234, 179, 8, 0.12);
-    color: #a16207;
-    border: 1px solid rgba(234, 179, 8, 0.3);
+    background: rgba(251, 191, 36, 0.1);
+    color: #fbbf24;
+    border: 1px solid rgba(251, 191, 36, 0.25);
 }
 
 .btn-edit:hover {
-    background: rgba(234, 179, 8, 0.22);
+    background: rgba(251, 191, 36, 0.2);
+    border-color: rgba(251, 191, 36, 0.45);
+    transform: translateY(-1px);
 }
 
 .btn-delete {
-    background: rgba(239, 68, 68, 0.1);
-    color: #dc2626;
-    border: 1px solid rgba(239, 68, 68, 0.25);
+    background: rgba(239, 68, 68, 0.08);
+    color: #f87171;
+    border: 1px solid rgba(239, 68, 68, 0.2);
 }
 
 .btn-delete:hover {
-    background: rgba(239, 68, 68, 0.2);
+    background: rgba(239, 68, 68, 0.18);
+    border-color: rgba(239, 68, 68, 0.4);
+    transform: translateY(-1px);
 }
 
 .btn-cancel {
-    background: var(--card-bg);
-    color: var(--text-secondary);
-    border: 1px solid var(--border);
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--text-muted);
+    border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .btn-cancel:hover {
-    background: var(--bg);
-    border-color: var(--text-secondary);
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.2);
+    color: var(--text-main);
 }
 
 /* ── Course Card: Actions Area ── */
 .course-actions {
     margin-top: auto;
     padding-top: 0.75rem;
+    border-top: 1px solid rgba(255,255,255,0.05);
 }
 
 .course-actions-secondary {
@@ -935,33 +968,37 @@ a {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 0.25rem;
+    margin-bottom: 0.5rem;
 }
 
 /* ── Status Badge ── */
 .course-status {
-    display: inline-block;
-    padding: 0.2rem 0.65rem;
+    display: inline-flex;
+    align-items: center;
+    padding: 0.2rem 0.7rem;
     border-radius: 9999px;
-    font-size: 0.7rem;
+    font-size: 0.68rem;
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.07em;
 }
 
 .course-status-active {
-    background: rgba(34, 197, 94, 0.12);
-    color: #16a34a;
+    background: rgba(16, 185, 129, 0.12);
+    color: #34d399;
+    border: 1px solid rgba(16, 185, 129, 0.25);
 }
 
 .course-status-draft {
-    background: rgba(234, 179, 8, 0.12);
-    color: #a16207;
+    background: rgba(251, 191, 36, 0.1);
+    color: #fbbf24;
+    border: 1px solid rgba(251, 191, 36, 0.2);
 }
 
 .course-status-archived {
-    background: rgba(156, 163, 175, 0.15);
-    color: #6b7280;
+    background: rgba(148, 163, 184, 0.1);
+    color: #94a3b8;
+    border: 1px solid rgba(148, 163, 184, 0.2);
 }
 
 /* ── Detail Page: Header with Actions ── */
@@ -984,111 +1021,241 @@ a {
     display: inline;
 }
 
-/* ── Form Card ── */
+/* ══════════════════════════════
+   Form Card (create / edit)
+   ══════════════════════════════ */
 .form-card {
-    background: var(--card-bg);
-    border-radius: var(--radius);
-    border: 1px solid var(--border);
-    padding: 2rem;
-    max-width: 680px;
+    background: rgba(17, 24, 39, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 1.25rem;
+    padding: 2.5rem;
+    max-width: 720px;
     margin-bottom: 2rem;
+    backdrop-filter: blur(20px);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Garis gradient di atas form-card */
+.form-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--primary), var(--accent), var(--primary));
+    background-size: 200% 100%;
+    animation: shimmer 3s linear infinite;
+}
+
+@keyframes shimmer {
+    0%   { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
 }
 
 .form-group {
     margin-bottom: 1.5rem;
 }
 
+/* Row layout untuk 2 field berdampingan */
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem;
+}
+
 .form-label {
-    display: block;
-    font-size: 0.875rem;
-    font-weight: 600;
-    color: var(--text-primary);
-    margin-bottom: 0.45rem;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #c7d2fe;
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+/* Wajib bintang merah */
+.form-label .required {
+    color: #f87171;
+    font-size: 1rem;
+    line-height: 1;
 }
 
 .form-input,
 .form-select,
 .form-textarea {
     width: 100%;
-    padding: 0.65rem 0.9rem;
-    font-size: 0.925rem;
+    padding: 0.75rem 1rem;
+    font-size: 0.95rem;
     font-family: inherit;
-    color: var(--text-primary);
-    background: var(--bg);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    color: var(--text-main);
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 0.625rem;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
     box-sizing: border-box;
+}
+
+.form-input::placeholder,
+.form-textarea::placeholder {
+    color: rgba(148, 163, 184, 0.5);
+}
+
+.form-input:hover,
+.form-select:hover,
+.form-textarea:hover {
+    border-color: rgba(255, 255, 255, 0.18);
+    background: rgba(255, 255, 255, 0.06);
 }
 
 .form-input:focus,
 .form-select:focus,
 .form-textarea:focus {
     outline: none;
-    border-color: var(--primary);
-    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
+    border-color: rgba(99, 102, 241, 0.7);
+    background: rgba(79, 70, 229, 0.06);
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15), 0 1px 3px rgba(0,0,0,0.3);
 }
 
-.form-input-error {
-    border-color: #ef4444;
+.form-input-error,
+.form-input-error:hover {
+    border-color: rgba(239, 68, 68, 0.6);
+    background: rgba(239, 68, 68, 0.05);
 }
 
 .form-input-error:focus {
+    border-color: rgba(239, 68, 68, 0.8);
     box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15);
 }
 
 .form-textarea {
     resize: vertical;
-    min-height: 100px;
+    min-height: 120px;
+    line-height: 1.6;
 }
 
+/* Custom select dropdown arrow (warna putih untuk dark mode) */
 .form-select {
     appearance: none;
-    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
-    background-position: right 0.6rem center;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%2394a3b8' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+    background-position: right 0.75rem center;
     background-repeat: no-repeat;
-    background-size: 1.4em 1.4em;
-    padding-right: 2.5rem;
+    background-size: 1.25em 1.25em;
+    padding-right: 2.75rem;
+    cursor: pointer;
 }
 
 .form-select option {
-    color: #1a1a2e;
-    background: #ffffff;
+    background: #1e293b;
+    color: #f1f5f9;
+    padding: 0.5rem;
 }
+
+/* Pesan error validasi */
 .form-error {
-    color: #ef4444;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    color: #f87171;
     font-size: 0.8rem;
-    margin-top: 0.3rem;
+    margin-top: 0.4rem;
     font-weight: 500;
 }
 
+.form-error::before {
+    content: '⚠';
+    font-size: 0.75rem;
+}
+
+/* Hint text di bawah field */
+.form-hint {
+    color: rgba(148, 163, 184, 0.65);
+    font-size: 0.78rem;
+    margin-top: 0.35rem;
+    line-height: 1.4;
+}
+
+/* Divider antar section form */
+.form-divider {
+    height: 1px;
+    background: rgba(255,255,255,0.06);
+    margin: 1.75rem 0;
+}
+
+/* Section title di dalam form */
+.form-section-title {
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--primary-light);
+    margin-bottom: 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.form-section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: rgba(99, 102, 241, 0.2);
+}
+
+/* Area tombol submit di bawah form */
 .form-actions {
     display: flex;
     gap: 0.75rem;
     align-items: center;
     margin-top: 2rem;
-    padding-top: 1.5rem;
-    border-top: 1px solid var(--border);
+    padding-top: 1.75rem;
+    border-top: 1px solid rgba(255,255,255,0.06);
+}
+
+/* Tombol submit form — lebih besar dari btn biasa */
+.form-actions .btn-create {
+    padding: 0.75rem 2rem;
+    font-size: 0.925rem;
+    letter-spacing: 0.02em;
+}
+
+.form-actions .btn-cancel {
+    padding: 0.75rem 1.5rem;
+    font-size: 0.925rem;
 }
 
 /* ── Empty State ── */
 .empty-state {
     grid-column: 1 / -1;
     text-align: center;
-    padding: 3rem 1rem;
-    color: var(--text-secondary);
-    font-size: 1.1rem;
+    padding: 4rem 1rem;
+    color: var(--text-muted);
+    font-size: 1.05rem;
 }
 
 .empty-state a {
-    color: var(--primary);
+    color: var(--primary-light);
     text-decoration: underline;
+    transition: color 0.2s;
+}
+
+.empty-state a:hover {
+    color: #fff;
 }
 
 /* ── Responsive: Form ── */
 @media (max-width: 768px) {
     .form-card {
-        padding: 1.25rem;
+        padding: 1.5rem;
+        border-radius: 1rem;
+    }
+
+    .form-row {
+        grid-template-columns: 1fr;
     }
 
     .form-actions {
@@ -1097,7 +1264,7 @@ a {
     }
 
     .form-actions .btn {
-        text-align: center;
+        width: 100%;
         justify-content: center;
     }
 
