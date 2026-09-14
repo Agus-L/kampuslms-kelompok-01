@@ -2,139 +2,138 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Course;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 /**
- * CourseController — Mengelola halaman modul Mata Kuliah.
+ * CourseController — CRUD lengkap untuk modul Mata Kuliah.
  *
- * Saat ini menggunakan data statis (array) sebagai pengganti database,
- * agar kita bisa fokus memahami alur Route → Controller → View
- * sebelum masuk ke Eloquent & migrasi.
+ * Semua data diambil dari database melalui Eloquent Model Course.
+ * Method mengikuti konvensi resource controller Laravel:
+ * index, create, store, show, edit, update, destroy.
  */
 class CourseController extends Controller
 {
     /**
-     * Sumber data statis.
+     * index — Menampilkan daftar seluruh mata kuliah.
      *
-     * KENAPA private static method?
-     * → Supaya data bisa dipakai oleh index() dan show()
-     *   tanpa duplikasi. Nanti saat sudah pakai database,
-     *   method ini diganti dengan query Eloquent (Course::all()).
-     */
-    private static function dummyCourses(): array
-    {
-        return [
-            [
-                'id'         => 1,
-                'kode'       => 'IF101',
-                'nama'       => 'Pemrograman Web',
-                'sks'        => 3,
-                'semester'   => 5,
-                'dosen'      => 'Dr. Budi Santoso, M.Kom.',
-                // 'deskripsi'  => 'Mempelajari pengembangan aplikasi web modern menggunakan HTML, CSS, JavaScript, dan framework Laravel. Mahasiswa akan membangun proyek nyata berupa Learning Management System.',
-                'deskripsi'  => '<script>alert("Kamu kena XSS!")</script>',
-                'jadwal'     => 'Senin, 08:00 – 10:30 WIB',
-                'ruangan'    => 'Lab Komputer 3',
-                'mahasiswa'  => 42,
-            ],
-            [
-                'id'         => 2,
-                'kode'       => 'IF102',
-                'nama'       => 'Basis Data Lanjut',
-                'sks'        => 3,
-                'semester'   => 5,
-                'dosen'      => 'Prof. Siti Aminah, Ph.D.',
-                'deskripsi'  => 'Membahas konsep lanjutan basis data relasional: normalisasi, indexing, stored procedure, trigger, serta pengenalan basis data NoSQL.',
-                'jadwal'     => 'Selasa, 13:00 – 15:30 WIB',
-                'ruangan'    => 'Lab Komputer 1',
-                'mahasiswa'  => 38,
-            ],
-            [
-                'id'         => 3,
-                'kode'       => 'IF103',
-                'nama'       => 'Rekayasa Perangkat Lunak',
-                'sks'        => 3,
-                'semester'   => 5,
-                'dosen'      => 'Dr. Ahmad Wijaya, M.T.',
-                'deskripsi'  => 'Mendalami siklus hidup pengembangan perangkat lunak, mulai dari requirement engineering, desain UML, implementasi, testing, hingga deployment dan maintenance.',
-                'jadwal'     => 'Rabu, 10:00 – 12:30 WIB',
-                'ruangan'    => 'Ruang 405',
-                'mahasiswa'  => 45,
-            ],
-            [
-                'id'         => 4,
-                'kode'       => 'IF104',
-                'nama'       => 'Jaringan Komputer',
-                'sks'        => 3,
-                'semester'   => 5,
-                'dosen'      => 'Dr. Rina Kartika, M.Kom.',
-                'deskripsi'  => 'Mempelajari arsitektur jaringan, model OSI & TCP/IP, subnetting, routing, dan keamanan jaringan. Praktikum menggunakan Cisco Packet Tracer.',
-                'jadwal'     => 'Kamis, 08:00 – 10:30 WIB',
-                'ruangan'    => 'Lab Jaringan',
-                'mahasiswa'  => 40,
-            ],
-            [
-                'id'         => 5,
-                'kode'       => 'IF105',
-                'nama'       => 'Kecerdasan Buatan',
-                'sks'        => 3,
-                'semester'   => 5,
-                'dosen'      => 'Prof. Hendra Gunawan, Ph.D.',
-                'deskripsi'  => 'Pengantar kecerdasan buatan meliputi search algorithm, knowledge representation, machine learning dasar, dan natural language processing.',
-                'jadwal'     => 'Jumat, 10:00 – 12:30 WIB',
-                'ruangan'    => 'Ruang 301',
-                'mahasiswa'  => 36,
-            ],
-        ];
-    }
-
-    /**
-     * index — Menampilkan DAFTAR seluruh mata kuliah.
-     *
-     * KENAPA index()?
-     * → Konvensi RESTful Laravel: method index() bertugas
-     *   menampilkan koleksi resource (semua mata kuliah).
-     *   Route: GET /courses  →  courses.index
+     * Route: GET /courses → courses.index
+     * Eager-load relasi 'lecturer' agar nama dosen bisa ditampilkan
+     * tanpa query tambahan per mata kuliah (menghindari N+1).
      */
     public function index()
     {
-        // Ambil semua data mata kuliah (nanti diganti Course::all())
-        $courses = self::dummyCourses();
+        $courses = Course::with('lecturer')->get();
 
-        // Kirim data ke view 'courses.index'
-        // compact('courses') sama dengan ['courses' => $courses]
         return view('courses.index', compact('courses'));
     }
 
     /**
-     * show — Menampilkan DETAIL satu mata kuliah.
+     * create — Menampilkan form untuk menambah mata kuliah baru.
      *
-     * KENAPA show($id)?
-     * → Konvensi RESTful Laravel: method show() bertugas
-     *   menampilkan satu resource tertentu berdasarkan identifier.
-     *   Route: GET /courses/{course}  →  courses.show
-     *
-     * KENAPA parameter $id, bukan Route Model Binding?
-     * → Karena kita belum pakai database/Eloquent Model.
-     *   Nanti saat sudah ada Model Course, parameter ini diganti
-     *   menjadi show(Course $course) dan Laravel otomatis
-     *   mencari data berdasarkan ID (Route Model Binding).
+     * Route: GET /courses/create → courses.create
+     * Mengambil daftar dosen untuk dropdown di form.
      */
-    public function show(string $id)
+    public function create()
     {
-        $courses = self::dummyCourses();
+        $lecturers = User::where('role', 'dosen')->orderBy('name')->get();
 
-        // Cari mata kuliah berdasarkan ID di dalam array statis.
-        // collect() mengubah array menjadi Laravel Collection
-        // supaya bisa pakai method firstWhere().
-        $course = collect($courses)->firstWhere('id', (int) $id);
+        return view('courses.create', compact('lecturers'));
+    }
 
-        // Jika ID tidak ditemukan, tampilkan halaman 404.
-        // abort(404) melempar HttpException yang ditangani Laravel.
-        if (!$course) {
-            abort(404);
-        }
+    /**
+     * store — Menyimpan mata kuliah baru ke database.
+     *
+     * Route: POST /courses → courses.store
+     * Validasi input terlebih dahulu, lalu buat record baru.
+     */
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'code'        => 'required|string|max:20|unique:courses,code',
+            'name'        => 'required|string|max:255',
+            'description' => 'required|string',
+            'sks'         => 'required|integer|min:1|max:8',
+            'lecturer_id' => 'required|exists:users,id',
+            'status'      => 'required|in:draft,active,archived',
+        ]);
+
+        Course::create($validated);
+
+        return redirect()->route('courses.index')
+                         ->with('success', 'Mata kuliah berhasil ditambahkan.');
+    }
+
+    /**
+     * show — Menampilkan detail satu mata kuliah.
+     *
+     * Route: GET /courses/{course} → courses.show
+     * Menggunakan Route Model Binding: Laravel otomatis mencari
+     * Course berdasarkan ID dan melempar 404 jika tidak ditemukan.
+     */
+    public function show(Course $course)
+    {
+        // Eager-load relasi yang dibutuhkan di halaman detail
+        $course->load('lecturer', 'students');
 
         return view('courses.show', compact('course'));
+    }
+
+    /**
+     * edit — Menampilkan form untuk mengedit mata kuliah.
+     *
+     * Route: GET /courses/{course}/edit → courses.edit
+     */
+    public function edit(Course $course)
+    {
+        $lecturers = User::where('role', 'dosen')->orderBy('name')->get();
+
+        return view('courses.edit', compact('course', 'lecturers'));
+    }
+
+    /**
+     * update — Menyimpan perubahan mata kuliah ke database.
+     *
+     * Route: PUT /courses/{course} → courses.update
+     * Rule unique untuk 'code' dikecualikan untuk ID course yang
+     * sedang diedit, agar tidak konflik dengan dirinya sendiri.
+     */
+    public function update(Request $request, Course $course)
+    {
+        $validated = $request->validate([
+            'code'        => 'required|string|max:20|unique:courses,code,' . $course->id,
+            'name'        => 'required|string|max:255',
+            'description' => 'required|string',
+            'sks'         => 'required|integer|min:1|max:8',
+            'lecturer_id' => 'required|exists:users,id',
+            'status'      => 'required|in:draft,active,archived',
+        ]);
+
+        $course->update($validated);
+
+        return redirect()->route('courses.show', $course)
+                         ->with('success', 'Mata kuliah berhasil diperbarui.');
+    }
+
+    /**
+     * destroy — Menghapus mata kuliah dari database.
+     *
+     * Route: DELETE /courses/{course} → courses.destroy
+     * Menggunakan try-catch karena tabel lain (materials, assignments)
+     * memiliki FK cascadeOnDelete, namun course_user tidak.
+     * Jika ada constraint yang menghalangi, tampilkan pesan error.
+     */
+    public function destroy(Course $course)
+    {
+        try {
+            $course->delete();
+
+            return redirect()->route('courses.index')
+                             ->with('success', 'Mata kuliah "' . $course->name . '" berhasil dihapus.');
+        } catch (\Illuminate\Database\QueryException $e) {
+            return redirect()->route('courses.index')
+                             ->with('error', 'Gagal menghapus mata kuliah. Pastikan tidak ada data terkait.');
+        }
     }
 }
