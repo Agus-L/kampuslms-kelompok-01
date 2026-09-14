@@ -41,3 +41,6 @@ Route::get('/courses/{course}', [CourseController::class, 'show'])
     ->name('courses.show');
 
 
+// Route::get('/courses/create', [CourseController::class, 'create'])
+//     ->name('courses.create');
+

@@ -27,7 +27,8 @@ class CourseController extends Controller
             [
                 'id'         => 1,
                 'kode'       => 'IF101',
-                'nama'       => 'Pemrograman Web',
+                'nama'       => "Pemrograman Web", 
+                // <script>alert('XSS')</script>
                 'sks'        => 3,
                 'semester'   => 5,
                 'dosen'      => 'Dr. Budi Santoso, M.Kom.',

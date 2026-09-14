@@ -70,6 +70,7 @@
 
                 {{-- Nama mata kuliah --}}
                 <h2 class="course-nama">{{ $course['nama'] }}</h2>
+                <!-- <h2 class="course-nama">{!! $course['nama'] !!}</h2> -->
 
                 {{-- Nama dosen pengampu --}}
                 <p class="course-dosen">
@@ -99,8 +100,12 @@
                 --}}
                 <a href="{{ route('courses.show', $course['id']) }}" class="course-link">
                     Lihat Detail
-                    <span class="course-link-arrow">→</span>
+                    <span class="course-link-arrow">→</span>   
                 </a>
+                <!-- <a href="/courses/{{ $course['id'] }}" class="course-link" style="background:#ef4444; margin-top:6px;">
+                    Hardcode /courses/ → klik ini (broken!)
+                    <span class="course-link-arrow">→</span>
+                </a> -->
             </div>
         @endforeach
     </div>
