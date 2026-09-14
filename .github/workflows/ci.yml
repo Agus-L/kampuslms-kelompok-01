@@ -75,21 +75,21 @@ jobs:
         run: |
           echo "▶ Menjalankan migrate:fresh --seed ..."
           php artisan migrate:fresh --seed --force
-          echo "✅ migrate:fresh --seed SUKSES"
+          echo "migrate:fresh --seed SUKSES"
 
       # ── 10. Tes 2: migrate:refresh ────────────────────────────
       - name: "[Test 2] migrate:refresh"
         run: |
           echo "▶ Menjalankan migrate:refresh ..."
           php artisan migrate:refresh --force
-          echo "✅ migrate:refresh SUKSES"
+          echo "migrate:refresh SUKSES"
 
       # ── 11. Tes 3: migrate:refresh --seed (reversibility) ─────
       - name: "[Test 3] migrate:refresh --seed (reversibility)"
         run: |
           echo "▶ Menjalankan migrate:refresh --seed (uji reversibility down()) ..."
           php artisan migrate:refresh --seed --force
-          echo "✅ Semua migrasi reversible — down() berjalan benar"
+          echo "Semua migrasi reversible — down() berjalan benar"
 
       # ── 12. Jalankan PHPUnit tests ────────────────────────────
       - name: "[Test 4] PHPUnit test suite"
