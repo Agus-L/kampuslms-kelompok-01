@@ -30,6 +30,7 @@
     --primary-light: #818cf8;
     --primary-glow: rgba(79, 70, 229, 0.25);
     --bg-body: #0b0f19;
+    --bg: rgba(15, 23, 42, 0.8);
     --card-bg: rgba(17, 24, 39, 0.75);
     --card-border: rgba(255, 255, 255, 0.08);
     --text-main: #f3f4f6;
@@ -37,6 +38,7 @@
     --accent: #06b6d4;
     --success: #10b981;
     --warning: #f59e0b;
+
     /* ── Form / CRUD Design Tokens ── */
     --radius: 0.75rem;
     --radius-sm: 0.5rem;
@@ -1245,6 +1247,131 @@ a {
 
 .empty-state a:hover {
     color: #fff;
+}
+
+/* ══════════════════════════════════════════════════════════
+   10. CSS CRUD Pengguna: Table, Role Badges, User Avatar
+   ══════════════════════════════════════════════════════════ */
+
+/* ── Table Card ── */
+.table-card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 1rem;
+    overflow: hidden;
+    backdrop-filter: blur(16px);
+    margin-bottom: 2rem;
+}
+
+.table-wrapper {
+    overflow-x: auto;
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
+
+.data-table thead {
+    background: rgba(79, 70, 229, 0.08);
+    border-bottom: 1px solid var(--card-border);
+}
+
+.data-table th {
+    padding: 0.85rem 1.25rem;
+    text-align: left;
+    font-weight: 700;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--primary-light);
+    white-space: nowrap;
+}
+
+.data-table td {
+    padding: 0.85rem 1.25rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    color: var(--text-main);
+    vertical-align: middle;
+}
+
+.data-table tbody tr {
+    transition: background 0.2s ease;
+}
+
+.data-table tbody tr:hover {
+    background: rgba(79, 70, 229, 0.06);
+}
+
+.data-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.td-center {
+    text-align: center;
+    color: var(--text-muted);
+    font-weight: 600;
+}
+
+/* ── User Name Cell with Avatar ── */
+.user-name-cell {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    font-weight: 600;
+}
+
+.user-avatar-sm {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #ffffff;
+    flex-shrink: 0;
+    box-shadow: 0 2px 8px rgba(79, 70, 229, 0.25);
+}
+
+/* ── Role Badge ── */
+.role-badge {
+    display: inline-block;
+    padding: 0.2rem 0.65rem;
+    border-radius: 9999px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.role-badge-admin {
+    background: rgba(239, 68, 68, 0.12);
+    color: #f87171;
+}
+
+.role-badge-dosen {
+    background: rgba(6, 182, 212, 0.12);
+    color: #22d3ee;
+}
+
+.role-badge-mahasiswa {
+    background: rgba(34, 197, 94, 0.12);
+    color: #4ade80;
+}
+
+/* ── Table Actions ── */
+.table-actions {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.table-actions form {
+    display: inline;
 }
 
 /* ── Responsive: Form ── */

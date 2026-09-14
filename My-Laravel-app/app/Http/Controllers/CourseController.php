@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Course;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 /**
  * CourseController — CRUD lengkap untuk modul Mata Kuliah.
@@ -55,7 +56,10 @@ class CourseController extends Controller
             'name'        => 'required|string|max:255',
             'description' => 'required|string',
             'sks'         => 'required|integer|min:1|max:8',
-            'lecturer_id' => 'required|exists:users,id',
+            'lecturer_id' => [
+                'required',
+                Rule::exists('users', 'id')->where('role', 'dosen')->whereNull('deleted_at'),
+            ],
             'status'      => 'required|in:draft,active,archived',
         ]);
 
@@ -106,7 +110,10 @@ class CourseController extends Controller
             'name'        => 'required|string|max:255',
             'description' => 'required|string',
             'sks'         => 'required|integer|min:1|max:8',
-            'lecturer_id' => 'required|exists:users,id',
+            'lecturer_id' => [
+                'required',
+                Rule::exists('users', 'id')->where('role', 'dosen')->whereNull('deleted_at'),
+            ],
             'status'      => 'required|in:draft,active,archived',
         ]);
 
