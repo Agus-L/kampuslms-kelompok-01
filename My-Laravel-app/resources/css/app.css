@@ -179,8 +179,17 @@ a {
 }
 
 @keyframes pulse {
-    0%, 100% { opacity: 1; transform: scale(1); }
-    50% { opacity: 0.5; transform: scale(0.8); }
+
+    0%,
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 0.5;
+        transform: scale(0.8);
+    }
 }
 
 .page-title {
@@ -809,6 +818,7 @@ a {
 }
 
 @media (max-width: 480px) {
+
     /* courses/show */
     .info-grid {
         grid-template-columns: 1fr;
@@ -842,8 +852,15 @@ a {
 }
 
 @keyframes slideDown {
-    from { opacity: 0; transform: translateY(-0.5rem); }
-    to   { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(-0.5rem);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 /* ── Page Header with Button ── */
@@ -1055,6 +1072,7 @@ a {
     color: #1a1a2e;
     background: #ffffff;
 }
+
 .form-error {
     color: #ef4444;
     font-size: 0.8rem;
