@@ -1,0 +1,12 @@
+# Nama: Aliya Labibah
+## NIM:10241007
+
+### BREAK
+
+| No | Yang dicoba | Yang harus Anda amati | Analisis Temuan |
+|---|---|---|---|
+| 1 | Hapus `unique(['course_id','user_id'])` dari `course_user`, lalu daftarkan mahasiswa yang sama dua kali | Data ganda lolos tanpa keluhan | Karena database kehilangan aturan pembatas unik di tabel pivot, data ganda bisa lolos tanpa error SQL sehingga mahasiswa yang sama dapat terdaftar berulang kali pada satu mata kuliah, yang pada akhirnya merusak kalkulasi data seperti total peserta saat query relasi dijalankan. |
+| 2 | Tambahkan `role` ke `$fillable` model User, lalu kirim request pembuatan user dengan `role=admin` lewat form yang tidak punya field role | Mass assignment nyata — Anda baru saja jadi admin | Model mengizinkan kolom role diisi secara massal, membuktikan bahwa form HTML frontend bukanlah pembatas keamanan karena penyerang tetap bisa menyisipkan payload `role=admin` (misal lewat cURL atau Inspect Element), sehingga pengguna baru langsung mendapatkan status admin secara sepihak di database. |
+| 3 | Ganti seluruh `$fillable` dengan `protected $guarded = [];` lalu ulangi nomor 2 | Kenapa `$guarded` kosong dilarang | Penggunaan `$guarded = []` sangat dilarang karena mematikan seluruh proteksi *mass assignment* pada tabel, yang memungkinkan penyerang atau pengguna biasa menyelipkan request tambahan (seperti `role=admin` di form update profil) untuk menaikkan hak akses mereka sendiri secara ilegal. |
+| 4 | Kosongkan isi `down()` di satu migrasi, lalu jalankan `php artisan migrate:refresh` | Migrasi tidak reversible = CI merah | Karena fungsi `down()` dikosongkan, tabel lama tidak terhapus saat proses rollback, sehingga ketika `up()` dipanggil kembali terminal akan melempar error SQL *Base table already exists*, yang membuat migrasi menjadi tidak *reversible* dan dipastikan akan langsung menggagalkan proses *automated testing* (CI/CD) di server. |
+| 5 | Ubah `restrictOnDelete` pada `lecturer_id` menjadi `cascadeOnDelete`, lalu hapus satu dosen | Kehilangan data berantai | Aturan `cascadeOnDelete` membuat database otomatis menghapus semua data turunan secara permanen saat data induk dihapus (seluruh mata kuliah, tugas, dan nilai ikut lenyap saat 1 dosen dihapus), berbeda dengan `restrictOnDelete` yang otomatis memblokir penghapusan dosen demi mencegah hilangnya data penting secara tidak sengaja. |

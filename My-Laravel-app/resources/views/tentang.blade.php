@@ -1,4 +1,4 @@
-﻿{{--
+{{--
     Halaman Tentang Proyek & Tim Pengembang
     Route: GET /tentang → tentang
     Controller: (langsung dari web.php dengan view())
@@ -96,12 +96,12 @@
                 </div>
             </article>
 
-            {{-- Author Card 3: Anasthasya Salsabila Khoirunnisa --}}
+            {{-- Author Card 3: Anastasya Salsabila Khoirunnisa --}}
             <article class="author-card">
                 <div class="author-header">
                     <div class="author-avatar" style="background: linear-gradient(135deg, #f59e0b, #ef4444);">ASK</div>
                     <div class="author-meta">
-                        <h3 class="author-name">Anasthasya Salsabila Khoirunnisa</h3>
+                        <h3 class="author-name">Anastasya Salsabila Khoirunnisa</h3>
                         <span class="author-role">Project Contributor</span>
                     </div>
                 </div>

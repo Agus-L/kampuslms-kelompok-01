@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\CourseController;
+use App\Http\Controllers\UserController;
 
 // ──────────────────────────────────────────────────────
 // Halaman Statis
@@ -19,29 +20,31 @@ Route::get('/tentang', function () {
 // Modul Mata Kuliah (Courses)
 // ──────────────────────────────────────────────────────
 //
-// KENAPA tidak pakai Route::resource('courses', ...)?
-// → Kita baru butuh 2 route (index & show). Menulis secara
-//   eksplisit lebih mudah dipahami bagi pemula daripada
-//   menyembunyikan 7 route di balik satu baris resource().
-//   Nanti saat semua method CRUD siap, bisa direfaktor
-//   menjadi Route::resource().
-//
-// KENAPA pakai ->name('courses.xxx')?
-// → Supaya di Blade kita bisa menulis route('courses.index')
-//   alih-alih hardcode '/courses'. Jika URI berubah,
-//   semua tautan otomatis ikut berubah.
+// Route::resource() mendaftarkan 7 route RESTful sekaligus:
+//   GET    /courses              → index   (daftar semua MK)
+//   GET    /courses/create       → create  (form tambah MK)
+//   POST   /courses              → store   (simpan MK baru)
+//   GET    /courses/{course}     → show    (detail satu MK)
+//   GET    /courses/{course}/edit→ edit    (form edit MK)
+//   PUT    /courses/{course}     → update  (simpan perubahan)
+//   DELETE /courses/{course}     → destroy (hapus MK)
 
-// GET /courses → Daftar semua mata kuliah
-Route::get('/courses', [CourseController::class, 'index'])
-    ->name('courses.index');
-
-
-
-// GET /courses/{course} → Detail satu mata kuliah
-// {course} adalah parameter dinamis (ID mata kuliah)
-Route::get('/courses/{course}', [CourseController::class, 'show'])
-    ->name('courses.show');
+Route::resource('courses', CourseController::class);
 
 // Route::get('/courses/create', [CourseController::class, 'create'])
 //     ->name('courses.create');
+
+// ──────────────────────────────────────────────────────
+// Modul Pengguna (Users)
+// ──────────────────────────────────────────────────────
+//
+// Route::resource() mendaftarkan route RESTful:
+//   GET    /users              → index   (daftar semua pengguna)
+//   GET    /users/create       → create  (form tambah pengguna)
+//   POST   /users              → store   (simpan pengguna baru)
+//   GET    /users/{user}/edit  → edit    (form edit pengguna)
+//   PUT    /users/{user}       → update  (simpan perubahan)
+//   DELETE /users/{user}       → destroy (hapus pengguna)
+
+Route::resource('users', UserController::class)->except(['show']);
 
