@@ -33,10 +33,10 @@ jobs:
           fi
 
       # ── 3. Setup PHP ───────────────────────────────────────────
-      - name: Setup PHP 8.3
+      - name: Setup PHP 8.4
         uses: shivammathur/setup-php@v2
         with:
-          php-version: "8.3"
+          php-version: "8.4"
           extensions: mbstring, xml, ctype, json, bcmath, pdo, pdo_sqlite, sqlite3
           coverage: none
 
