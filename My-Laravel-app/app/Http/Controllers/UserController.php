@@ -54,7 +54,7 @@ class UserController extends Controller
             'email'    => 'required|email|max:255|unique:users,email',
             'password' => 'required|string|min:8|confirmed',
             'nim_nip'  => 'nullable|string|max:50|unique:users,nim_nip',
-            'role'     => 'required|in:admin,dosen,mahasiswa',
+            'role'     => ['required', Rule::in(['admin', 'dosen', 'mahasiswa'])],
         ]);
 
         // Mass assignment hanya untuk kolom yang ada di $fillable
@@ -106,8 +106,18 @@ class UserController extends Controller
                 'nullable', 'string', 'max:50',
                 Rule::unique('users', 'nim_nip')->ignore($user->id),
             ],
-            'role'     => 'required|in:admin,dosen,mahasiswa',
+            'role'     => ['required', Rule::in(['admin', 'dosen', 'mahasiswa'])],
         ]);
+
+        // Keamanan: Cegah self-demotion / penghapusan privilege satu-satunya Administrator
+        if ($user->role === 'admin' && $validated['role'] !== 'admin') {
+            $adminCount = User::where('role', 'admin')->whereNull('deleted_at')->count();
+            if ($adminCount <= 1) {
+                return back()->withInput()->withErrors([
+                    'role' => 'Tidak dapat mengubah role satu-satunya Administrator yang tersisa.',
+                ]);
+            }
+        }
 
         // Mass assignment hanya untuk kolom yang ada di $fillable
         $user->name  = $validated['name'];
@@ -136,6 +146,21 @@ class UserController extends Controller
      */
     public function destroy(User $user)
     {
+        // Keamanan: Cegah pengguna menghapus akunnya sendiri jika sedang login
+        if (auth()->check() && auth()->id() === $user->id) {
+            return redirect()->route('users.index')
+                             ->with('error', 'Anda tidak dapat menghapus akun Anda sendiri yang sedang aktif.');
+        }
+
+        // Keamanan: Cegah penghapusan satu-satunya Administrator
+        if ($user->role === 'admin') {
+            $adminCount = User::where('role', 'admin')->whereNull('deleted_at')->count();
+            if ($adminCount <= 1) {
+                return redirect()->route('users.index')
+                                 ->with('error', 'Tidak dapat menghapus satu-satunya Administrator yang tersisa.');
+            }
+        }
+
         try {
             $name = $user->name;
             $user->delete();

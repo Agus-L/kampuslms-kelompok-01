@@ -30,13 +30,18 @@
     --primary-light: #818cf8;
     --primary-glow: rgba(79, 70, 229, 0.25);
     --bg-body: #0b0f19;
+    --bg: rgba(15, 23, 42, 0.8);
     --card-bg: rgba(17, 24, 39, 0.75);
     --card-border: rgba(255, 255, 255, 0.08);
+    --border: rgba(255, 255, 255, 0.08);
     --text-main: #f3f4f6;
+    --text-primary: #f3f4f6;
     --text-muted: #9ca3af;
+    --text-secondary: #9ca3af;
     --accent: #06b6d4;
     --success: #10b981;
     --warning: #f59e0b;
+    --radius: 0.75rem;
 }
 
 /* ── 3. Reset & Typography ── */
