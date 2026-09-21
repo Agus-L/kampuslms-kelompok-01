@@ -9,6 +9,9 @@
 | Annisa Dwi Lestari Sonny | 10241011 |
 
 ## **Read**
+### **1. Gambar ulang ERD dari spesifikasi di papan/kertas, tanpa melihat dokumen.** 
+![gambar ERD](/docs/gambar_ERD.jpeg)
+
 ### **2. Untuk setiap foreign key, tentukan perilaku `onDelete`-nya dan tuliskan alasannya**
 
 #### 1. Tabel `courses`
@@ -96,30 +99,9 @@
 
 ### 3. **Apa yang terjadi pada mata kuliah jika seorang dosen dihapus?**
 
-   Mata kuliah tidak ikut terhapus, tetapi penghapusan dosen akan dicegah/ditolak oleh database selama masih ada mata kuliah yang terhubung ke dosen tersebut.
-
-   Ada dua lapis mekanisme yang bekerja:
-
-   **`restrictOnDelete()`**
-
-   Di migration `2025_01_02_000001_create_courses_table.php`
-   ```php
-   $table->foreignId('lecturer_id')->constrained('users')->restrictOnDelete();
-   ```
-   Artinya: database akan menolak perintah DELETE pada tabel `users` jika masih ada baris di tabel `courses` yang merujuk ke user tersebut lewat `lecturer_id`. Akan muncul error foreign key constraint.
-
-   **`SoftDeletes`**
-
-   Di model `User.php`
-   ```php
-   use HasFactory, Notifiable, SoftDeletes;
-   ```
-   Artinya: `User::delete()` tidak benar-benar menghapus baris dari database, tetapi hanya mengisi kolom `deleted_at` dengan timestamp. Data dosen tetap ada di tabel `users`, sehingga tidak pernah benar-benar memicu pelanggaran foreign key `restrictOnDelete`.
-
-    **Kenapa dirancang begitu?**
-
-    Rancangan ini melindungi integritas data dari dua sisi:
-    - **SoftDeletes** memastikan histori dosen tetap ada, sehingga mata kuliah yang pernah diampu tidak kehilangan referensi dosennya. Data dosen yang "dihapus" masih bisa ditelusuri.
-    - **`restrictOnDelete`** adalah pengaman terakhir di level database — jika seseorang mencoba hard-delete sebuah user secara langsung (misal lewat query SQL), database akan memblokir aksi tersebut agar tidak ada `courses.lecturer_id` yang menggantung (orphan record).
+   Sistem akan menolak penghapusan akun dosen jika ia masih terdaftar mengajar suatu mata kuliah. Hal ini dirancang untuk menjaga integritas data agar mata kuliah tidak kehilangan informasi pengajar, sekaligus mencegah error sistem yang dapat mengakibatkan rusak atau hilangnya riwayat penting seperti nilai, tugas, dan materi kuliah.
 
 
+### 4. **kenapa `grades.submission_id` bersifat `unique`, bukan sekadar index biasa?**
+
+   Karena satu submission hanya boleh dinilai satu kali. Kalau hanya pakai index biasa, database tidak akan mencegah dosen menginput dua nilai untuk submission yang sama — dan itu tidak masuk akal secara logika. Dengan `unique`, database langsung menolak jika ada upaya duplikasi nilai untuk submission yang sudah ada nilainya. Ini juga yang mewujudkan relasi **one-to-one** antara tabel `submissions` dan `grades` — satu submission, satu nilai, tidak lebih.

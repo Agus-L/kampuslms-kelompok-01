@@ -6,22 +6,23 @@
 
 <x-layout :title="'Tambah Mata Kuliah — Kampus LMS'">
 
-    {{-- ── Breadcrumb ── --}}
-    <nav class="breadcrumb">
-        <a href="{{ route('courses.index') }}" class="breadcrumb-link">Mata Kuliah</a>
-        <span class="breadcrumb-separator">›</span>
-        <span class="breadcrumb-current">Tambah Baru</span>
-    </nav>
+    <div class="form-container">
+        {{-- ── Breadcrumb ── --}}
+        <nav class="breadcrumb">
+            <a href="{{ route('courses.index') }}" class="breadcrumb-link">Mata Kuliah</a>
+            <span class="breadcrumb-separator">›</span>
+            <span class="breadcrumb-current">Tambah Baru</span>
+        </nav>
 
-    {{-- ── Header ── --}}
-    <div class="page-header">
-        <h1 class="page-title">Tambah Mata Kuliah</h1>
-        <p class="page-subtitle">Isi formulir di bawah untuk menambahkan mata kuliah baru ke sistem LMS.</p>
-    </div>
+        {{-- ── Header ── --}}
+        <div class="page-header">
+            <h1 class="page-title">Tambah Mata Kuliah</h1>
+            <p class="page-subtitle">Isi formulir di bawah untuk menambahkan mata kuliah baru ke sistem LMS.</p>
+        </div>
 
-    {{-- ── Form ── --}}
-    <div class="form-card">
-        <form action="{{ route('courses.store') }}" method="POST">
+        {{-- ── Form ── --}}
+        <div class="form-card">
+            <form action="{{ route('courses.store') }}" method="POST">
             @csrf
 
             {{-- ── Seksi 1: Identitas ── --}}
@@ -157,6 +158,7 @@
                 </a>
             </div>
         </form>
+        </div>
     </div>
 
 </x-layout>
