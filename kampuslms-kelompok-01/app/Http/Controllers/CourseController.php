@@ -2,10 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreCourseRequest;
+use App\Http\Requests\UpdateCourseRequest;
 use App\Models\Course;
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
 
 /**
  * CourseController — CRUD lengkap untuk modul Mata Kuliah.
@@ -23,9 +24,18 @@ class CourseController extends Controller
      * Eager-load relasi 'lecturer' agar nama dosen bisa ditampilkan
      * tanpa query tambahan per mata kuliah (menghindari N+1).
      */
-    public function index()
+    public function index(Request $request)
     {
-        $courses = Course::with('lecturer')->get();
+        $courses = Course::query()
+            ->with('lecturer')
+            ->when($request->filled('q'), fn ($query) =>
+                $query->where('name', 'like', '%' . $request->q . '%')
+                      ->orWhere('code', 'like', '%' . $request->q . '%'))
+            ->when($request->filled('status'), fn ($query) =>
+                $query->where('status', $request->status))
+            ->latest()
+            ->paginate(15)
+            ->withQueryString();
 
         return view('courses.index', compact('courses'));
     }
@@ -49,19 +59,9 @@ class CourseController extends Controller
      * Route: POST /courses → courses.store
      * Validasi input terlebih dahulu, lalu buat record baru.
      */
-    public function store(Request $request)
+    public function store(StoreCourseRequest $request)
     {
-        $validated = $request->validate([
-            'code'        => 'required|string|max:20|unique:courses,code',
-            'name'        => 'required|string|max:255',
-            'description' => 'required|string',
-            'sks'         => 'required|integer|min:1|max:8',
-            'lecturer_id' => [
-                'required',
-                Rule::exists('users', 'id')->where('role', 'dosen')->whereNull('deleted_at'),
-            ],
-            'status'      => 'required|in:draft,active,archived',
-        ]);
+        $validated = $request->validated();
 
         Course::create($validated);
 
@@ -103,19 +103,9 @@ class CourseController extends Controller
      * Rule unique untuk 'code' dikecualikan untuk ID course yang
      * sedang diedit, agar tidak konflik dengan dirinya sendiri.
      */
-    public function update(Request $request, Course $course)
+    public function update(UpdateCourseRequest $request, Course $course)
     {
-        $validated = $request->validate([
-            'code'        => 'required|string|max:20|unique:courses,code,' . $course->id,
-            'name'        => 'required|string|max:255',
-            'description' => 'required|string',
-            'sks'         => 'required|integer|min:1|max:8',
-            'lecturer_id' => [
-                'required',
-                Rule::exists('users', 'id')->where('role', 'dosen')->whereNull('deleted_at'),
-            ],
-            'status'      => 'required|in:draft,active,archived',
-        ]);
+        $validated = $request->validated();
 
         $course->update($validated);
 
