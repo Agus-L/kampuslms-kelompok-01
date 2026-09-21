@@ -100,6 +100,24 @@
         secara otomatis masuk ke variabel $slot ini.
     --}}
     <main class="main-content">
+        {{--
+            ── Global Flash Messages ──
+            Ditaruh di layout agar berlaku untuk SELURUH halaman.
+            Controller cukup memanggil ->with('success', '...') atau
+            ->with('error', '...') dan pesan otomatis tampil di sini.
+        --}}
+        @if (session('success'))
+            <div class="alert alert-success" role="alert">
+                ✅ {{ session('success') }}
+            </div>
+        @endif
+
+        @if (session('error'))
+            <div class="alert alert-error" role="alert">
+                ❌ {{ session('error') }}
+            </div>
+        @endif
+
         {{ $slot }}
     </main>
 

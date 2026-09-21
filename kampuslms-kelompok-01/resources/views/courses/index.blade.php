@@ -13,19 +13,6 @@
 --}}
 <x-layout :title="'Daftar Mata Kuliah — Kampus LMS'">
 
-    {{-- ── Flash Message ── --}}
-    @if (session('success'))
-        <div class="alert alert-success">
-            ✅ {{ session('success') }}
-        </div>
-    @endif
-
-    @if (session('error'))
-        <div class="alert alert-error">
-            ❌ {{ session('error') }}
-        </div>
-    @endif
-
     {{-- ── Header Halaman ── --}}
     <div class="page-header">
         <div class="page-header-top">
