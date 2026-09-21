@@ -30,7 +30,7 @@
 
         {{-- ── Form ── --}}
         <div class="form-card">
-            <form action="{{ route('courses.update', $course) }}" method="POST">
+            <form action="{{ route('courses.update', $course) }}" method="POST" novalidate>
             @csrf
             @method('PUT')
 
@@ -65,13 +65,13 @@
                     <input type="number" id="sks" name="sks"
                            class="form-input @error('sks') form-input-error @enderror"
                            value="{{ old('sks', $course->sks) }}"
-                           min="1" max="8"
-                           placeholder="1 – 8"
+                           min="1" max="6"
+                           placeholder="1 – 6"
                            required>
                     @error('sks')
                         <p class="form-error">{{ $message }}</p>
                     @else
-                        <p class="form-hint">Antara 1 hingga 8 SKS.</p>
+                        <p class="form-hint">Antara 1 hingga 6 SKS.</p>
                     @enderror
                 </div>
             </div>
@@ -95,12 +95,11 @@
             {{-- Deskripsi --}}
             <div class="form-group">
                 <label for="description" class="form-label">
-                    Deskripsi <span class="required">*</span>
+                    Deskripsi <span style="font-weight: normal; color: var(--text-muted);">(Opsional)</span>
                 </label>
                 <textarea id="description" name="description" rows="4"
                           class="form-textarea @error('description') form-input-error @enderror"
-                          placeholder="Jelaskan materi, capaian pembelajaran, dan tujuan mata kuliah..."
-                          required>{{ old('description', $course->description) }}</textarea>
+                          placeholder="Jelaskan materi, capaian pembelajaran, dan tujuan mata kuliah...">{{ old('description', $course->description) }}</textarea>
                 @error('description')
                     <p class="form-error">{{ $message }}</p>
                 @enderror

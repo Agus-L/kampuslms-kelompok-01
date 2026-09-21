@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('code')->unique();
             $table->string('name');
-            $table->text('description');
+            $table->text('description')->nullable();
             $table->tinyInteger('sks');
             $table->foreignId('lecturer_id')->constrained('users')->restrictOnDelete();
             $table->enum('status', ['draft', 'active', 'archived'])->default('draft');
