@@ -10,26 +10,27 @@
 
 <x-layout :title="'Edit ' . $course->name . ' — Kampus LMS'">
 
-    {{-- ── Breadcrumb ── --}}
-    <nav class="breadcrumb">
-        <a href="{{ route('courses.index') }}" class="breadcrumb-link">Mata Kuliah</a>
-        <span class="breadcrumb-separator">›</span>
-        <a href="{{ route('courses.show', $course) }}" class="breadcrumb-link">{{ $course->name }}</a>
-        <span class="breadcrumb-separator">›</span>
-        <span class="breadcrumb-current">Edit</span>
-    </nav>
+    <div class="form-container">
+        {{-- ── Breadcrumb ── --}}
+        <nav class="breadcrumb">
+            <a href="{{ route('courses.index') }}" class="breadcrumb-link">Mata Kuliah</a>
+            <span class="breadcrumb-separator">›</span>
+            <a href="{{ route('courses.show', $course) }}" class="breadcrumb-link">{{ $course->name }}</a>
+            <span class="breadcrumb-separator">›</span>
+            <span class="breadcrumb-current">Edit</span>
+        </nav>
 
-    {{-- ── Header ── --}}
-    <div class="page-header">
-        <h1 class="page-title">Edit Mata Kuliah</h1>
-        <p class="page-subtitle">
-            Perbarui informasi untuk <strong style="color: var(--primary-light)">{{ $course->name }}</strong>.
-        </p>
-    </div>
+        {{-- ── Header ── --}}
+        <div class="page-header">
+            <h1 class="page-title">Edit Mata Kuliah</h1>
+            <p class="page-subtitle">
+                Perbarui informasi untuk <strong style="color: var(--primary-light)">{{ $course->name }}</strong>.
+            </p>
+        </div>
 
-    {{-- ── Form ── --}}
-    <div class="form-card">
-        <form action="{{ route('courses.update', $course) }}" method="POST">
+        {{-- ── Form ── --}}
+        <div class="form-card">
+            <form action="{{ route('courses.update', $course) }}" method="POST">
             @csrf
             @method('PUT')
 
@@ -165,7 +166,8 @@
                     ✕ Batal
                 </a>
             </div>
-        </form>
+            </form>
+        </div>
     </div>
 
 </x-layout>

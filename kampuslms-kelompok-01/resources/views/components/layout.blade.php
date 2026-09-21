@@ -39,6 +39,16 @@
         SYARAT: jalankan `npm run dev` paralel dengan `php artisan serve`
         agar aset tersedia saat development.
     --}}
+    {{-- Script anti-flicker tema: dieksekusi sebelum render body agar tidak berkedip --}}
+    <script>
+        (function () {
+            const savedTheme = localStorage.getItem('theme');
+            const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+            const activeTheme = savedTheme ? savedTheme : (prefersDark ? 'dark' : 'dark');
+            document.documentElement.setAttribute('data-theme', activeTheme);
+        })();
+    </script>
+
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body>
@@ -73,6 +83,14 @@
                 class="nav-link {{ request()->routeIs('tentang') ? 'active' : '' }}">
                 Tentang
             </a>
+
+            {{-- ── Switch Button Dark / Light Mode (Pojok Kanan Atas) ── --}}
+            <div class="theme-switch-wrapper">
+                <span id="theme-label" class="theme-switch-label">Mode Gelap</span>
+                <button id="theme-toggle" class="theme-switch" type="button" role="switch" aria-checked="false" aria-label="Ganti mode tampilan" title="Ganti mode tampilan">
+                    <span class="theme-switch-slider"></span>
+                </button>
+            </div>
         </div>
     </nav>
 
