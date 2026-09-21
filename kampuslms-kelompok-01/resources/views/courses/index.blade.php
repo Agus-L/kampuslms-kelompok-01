@@ -160,14 +160,15 @@
                         <a href="{{ route('courses.edit', $course) }}" class="btn btn-edit" title="Edit">
                             ✏️ Edit
                         </a>
-                        <form action="{{ route('courses.destroy', $course) }}" method="POST"
-                              onsubmit="return confirm('Yakin ingin menghapus mata kuliah {{ $course->name }}?')">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="btn btn-delete" title="Hapus">
-                                🗑️ Hapus
-                            </button>
-                        </form>
+                        <button type="button" class="btn btn-delete" title="Hapus"
+                                data-modal-target="delete-course-{{ $course->id }}">
+                            🗑️ Hapus
+                        </button>
+                        <x-delete-modal
+                            id="delete-course-{{ $course->id }}"
+                            :action="route('courses.destroy', $course)"
+                            :itemName="$course->name"
+                        />
                     </div>
                 </div>
             </div>

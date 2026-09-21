@@ -175,14 +175,15 @@
                                         <a href="{{ route('users.edit', $user) }}" class="btn btn-edit" title="Edit">
                                             ✏️ Edit
                                         </a>
-                                        <form action="{{ route('users.destroy', $user) }}" method="POST"
-                                              onsubmit="return confirm('Yakin ingin menghapus pengguna {{ $user->name }}?')">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="btn btn-delete" title="Hapus">
-                                                🗑️ Hapus
-                                            </button>
-                                        </form>
+                                        <button type="button" class="btn btn-delete" title="Hapus"
+                                                data-modal-target="delete-user-{{ $user->id }}">
+                                            🗑️ Hapus
+                                        </button>
+                                        <x-delete-modal
+                                            id="delete-user-{{ $user->id }}"
+                                            :action="route('users.destroy', $user)"
+                                            :itemName="$user->name"
+                                        />
                                     </div>
                                 </td>
                             </tr>

@@ -90,9 +90,65 @@ function setupUserFilter() {
     }
 }
 
+// ── Delete Confirmation Modal ──
+function setupDeleteModals() {
+    // Buka modal saat tombol trigger diklik
+    document.querySelectorAll('[data-modal-target]').forEach(trigger => {
+        trigger.addEventListener('click', () => {
+            const modalId = trigger.getAttribute('data-modal-target');
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                // Pindahkan modal ke body agar tidak terjebak di dalam
+                // parent yang punya overflow:hidden atau backdrop-filter
+                // (yang membuat position:fixed jadi relatif terhadap parent)
+                document.body.appendChild(modal);
+                modal.classList.add('is-open');
+                modal.setAttribute('aria-hidden', 'false');
+                // Focus pada tombol Batal agar keyboard-accessible
+                const cancelBtn = modal.querySelector('[data-modal-close]');
+                if (cancelBtn) cancelBtn.focus();
+            }
+        });
+    });
+
+    // Tutup modal saat tombol Batal diklik
+    document.querySelectorAll('[data-modal-close]').forEach(closeBtn => {
+        closeBtn.addEventListener('click', () => {
+            const modalId = closeBtn.getAttribute('data-modal-close');
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.classList.remove('is-open');
+                modal.setAttribute('aria-hidden', 'true');
+            }
+        });
+    });
+
+    // Tutup modal saat klik area gelap overlay (di luar kartu modal)
+    document.querySelectorAll('.delete-modal-overlay').forEach(overlay => {
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) {
+                overlay.classList.remove('is-open');
+                overlay.setAttribute('aria-hidden', 'true');
+            }
+        });
+    });
+
+    // Tutup modal saat tekan tombol Escape
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            const openModal = document.querySelector('.delete-modal-overlay.is-open');
+            if (openModal) {
+                openModal.classList.remove('is-open');
+                openModal.setAttribute('aria-hidden', 'true');
+            }
+        }
+    });
+}
+
 function initApp() {
     setupThemeToggle();
     setupUserFilter();
+    setupDeleteModals();
 }
 
 if (document.readyState === 'loading') {
