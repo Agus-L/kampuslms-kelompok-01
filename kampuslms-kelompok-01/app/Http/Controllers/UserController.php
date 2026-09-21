@@ -20,12 +20,52 @@ class UserController extends Controller
      * index — Menampilkan daftar seluruh pengguna.
      *
      * Route: GET /users → users.index
+     *
+     * Minggu 4 (BUILD 5):
+     * - Pencarian (q): mencari kecocokan pada kolom name, email, atau nim_nip
+     * - Filter peran (role): admin, dosen, mahasiswa
+     * - Pagination: 15 per halaman dengan withQueryString() agar parameter
+     *   search dan filter tetap bertahan saat berpindah halaman.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $users = User::orderBy('name')->get();
+        // Statistik total keseluruhan pengguna di sistem (tetap, tidak berubah mengikuti halaman/filter)
+        $roleCounts = User::selectRaw('role, count(*) as total')
+            ->groupBy('role')
+            ->pluck('total', 'role');
 
-        return view('users.index', compact('users'));
+        $stats = [
+            'total'     => (int) $roleCounts->sum(),
+            'admin'     => (int) ($roleCounts['admin'] ?? 0),
+            'dosen'     => (int) ($roleCounts['dosen'] ?? 0),
+            'mahasiswa' => (int) ($roleCounts['mahasiswa'] ?? 0),
+        ];
+
+        $query = User::query()
+            ->when($request->filled('q'), function ($query) use ($request) {
+                $query->where(function ($sub) use ($request) {
+                    $sub->where('name', 'like', '%' . $request->q . '%')
+                        ->orWhere('email', 'like', '%' . $request->q . '%')
+                        ->orWhere('nim_nip', 'like', '%' . $request->q . '%');
+                });
+            })
+            ->when($request->filled('role'), fn ($query) =>
+                $query->where('role', $request->role))
+            ->orderBy('name');
+
+        // Hitung halaman kemunculan pertama tiap huruf abjad untuk navigasi cepat
+        $allMatchingNames = (clone $query)->pluck('name');
+        $letterPages = [];
+        foreach ($allMatchingNames as $index => $name) {
+            $char = strtoupper(substr(trim($name), 0, 1));
+            if (!isset($letterPages[$char])) {
+                $letterPages[$char] = (int) floor($index / 15) + 1;
+            }
+        }
+
+        $users = $query->paginate(15)->withQueryString();
+
+        return view('users.index', compact('users', 'letterPages', 'stats'));
     }
 
     /**

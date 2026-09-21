@@ -45,24 +45,21 @@ function setupThemeToggle() {
     }
 }
 
-// ── Filter Pengguna Berdasarkan Peran & Scroll Bar Alfabet ──
+// ── Navigasi Cepat Abjad ──
 function setupUserFilter() {
-    const filterButtons = document.querySelectorAll('.user-filter-bar .filter-btn');
-    const userRows = document.querySelectorAll('.data-table .user-row');
-    const alphabetHeaders = document.querySelectorAll('.data-table .alphabet-header-row');
     const alphabetNavItems = document.querySelectorAll('.alphabet-nav-item');
-    const emptyRow = document.getElementById('empty-filter-row');
-
-    if (!userRows.length) return;
 
     // Handler klik pada item scroll bar alfabet (Lompat cepat ke bagian huruf)
     alphabetNavItems.forEach(item => {
         item.addEventListener('click', (e) => {
-            e.preventDefault();
             const letter = item.getAttribute('data-nav-letter');
+            const targetPage = item.getAttribute('data-target-page');
+            const currentPage = item.getAttribute('data-current-page');
             const targetHeader = document.querySelector(`.alphabet-header-row[data-letter="${letter}"]`);
 
-            if (targetHeader && targetHeader.style.display !== 'none') {
+            // Jika huruf berada di halaman saat ini: scroll langsung tanpa reload
+            if (targetHeader && targetHeader.style.display !== 'none' && targetPage === currentPage) {
+                e.preventDefault();
                 targetHeader.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
                 // Highlight sekejap pada badge huruf yang dituju
@@ -72,68 +69,25 @@ function setupUserFilter() {
                     setTimeout(() => badge.classList.remove('badge-highlight'), 1200);
                 }
             }
+            // Jika huruf berada di halaman lain, browser akan membuka halaman tersebut dan auto-scroll via hash
         });
     });
 
-    filterButtons.forEach(button => {
-        button.addEventListener('click', () => {
-            const selectedRole = button.getAttribute('data-filter');
-
-            // Update status active pada tombol filter
-            filterButtons.forEach(btn => btn.classList.remove('active'));
-            button.classList.add('active');
-
-            let visibleIndex = 0;
-            const visibleLetters = new Set();
-
-            userRows.forEach(row => {
-                const rowRole = row.getAttribute('data-role');
-                const rowLetter = row.getAttribute('data-letter');
-                const isMatch = (selectedRole === 'all' || rowRole === selectedRole);
-
-                if (isMatch) {
-                    row.style.display = '';
-                    visibleIndex++;
-                    if (rowLetter) {
-                        visibleLetters.add(rowLetter);
-                    }
-                    const numberCell = row.querySelector('.row-number');
-                    if (numberCell) {
-                        numberCell.textContent = visibleIndex;
-                    }
-                } else {
-                    row.style.display = 'none';
+    // Otomatis scroll ke huruf jika URL memuat anchor #letter-X
+    if (window.location.hash && window.location.hash.startsWith('#letter-')) {
+        const hashLetter = window.location.hash.replace('#letter-', '');
+        const targetHeader = document.querySelector(`.alphabet-header-row[data-letter="${hashLetter}"]`);
+        if (targetHeader) {
+            setTimeout(() => {
+                targetHeader.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                const badge = targetHeader.querySelector('.alphabet-badge');
+                if (badge) {
+                    badge.classList.add('badge-highlight');
+                    setTimeout(() => badge.classList.remove('badge-highlight'), 1200);
                 }
-            });
-
-            // Tampilkan hanya header abjad yang memiliki data pengguna aktif
-            alphabetHeaders.forEach(header => {
-                const letter = header.getAttribute('data-letter');
-                header.style.display = visibleLetters.has(letter) ? '' : 'none';
-            });
-
-            // Update status aktif/disabled pada scroll bar alfabet di sebelah kanan
-            alphabetNavItems.forEach(item => {
-                const letter = item.getAttribute('data-nav-letter');
-                const hasData = visibleLetters.has(letter);
-                if (hasData) {
-                    item.classList.add('has-data');
-                    item.classList.remove('disabled');
-                    item.removeAttribute('disabled');
-                    item.setAttribute('title', 'Lompat ke huruf ' + letter);
-                } else {
-                    item.classList.remove('has-data');
-                    item.classList.add('disabled');
-                    item.setAttribute('disabled', 'true');
-                    item.setAttribute('title', 'Tidak ada data berawalan ' + letter);
-                }
-            });
-
-            if (emptyRow) {
-                emptyRow.style.display = visibleIndex === 0 ? '' : 'none';
-            }
-        });
-    });
+            }, 200);
+        }
+    }
 }
 
 function initApp() {
