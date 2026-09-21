@@ -9,13 +9,6 @@
 
 <x-layout :title="$course->name . ' — Kampus LMS'">
 
-    {{-- ── Flash Message ── --}}
-    @if (session('success'))
-        <div class="alert alert-success">
-            ✅ {{ session('success') }}
-        </div>
-    @endif
-
     {{-- ── Breadcrumb ── --}}
     <nav class="breadcrumb">
         <a href="{{ route('courses.index') }}" class="breadcrumb-link">Mata Kuliah</a>
