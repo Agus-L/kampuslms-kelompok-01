@@ -1634,13 +1634,15 @@ button.filter-btn.active .stat-value {
     padding: 0;
     font-family: inherit;
     line-height: 1;
+    text-decoration: none;
 }
 
 .alphabet-nav-item.has-data {
     color: var(--primary-light);
 }
 
-.alphabet-nav-item.has-data:hover {
+.alphabet-nav-item.has-data:hover,
+.alphabet-nav-item.active {
     background: var(--primary);
     color: #ffffff;
     transform: scale(1.35);
