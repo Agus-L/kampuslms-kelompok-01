@@ -26,24 +26,16 @@ class CourseController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Course::with('lecturer');
-
-        // Pencarian berdasarkan kode atau nama
-        if ($request->filled('search')) {
-            $search = $request->search;
-            $query->where(function ($q) use ($search) {
-                $q->where('code', 'like', '%' . $search . '%')
-                  ->orWhere('name', 'like', '%' . $search . '%');
-            });
-        }
-
-        // Filter berdasarkan status
-        if ($request->filled('status')) {
-            $query->where('status', $request->status);
-        }
-
-        // Pagination 15 per halaman, query string dipertahankan saat berpindah halaman
-        $courses = $query->orderBy('name')->paginate(15)->withQueryString();
+        $courses = Course::query()
+            ->with('lecturer')
+            ->when($request->filled('q'), fn ($query) =>
+                $query->where('name', 'like', '%' . $request->q . '%')
+                      ->orWhere('code', 'like', '%' . $request->q . '%'))
+            ->when($request->filled('status'), fn ($query) =>
+                $query->where('status', $request->status))
+            ->latest()
+            ->paginate(15)
+            ->withQueryString();
 
         return view('courses.index', compact('courses'));
     }

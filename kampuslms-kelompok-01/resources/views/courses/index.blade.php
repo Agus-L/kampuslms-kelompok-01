@@ -5,6 +5,11 @@
 
     View ini menerima variabel $courses (LengthAwarePaginator berisi
     model Course) yang dikirim dari controller via compact('courses').
+
+    Fitur Minggu 4 (BUILD No. 4):
+    - Pencarian berdasarkan kode atau nama mata kuliah (query string ?q=...)
+    - Filter berdasarkan status (query string ?status=...)
+    - Pagination 15 per halaman dengan filter yang bertahan (withQueryString)
 --}}
 
 {{--
@@ -34,27 +39,68 @@
         </div>
     </div>
 
-    {{-- ── Form Pencarian & Filter ── --}}
+    {{-- ══════════════════════════════════════════════════════
+         Minggu 4 — Pencarian & Filter (query string, bukan session)
+
+         KENAPA query string?
+         → Pengguna bisa membagikan URL hasil pencarian.
+         → Tombol back browser tetap berfungsi.
+         → Membuka dua tab tidak saling mengganggu.
+         → Sesuai prinsip modul 4.1: "filter dan pencarian ke query string,
+           jangan ke session."
+    ══════════════════════════════════════════════════════ --}}
     <div class="search-filter-bar">
-        <form action="{{ route('courses.index') }}" method="GET" class="search-filter-form">
+        <form method="GET" action="{{ route('courses.index') }}" class="search-filter-form">
+            {{-- Input Pencarian --}}
             <div class="search-input-wrapper">
                 <span class="search-icon">🔍</span>
-                <input type="text" name="search" value="{{ request('search') }}"
-                       placeholder="Cari kode atau nama mata kuliah..."
-                       class="search-input">
+                <input
+                    type="text"
+                    name="q"
+                    class="search-input"
+                    placeholder="Cari kode atau nama mata kuliah..."
+                    value="{{ request('q') }}"
+                    aria-label="Cari mata kuliah"
+                >
             </div>
-            <select name="status" class="filter-select">
+
+            {{-- Filter Status --}}
+            <select name="status" class="filter-select" aria-label="Filter berdasarkan status">
                 <option value="">Semua Status</option>
-                <option value="active"   {{ request('status') == 'active'   ? 'selected' : '' }}>✅ Aktif</option>
-                <option value="draft"    {{ request('status') == 'draft'    ? 'selected' : '' }}>📝 Draft</option>
-                <option value="archived" {{ request('status') == 'archived' ? 'selected' : '' }}>🗃️ Arsip</option>
+                <option value="active" {{ request('status') === 'active' ? 'selected' : '' }}>Active</option>
+                <option value="draft" {{ request('status') === 'draft' ? 'selected' : '' }}>Draft</option>
+                <option value="archived" {{ request('status') === 'archived' ? 'selected' : '' }}>Archived</option>
             </select>
-            <button type="submit" class="btn btn-search">Cari</button>
-            @if(request('search') || request('status'))
-                <a href="{{ route('courses.index') }}" class="btn btn-reset" title="Reset filter">✕ Reset</a>
+
+            {{-- Tombol Cari --}}
+            <button type="submit" class="btn btn-search">
+                🔎 Cari
+            </button>
+
+            {{-- Tombol Reset — hanya tampil jika ada filter aktif --}}
+            @if (request('q') || request('status'))
+                <a href="{{ route('courses.index') }}" class="btn btn-reset" title="Hapus semua filter">
+                    ✕ Reset
+                </a>
             @endif
         </form>
     </div>
+
+    {{-- ── Info Hasil Pencarian ── --}}
+    @if (request('q') || request('status'))
+        <div class="search-info">
+            <span class="search-info-icon">📋</span>
+            <span>
+                Menampilkan <strong>{{ $courses->total() }}</strong> hasil
+                @if (request('q'))
+                    untuk pencarian "<strong>{{ request('q') }}</strong>"
+                @endif
+                @if (request('status'))
+                    dengan status <strong>{{ ucfirst(request('status')) }}</strong>
+                @endif
+            </span>
+        </div>
+    @endif
 
     {{-- ── Statistik Ringkas ── --}}
     <div class="stats-bar">
@@ -62,6 +108,16 @@
             <span class="stat-icon">📚</span>
             <span class="stat-value">{{ $courses->total() }}</span>
             <span class="stat-label">Mata Kuliah</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-icon">✅</span>
+            <span class="stat-value">{{ $courses->where('status', 'active')->count() }}</span>
+            <span class="stat-label">Aktif</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-icon">📝</span>
+            <span class="stat-value">{{ $courses->where('status', 'draft')->count() }}</span>
+            <span class="stat-label">Draft</span>
         </div>
     </div>
 
@@ -104,31 +160,42 @@
                         <a href="{{ route('courses.edit', $course) }}" class="btn btn-edit" title="Edit">
                             ✏️ Edit
                         </a>
-                        <form action="{{ route('courses.destroy', $course) }}" method="POST"
-                              onsubmit="return confirm('Yakin ingin menghapus mata kuliah {{ $course->name }}?')">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="btn btn-delete" title="Hapus">
-                                🗑️ Hapus
-                            </button>
-                        </form>
+                        <button type="button" class="btn btn-delete" title="Hapus"
+                                data-modal-target="delete-course-{{ $course->id }}">
+                            🗑️ Hapus
+                        </button>
+                        <x-delete-modal
+                            id="delete-course-{{ $course->id }}"
+                            :action="route('courses.destroy', $course)"
+                            :itemName="$course->name"
+                        />
                     </div>
                 </div>
             </div>
         @empty
             <div class="empty-state">
-                <p>📭 Tidak ada mata kuliah yang ditemukan.
-                    @if(request('search') || request('status'))
+                @if (request('q') || request('status'))
+                    <p>📭 Tidak ada mata kuliah yang cocok dengan pencarian/filter Anda.
                         <a href="{{ route('courses.index') }}">Tampilkan semua</a>.
-                    @else
-                        <a href="{{ route('courses.create') }}">Tambah sekarang</a>.
-                    @endif
-                </p>
+                    </p>
+                @else
+                    <p>📭 Belum ada mata kuliah. <a href="{{ route('courses.create') }}">Tambah sekarang</a>.</p>
+                @endif
             </div>
         @endforelse
     </div>
 
-    {{-- ── Pagination ── --}}
+    {{-- ══════════════════════════════════════════════════════
+         Minggu 4 — Pagination Links
+
+         $courses->links() menampilkan tautan navigasi halaman.
+         Karena controller sudah memanggil ->withQueryString(),
+         tautan halaman 2 dst. otomatis membawa filter yang aktif.
+         Contoh: /courses?q=basis&status=active&page=2
+
+         TANPA withQueryString(), klik halaman 2 akan kehilangan
+         filter — bug klasik yang disebutkan di modul 4.1.
+    ══════════════════════════════════════════════════════ --}}
     @if ($courses->hasPages())
         <div class="pagination-wrapper">
             {{ $courses->links() }}
