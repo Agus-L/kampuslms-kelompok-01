@@ -24,9 +24,26 @@ class CourseController extends Controller
      * Eager-load relasi 'lecturer' agar nama dosen bisa ditampilkan
      * tanpa query tambahan per mata kuliah (menghindari N+1).
      */
-    public function index()
+    public function index(Request $request)
     {
-        $courses = Course::with('lecturer')->get();
+        $query = Course::with('lecturer');
+
+        // Pencarian berdasarkan kode atau nama
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('code', 'like', '%' . $search . '%')
+                  ->orWhere('name', 'like', '%' . $search . '%');
+            });
+        }
+
+        // Filter berdasarkan status
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        // Pagination 15 per halaman, query string dipertahankan saat berpindah halaman
+        $courses = $query->orderBy('name')->paginate(15)->withQueryString();
 
         return view('courses.index', compact('courses'));
     }

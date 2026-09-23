@@ -3,24 +3,11 @@
     Route: GET /users → users.index
     Controller: UserController@index
 
-    View ini menerima variabel $users (Eloquent Collection berisi
+    View ini menerima variabel $users (LengthAwarePaginator berisi
     model User) yang dikirim dari controller via compact('users').
 --}}
 
 <x-layout :title="'Daftar Pengguna — Kampus LMS'">
-
-    {{-- ── Flash Message ── --}}
-    @if (session('success'))
-        <div class="alert alert-success">
-            ✅ {{ session('success') }}
-        </div>
-    @endif
-
-    @if (session('error'))
-        <div class="alert alert-error">
-            ❌ {{ session('error') }}
-        </div>
-    @endif
 
     {{-- ── Header Halaman ── --}}
     <div class="page-header">
@@ -43,35 +30,39 @@
         </div>
     </div>
 
-    {{-- ── Statistik Ringkas / Tombol Filter Peran ── --}}
-    <div class="stats-bar user-filter-bar" role="tablist" aria-label="Filter pengguna berdasarkan peran">
-        <button type="button" class="stat-item filter-btn active" data-filter="all" title="Tampilkan Semua Pengguna">
+    {{-- ── Form Pencarian & Filter ── --}}
+    <div class="search-filter-bar">
+        <form action="{{ route('users.index') }}" method="GET" class="search-filter-form">
+            <div class="search-input-wrapper">
+                <span class="search-icon">🔍</span>
+                <input type="text" name="search" value="{{ request('search') }}"
+                       placeholder="Cari nama, email, atau NIM/NIP..."
+                       class="search-input">
+            </div>
+            <select name="role" class="filter-select">
+                <option value="">Semua Role</option>
+                <option value="admin"     {{ request('role') == 'admin'     ? 'selected' : '' }}>🛡️ Admin</option>
+                <option value="dosen"     {{ request('role') == 'dosen'     ? 'selected' : '' }}>🎓 Dosen</option>
+                <option value="mahasiswa" {{ request('role') == 'mahasiswa' ? 'selected' : '' }}>📚 Mahasiswa</option>
+            </select>
+            <button type="submit" class="btn btn-search">Cari</button>
+            @if(request('search') || request('role'))
+                <a href="{{ route('users.index') }}" class="btn btn-reset" title="Reset filter">✕ Reset</a>
+            @endif
+        </form>
+    </div>
+
+    {{-- ── Statistik Ringkas ── --}}
+    <div class="stats-bar">
+        <div class="stat-item">
             <span class="stat-icon">👥</span>
-            <span class="stat-value">{{ $users->count() }}</span>
+            <span class="stat-value">{{ $users->total() }}</span>
             <span class="stat-label">Total Pengguna</span>
-        </button>
-        <button type="button" class="stat-item filter-btn" data-filter="admin" title="Filter Pengguna Admin">
-            <span class="stat-icon">🛡️</span>
-            <span class="stat-value">{{ $users->where('role', 'admin')->count() }}</span>
-            <span class="stat-label">Admin</span>
-        </button>
-        <button type="button" class="stat-item filter-btn" data-filter="dosen" title="Filter Pengguna Dosen">
-            <span class="stat-icon">🎓</span>
-            <span class="stat-value">{{ $users->where('role', 'dosen')->count() }}</span>
-            <span class="stat-label">Dosen</span>
-        </button>
-        <button type="button" class="stat-item filter-btn" data-filter="mahasiswa" title="Filter Pengguna Mahasiswa">
-            <span class="stat-icon">📚</span>
-            <span class="stat-value">{{ $users->where('role', 'mahasiswa')->count() }}</span>
-            <span class="stat-label">Mahasiswa</span>
-        </button>
+        </div>
     </div>
 
     {{-- ── Tabel Pengguna ── --}}
     @if ($users->count() > 0)
-        @php
-            $existingLetters = $users->map(fn($u) => strtoupper(substr(trim($u->name), 0, 1)))->unique()->values()->all();
-        @endphp
         <div class="table-card">
             <div class="table-wrapper">
                 <table class="data-table">
@@ -86,30 +77,9 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @php
-                            $currentLetter = null;
-                        @endphp
                         @foreach ($users as $index => $user)
-                            @php
-                                $firstLetter = strtoupper(substr(trim($user->name), 0, 1));
-                            @endphp
-
-                            @if ($firstLetter !== $currentLetter)
-                                @php
-                                    $currentLetter = $firstLetter;
-                                @endphp
-                                <tr class="alphabet-header-row" data-letter="{{ $firstLetter }}">
-                                    <td colspan="6" class="alphabet-header-cell">
-                                        <div class="alphabet-badge-wrapper">
-                                            <span class="alphabet-badge">{{ $firstLetter }}</span>
-                                            <span class="alphabet-line"></span>
-                                        </div>
-                                    </td>
-                                </tr>
-                            @endif
-
-                            <tr class="user-row" data-role="{{ $user->role }}" data-letter="{{ $firstLetter }}">
-                                <td class="td-center row-number">{{ $index + 1 }}</td>
+                            <tr class="user-row" data-role="{{ $user->role }}">
+                                <td class="td-center row-number">{{ $users->firstItem() + $index }}</td>
                                 <td class="td-name">
                                     {{ $user->name }}
                                 </td>
@@ -137,36 +107,26 @@
                                 </td>
                             </tr>
                         @endforeach
-                        <tr id="empty-filter-row" style="display: none;">
-                            <td colspan="6" class="empty-filter-cell">
-                                📭 Tidak ada data pengguna untuk kategori peran ini.
-                            </td>
-                        </tr>
                     </tbody>
                 </table>
             </div>
         </div>
 
-        {{-- ── Scroll Bar Alfabet (Fixed di Pinggir Kanan Layar, Tengah Vertikal) ── --}}
-        <aside class="alphabet-nav" aria-label="Navigasi Cepat Abjad">
-            <div class="alphabet-nav-track">
-                @foreach (range('A', 'Z') as $char)
-                    @php
-                        $hasData = in_array($char, $existingLetters);
-                    @endphp
-                    <button type="button"
-                            class="alphabet-nav-item {{ $hasData ? 'has-data' : 'disabled' }}"
-                            data-nav-letter="{{ $char }}"
-                            {{ !$hasData ? 'disabled' : '' }}
-                            title="{{ $hasData ? 'Lompat ke huruf ' . $char : 'Tidak ada nama berawalan ' . $char }}">
-                        {{ $char }}
-                    </button>
-                @endforeach
+        {{-- ── Pagination ── --}}
+        @if ($users->hasPages())
+            <div class="pagination-wrapper">
+                {{ $users->links() }}
             </div>
-        </aside>
+        @endif
     @else
         <div class="empty-state">
-            <p>📭 Belum ada pengguna. <a href="{{ route('users.create') }}">Tambah sekarang</a>.</p>
+            <p>📭 Tidak ada pengguna yang ditemukan.
+                @if(request('search') || request('role'))
+                    <a href="{{ route('users.index') }}">Tampilkan semua</a>.
+                @else
+                    <a href="{{ route('users.create') }}">Tambah sekarang</a>.
+                @endif
+            </p>
         </div>
     @endif
 

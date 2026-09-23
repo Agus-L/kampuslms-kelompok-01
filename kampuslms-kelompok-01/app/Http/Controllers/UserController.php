@@ -21,9 +21,27 @@ class UserController extends Controller
      *
      * Route: GET /users → users.index
      */
-    public function index()
+    public function index(Request $request)
     {
-        $users = User::orderBy('name')->get();
+        $query = User::query();
+
+        // Pencarian berdasarkan nama, email, atau NIM/NIP
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', '%' . $search . '%')
+                  ->orWhere('email', 'like', '%' . $search . '%')
+                  ->orWhere('nim_nip', 'like', '%' . $search . '%');
+            });
+        }
+
+        // Filter berdasarkan role
+        if ($request->filled('role')) {
+            $query->where('role', $request->role);
+        }
+
+        // Pagination 15 per halaman, query string dipertahankan saat berpindah halaman
+        $users = $query->orderBy('name')->paginate(15)->withQueryString();
 
         return view('users.index', compact('users'));
     }
