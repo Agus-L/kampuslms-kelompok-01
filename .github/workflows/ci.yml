@@ -8,7 +8,7 @@ on:
 
 defaults:
   run:
-    working-directory: My-Laravel-app
+    working-directory: kampuslms-kelompok-01
 
 jobs:
   laravel-ci:
@@ -24,9 +24,9 @@ jobs:
       - name: Check .env not committed
         working-directory: .
         run: |
-          if git ls-files --error-unmatch My-Laravel-app/.env 2>/dev/null; then
-            echo "❌ GAGAL: My-Laravel-app/.env ter-commit ke repository!"
-            echo "   Jalankan: git rm --cached My-Laravel-app/.env"
+          if git ls-files --error-unmatch kampuslms-kelompok-01/.env 2>/dev/null; then
+            echo "❌ GAGAL: kampuslms-kelompok-01/.env ter-commit ke repository!"
+            echo "   Jalankan: git rm --cached kampuslms-kelompok-01/.env"
             exit 1
           else
             echo "✅ .env tidak ter-commit (aman)"
@@ -44,8 +44,8 @@ jobs:
       - name: Cache Composer packages
         uses: actions/cache@v4
         with:
-          path: My-Laravel-app/vendor
-          key: composer-${{ hashFiles('My-Laravel-app/composer.lock') }}
+          path: kampuslms-kelompok-01/vendor
+          key: composer-${{ hashFiles('kampuslms-kelompok-01/composer.lock') }}
           restore-keys: composer-
 
       # ── 5. Install Composer dependencies ──────────────────────
