@@ -1039,6 +1039,241 @@ a {
     }
 }
 
+/* ── Search & Filter Bar ── */
+.search-filter-bar {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius);
+    padding: 1rem 1.25rem;
+    margin-bottom: 1.5rem;
+    backdrop-filter: blur(12px);
+}
+
+.search-filter-form {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.search-input-wrapper {
+    flex: 1 1 250px;
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.search-icon {
+    position: absolute;
+    left: 0.85rem;
+    font-size: 0.9rem;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.search-input {
+    width: 100%;
+    padding: 0.6rem 0.85rem 0.6rem 2.5rem;
+    background-color: var(--input-bg);
+    border: 1px solid var(--input-border);
+    border-radius: var(--radius);
+    color: var(--text-main);
+    font-size: 0.875rem;
+    font-family: inherit;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    color-scheme: dark;
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px var(--primary-glow);
+}
+
+.search-input::placeholder {
+    color: var(--text-muted);
+}
+
+[data-theme="light"] .search-input {
+    color-scheme: light;
+}
+
+.filter-select {
+    padding: 0.6rem 2rem 0.6rem 0.85rem;
+    background-color: var(--input-bg);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%239ca3af' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10l-5 5z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    background-size: 12px;
+    border: 1px solid var(--input-border);
+    border-radius: var(--radius);
+    color: var(--text-main);
+    font-size: 0.875rem;
+    font-family: inherit;
+    cursor: pointer;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    min-width: 160px;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    color-scheme: dark;
+}
+
+.filter-select option {
+    background: #1e293b;
+    color: var(--text-main);
+}
+
+[data-theme="light"] .filter-select {
+    color-scheme: light;
+}
+
+[data-theme="light"] .filter-select option {
+    background: #ffffff;
+    color: #0f172a;
+}
+
+.filter-select:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px var(--primary-glow);
+}
+
+.btn-search {
+    padding: 0.6rem 1.25rem;
+    background: var(--primary);
+    color: #ffffff;
+    border: none;
+    border-radius: var(--radius);
+    font-size: 0.875rem;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.15s;
+    white-space: nowrap;
+}
+
+.btn-search:hover {
+    background: var(--primary-hover);
+    transform: translateY(-1px);
+}
+
+.btn-reset {
+    padding: 0.6rem 1rem;
+    background: transparent;
+    color: var(--text-muted);
+    border: 1px solid var(--input-border);
+    border-radius: var(--radius);
+    font-size: 0.8rem;
+    font-weight: 500;
+    text-decoration: none;
+    cursor: pointer;
+    transition: color 0.2s, border-color 0.2s;
+    white-space: nowrap;
+}
+
+.btn-reset:hover {
+    color: var(--btn-delete-color);
+    border-color: var(--btn-delete-border);
+}
+
+/* ── Pagination ── */
+.pagination-wrapper {
+    display: flex;
+    justify-content: center;
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+}
+
+.pagination {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.pagination-info {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin: 0;
+}
+
+.pagination-info-bold {
+    font-weight: 700;
+    color: var(--primary-light);
+}
+
+.pagination-links {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 9999px;
+    padding: 0.3rem;
+    backdrop-filter: blur(12px);
+}
+
+.pagination-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 2.25rem;
+    height: 2.25rem;
+    padding: 0 0.5rem;
+    border-radius: 9999px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    font-family: inherit;
+    text-decoration: none;
+    color: var(--text-muted);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+a.pagination-btn:hover {
+    background: rgba(99, 102, 241, 0.15);
+    color: var(--primary-light);
+    transform: scale(1.08);
+}
+
+.pagination-active {
+    background: var(--primary) !important;
+    color: #ffffff !important;
+    font-weight: 700;
+    box-shadow: 0 0 16px var(--primary-glow), 0 4px 8px rgba(0, 0, 0, 0.2);
+    cursor: default;
+}
+
+.pagination-disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.pagination-dots {
+    cursor: default;
+    letter-spacing: 2px;
+    color: var(--text-muted);
+    opacity: 0.5;
+}
+
+.pagination-prev,
+.pagination-next {
+    color: var(--text-main);
+}
+
+.pagination-prev:hover,
+.pagination-next:hover {
+    color: #ffffff;
+}
+
+
 /* ── Page Header with Button ── */
 .page-header-top {
     display: flex;
