@@ -1,0 +1,41 @@
+## Nama: Aan Mardiah
+## NIM:10241001
+
+### READ
+
+1. Method apa yang menerima request? Di controller mana?    
+Jawab: Saat form disubmit, form mengirimkan data lewat method POST ke URL /courses, yang diarahkan oleh router Laravel ke method store(Request $request) di dalam CourseController.
+
+2. Di titik mana persisnya validasi terjadi — sebelum atau sesudah baris pertama method controller?   
+Jawab: Request masuk terlebih dahulu ke method store() didalam controller, lalu di baris paling awal method tersebut dipanggil fungsi $request->validate(). Karena data SKS bernilai 99 (melebihi batas max:6), validasi langsung gagal di baris tersebut dan Laravel melempar ValidationException. Baris-baris kode di bawahnya (seperti Course::create()) tidak akan pernah dieksekusi.
+
+3. Ke mana Laravel me-redirect setelah gagal? Siapa yang menentukan tujuannya?    
+Jawab: Ketika validasi gagal, Laravel secara otomatis mendeteksi URL asal pengirim form (HTTP Referer atau url()->previous()), lalu membuat respons redirect 302 kembali ke halaman tersebut tanpa kita perlu menulis kode redirect manual.
+
+4. Dari mana @error('sks') mengambil pesannya?  
+Jawab: Saat validasi gagal, Laravel otomatis menyimpan pesan error ke dalam session. Middleware Laravel (ShareErrorsFromSession) membagikan variabel $errors ke seluruh Blade view. Direktif @error('sks') akan mengecek apakah ada error untuk field sks, lalu menampilkan pesannya (Bobot SKS maksimal 6 SKS.).
+
+5. Dari mana old('sks') mengambil nilainya? Berapa lama nilai itu bertahan?    
+Jawab: Ketika validasi gagal, Laravel otomatis menyertakan input lama ke session (withInput()). Fungsi old('sks') mengambil kembali angka 99 tersebut agar form tidak kosong lagi. Nilai ini bersifat sementara: jika halaman di-refresh ulang atau pengguna pindah halaman, data tersebut langsung terhapus otomatis dari session.
+
+6. Buka DevTools → Application → Cookies. Temukan cookie session Laravel. Catat namanya.  
+Jawab:  
+
+| # | Nama | Value | 
+| --- | --- | --- | 
+| 1 | laravel_session | eyJpdiI6Ink5S2NXcWx5NmhjWjlNeS9udTZMRVE9PSIsInZhbHVlIjoib3IrK0owQVFuTklxamFHZ0UxalNBMGNNMERVUEN4SjdvQXRjUFJ0NkpLc1JGYkxwRWdlUWdNbXR4QldudmNkTmZuQklNbi9CY3U0WFhJMnZxamtPa0JUWXJiZ2ZjbXB1MWRrSmVWK1pCNStydDRTLzJXbTQvckIzOVBtRnZYZlMiLCJtYWMiOiJmYjU5MzFkY2I0OGU5Mzc3ZDU5MGM5MmJlMDI4OTYwODkxZWI3ZmQ5MGMxYTE2NjFkZjgzYTQ0MzZlMjk2YzM2IiwidGFnIjoiIn0%3D|
+| 2 | XSRF-TOKEN |eyJpdiI6InN4VjZ6RjJIMzA1UGt2ZFZ1bTdsV0E9PSIsInZhbHVlIjoiRzVNMzNvQndUUDIyN0RmWjZic01FQVJHeFF0MDhoMmdoTkZPR2t2Mld3WWwwaC9iTU5ab0hKTGVZZVFPYitLL05nYnpjaS9nUnM2NU5QMEZrQUJySGJXRzlEVHM5UGZEQng3amx4d2pLdDQxdVpLcGw0RW9Rakx5VFdmTUIxMDMiLCJtYWMiOiJiOWZjMzhmMzI0MGQ0Y2NkNjRmNzZmZWI1OTAzN2IyOTY5MzRmYTdkNWZmNzhjMWJjNDk0NWRmNTUzODRjNzY1IiwidGFnIjoiIn0%3D | 
+
+
+
+### BREAK
+
+| # | Yang dirusak | Prediksi | Hasil Sebenarnya |
+| --- | --- | --- | --- |
+| 1 | Hapus `@csrf` dari form, lalu kirim | Form akan tetap terkirim normal ke server dan data berhasil disimpan ke database. | Request ditolak dengan respon HTTP 419 (Page Expired) karena middleware keamanan Laravel tidak menemukan _token CSRF yang valid pada data form. Akibatnya, request langsung diblokir demi keamanan sebelum sempat dieksekusi oleh controller maupun disimpan ke database. |
+| 2 | Ganti `$request->validated()` menjadi `$request->all()`, lalu kirim field liar lewat cURL | Data liar yang dikirimkan (misal `is_admin=1` atau `role=admin`) akan langsung masuk dan tersimpan ke database. | Pada website kami data mata kuliah tetap berhasil disimpan, tetapi field liar yang dikirim diabaikan dan tidak masuk ke database. Hal ini terjadi karena Laravel memiliki fitur Mass Assignment Protection pada Model melalui properti $fillable, yang otomatis menyaring dan membuang kolom mana pun yang tidak terdaftar secara resmi. Namun apabila sebuah website tidak menerapkan fitur tersebut kolom sensitif database bisa dijebol dan disusupi field liar dari penyerang.  |
+| 3 | Hapus validasi `exists:users,id` pada `lecturer_id`, kirim `lecturer_id=99999` | Database akan otomatis menolak penyimpanan data karena ID dosen tidak ditemukan pada tabel `users`. | Rule::exists bertindak sebagai lapisan pelindung pertama di tingkat aplikasi sebelum data sempat dikirim ke database. Ketika validasi tersebut aktif dan kamu memilih ID palsu (99999), Laravel langsung mencegatnya lebih awal lalu mengembalikan pesan error yang ramah pengguna ("Dosen yang dipilih tidak valid atau bukan merupakan dosen aktif"), sedangkan jika memilih dosen asli, validasi lolos karena ID-nya terbukti terdaftar di database. Sebaliknya, saat Rule::exists dihapus, Laravel meloloskan ID palsu tersebut ke database, dan karena database memiliki aturan relasi (Foreign Key) yang mewajibkan ID dosen benar-benar ada di tabel users, database menolaknya secara keras hingga memicu crash sistem fatal (500 Internal Server Error / QueryException). |
+| 4 | Hapus validasi `in:...` pada `status`, kirim `status=superadmin` | Server akan menolak karena nilai status tidak sesuai dengan opsi dropdown form. | Rule::in bertindak sebagai pelindung di tingkat aplikasi untuk memastikan data yang dikirim hanya sesuai dengan opsi yang diizinkan (draft, active, archived). Ketika validasi tersebut aktif dan dikirim status palsu (superadmin), Laravel langsung mencegatnya lebih awal dan mengembalikan pesan error yang ramah ("Status mata kuliah harus salah satu dari: draft, active, atau archived"), serta jika memilih opsi normal maka data berhasil disimpan. Sebaliknya, saat Rule::in dihapus, Laravel meloloskan nilai superadmin ke database karena hanya mengecek syarat required. Namun, karena di database kolom status bertipe enum yang memiliki batasan ketat (CHECK constraint), database menolak nilai tersebut secara keras hingga memicu crash sistem fatal (500 Internal Server Error / QueryException: CHECK constraint failed). |
+| 5 | Hapus `->withQueryString()`, lakukan pencarian lalu klik halaman 2 | Hasil pencarian akan tetap bertahan saat berpindah halaman paginasi. | Pada file CourseController.php method index(), kita ubah paginate(15) menjadi paginate(2) agar tautan navigasi pagination muncul tanpa harus menambah banyak data, lalu menonaktifkan ->withQueryString(). Ketika melakukan pencarian (misalnya mencari huruf "a") di halaman 1, URL awal memuat query ?q=a. Namun, begitu kita mengklik halaman 2, parameter pencarian ?q=a tersebut hilang dan URL hanya menyisakan ?page=2, sehingga hasil pencarian ter-reset dan halaman 2 menampilkan seluruh data tanpa filter. Sebaliknya, ketika ->withQueryString() diaktifkan, Laravel secara otomatis menyertakan parameter pencarian ke setiap link halaman (?q=a&page=2), sehingga hasil filter pencarian tetap bertahan saat berpindah halaman paginasi. |
+| 6 | Ganti `return redirect()` menjadi `return view()` pada `store()`, lalu tekan F5 setelah simpan | Halaman hasil simpan akan muncul biasa dan me-refresh tidak akan mempengaruhi isi database. | Ketika menekan F5 setelah simpan, browser memunculkan popup peringatan "Resubmit The Form". Jika dilanjutkan, browser akan mengirim ulang request POST tersebut ke server sehingga memicu error validasi kode unik ("Kode mata kuliah sudah digunakan" atau menghasilkan data duplikat di database). Hal ini membuktikan pentingnya pola Post/Redirect/Get (PRG): request POST harus selalu diakhiri dengan return redirect() agar refresh halaman berpindah ke method GET yang aman dan tidak mengeksekusi ulang penyimpanan data. |
+| 7 | Hapus `old(...)` dari semua input, lalu kirim form dengan satu kesalahan | Form tetap menampilkan pesan kesalahan dan isian yang sebelumnya sudah diketik tetap ada di kotak input. | Pesan error tetap muncul, tetapi seluruh isian form yang sudah diketik (Nama MK, Deskripsi, SKS) hilang dan kembali kosong melompong. Hal ini membuktikan bahwa tanpa helper old(...), browser akan me-render form kosong baru saat redirect gagal validasi. Helper old() sangat krusial bagi User Experience (UX) agar pengguna tidak perlu mengetik ulang seluruh data dari nol saat terjadi kesalahan pada salah satu input. |
