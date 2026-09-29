@@ -3,62 +3,34 @@
 namespace App\Http\Controllers\Mahasiswa;
 
 use App\Http\Controllers\Controller;
+use App\Models\Submission;
 use Illuminate\Http\Request;
 
+/**
+ * Mahasiswa\GradeController — Melihat nilai sendiri.
+ *
+ * Route model binding diterapkan:
+ * - Route bersarang (index): menerima Submission $submission
+ *   sebagai parent → /mahasiswa/submissions/{submission}/grades
+ *
+ * Route hanya mendaftarkan: index
+ * (lihat ->only(['index']) di routes/web.php)
+ * Mahasiswa hanya bisa melihat nilai, tidak bisa edit.
+ *
+ * ⚠️ IDOR TINGGI: Route ini harus di-scope ke
+ * auth()->user()->submissions agar mahasiswa tidak bisa
+ * melihat nilai submission orang lain.
+ * → Akan dipindahkan ke Policy di minggu 7.
+ */
 class GradeController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Lihat nilai untuk sebuah submission.
+     *
+     * Route: GET /mahasiswa/submissions/{submission}/grades → mahasiswa.submissions.grades.index
+     * Route model binding: {submission} → Submission $submission
      */
-    public function index()
-    {
-        //
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
+    public function index(Submission $submission)
     {
         //
     }

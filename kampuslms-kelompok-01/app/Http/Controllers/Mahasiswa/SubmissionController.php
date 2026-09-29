@@ -3,62 +3,91 @@
 namespace App\Http\Controllers\Mahasiswa;
 
 use App\Http\Controllers\Controller;
+use App\Models\Assignment;
+use App\Models\Submission;
 use Illuminate\Http\Request;
 
+/**
+ * Mahasiswa\SubmissionController — Mengumpulkan dan melihat tugas.
+ *
+ * Route model binding diterapkan:
+ * - Route bersarang (index, create, store): menerima Assignment $assignment
+ *   sebagai parent → /mahasiswa/assignments/{assignment}/submissions
+ * - Route shallow (show, edit, update): menerima Submission $submission
+ *   langsung → /mahasiswa/submissions/{submission}
+ *
+ * Route mendaftarkan semua kecuali destroy
+ * (lihat ->except(['destroy']) di routes/web.php)
+ * Submission yang sudah dikumpulkan tidak boleh dihapus.
+ *
+ * ⚠️ IDOR SANGAT KRITIS: Mahasiswa Budi bisa ganti ID untuk
+ * melihat submission mahasiswa Ani beserta nilainya.
+ * → Akan dipindahkan ke Policy di minggu 7.
+ */
 class SubmissionController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Daftar submission untuk satu tugas.
+     *
+     * Route: GET /mahasiswa/assignments/{assignment}/submissions → mahasiswa.assignments.submissions.index
+     * Route model binding: {assignment} → Assignment $assignment
      */
-    public function index()
+    public function index(Assignment $assignment)
     {
         //
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Form untuk mengumpulkan tugas baru.
+     *
+     * Route: GET /mahasiswa/assignments/{assignment}/submissions/create → mahasiswa.assignments.submissions.create
+     * Route model binding: {assignment} → Assignment $assignment
      */
-    public function create()
+    public function create(Assignment $assignment)
     {
         //
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Simpan submission baru.
+     *
+     * Route: POST /mahasiswa/assignments/{assignment}/submissions → mahasiswa.assignments.submissions.store
+     * Route model binding: {assignment} → Assignment $assignment
      */
-    public function store(Request $request)
+    public function store(Request $request, Assignment $assignment)
     {
         //
     }
 
     /**
-     * Display the specified resource.
+     * Detail satu submission (shallow route).
+     *
+     * Route: GET /mahasiswa/submissions/{submission} → mahasiswa.submissions.show
+     * Route model binding: {submission} → Submission $submission
      */
-    public function show(string $id)
+    public function show(Submission $submission)
     {
         //
     }
 
     /**
-     * Show the form for editing the specified resource.
+     * Form edit submission (shallow route).
+     *
+     * Route: GET /mahasiswa/submissions/{submission}/edit → mahasiswa.submissions.edit
+     * Route model binding: {submission} → Submission $submission
      */
-    public function edit(string $id)
+    public function edit(Submission $submission)
     {
         //
     }
 
     /**
-     * Update the specified resource in storage.
+     * Simpan perubahan submission (shallow route).
+     *
+     * Route: PUT /mahasiswa/submissions/{submission} → mahasiswa.submissions.update
+     * Route model binding: {submission} → Submission $submission
      */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
+    public function update(Request $request, Submission $submission)
     {
         //
     }

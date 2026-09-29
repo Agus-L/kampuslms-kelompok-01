@@ -3,12 +3,26 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use Illuminate\Http\Request;
 
+/**
+ * Admin\UserController — CRUD pengguna oleh Admin.
+ *
+ * Route model binding diterapkan: parameter {user} di URL
+ * otomatis di-resolve menjadi instance User oleh Laravel.
+ * Jika user tidak ditemukan, Laravel melempar 404 otomatis.
+ *
+ * Catatan: route resource untuk users menggunakan ->except(['show']),
+ * sehingga method show() tidak akan dipanggil melalui route.
+ * Tetap disediakan untuk kelengkapan resource controller.
+ */
 class UserController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Daftar seluruh pengguna.
+     *
+     * Route: GET /admin/users → admin.users.index
      */
     public function index()
     {
@@ -16,7 +30,9 @@ class UserController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Form tambah pengguna baru.
+     *
+     * Route: GET /admin/users/create → admin.users.create
      */
     public function create()
     {
@@ -24,7 +40,9 @@ class UserController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Simpan pengguna baru ke database.
+     *
+     * Route: POST /admin/users → admin.users.store
      */
     public function store(Request $request)
     {
@@ -32,33 +50,45 @@ class UserController extends Controller
     }
 
     /**
-     * Display the specified resource.
+     * Detail satu pengguna.
+     *
+     * Route: Tidak terdaftar (excluded dari resource).
+     * Route model binding: {user} → User $user
      */
-    public function show(string $id)
+    public function show(User $user)
     {
         //
     }
 
     /**
-     * Show the form for editing the specified resource.
+     * Form edit pengguna.
+     *
+     * Route: GET /admin/users/{user}/edit → admin.users.edit
+     * Route model binding: {user} → User $user
      */
-    public function edit(string $id)
+    public function edit(User $user)
     {
         //
     }
 
     /**
-     * Update the specified resource in storage.
+     * Simpan perubahan pengguna.
+     *
+     * Route: PUT /admin/users/{user} → admin.users.update
+     * Route model binding: {user} → User $user
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, User $user)
     {
         //
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Hapus pengguna.
+     *
+     * Route: DELETE /admin/users/{user} → admin.users.destroy
+     * Route model binding: {user} → User $user
      */
-    public function destroy(string $id)
+    public function destroy(User $user)
     {
         //
     }
