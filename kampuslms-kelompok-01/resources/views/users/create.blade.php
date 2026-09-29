@@ -13,7 +13,7 @@
     <div class="form-container">
         {{-- ── Breadcrumb ── --}}
         <nav class="breadcrumb">
-            <a href="{{ route('users.index') }}" class="breadcrumb-link">Pengguna</a>
+            <a href="{{ route('admin.users.index') }}" class="breadcrumb-link">Pengguna</a>
             <span class="breadcrumb-separator">›</span>
             <span class="breadcrumb-current">Tambah Baru</span>
         </nav>
@@ -26,7 +26,7 @@
 
         {{-- ── Form ── --}}
         <div class="form-card">
-            <form action="{{ route('users.store') }}" method="POST">
+            <form action="{{ route('admin.users.store') }}" method="POST">
                 @csrf
 
                 {{-- Nama --}}
@@ -115,7 +115,7 @@
                     <button type="submit" class="btn btn-create">
                         💾 Simpan Pengguna
                     </button>
-                    <a href="{{ route('users.index') }}" class="btn btn-cancel">
+                    <a href="{{ route('admin.users.index') }}" class="btn btn-cancel">
                         ✕ Batal
                     </a>
                 </div>

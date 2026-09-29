@@ -11,7 +11,7 @@
 
     {{-- ── Breadcrumb ── --}}
     <nav class="breadcrumb">
-        <a href="{{ route('courses.index') }}" class="breadcrumb-link">Mata Kuliah</a>
+        <a href="{{ route('admin.courses.index') }}" class="breadcrumb-link">Mata Kuliah</a>
         <span class="breadcrumb-separator">›</span>
         <span class="breadcrumb-current">{{ $course->name }}</span>
     </nav>
@@ -29,7 +29,7 @@
             </div>
             {{-- Tombol Aksi --}}
             <div class="detail-actions">
-                <a href="{{ route('courses.edit', $course) }}" class="btn btn-edit">
+                <a href="{{ route('admin.courses.edit', $course) }}" class="btn btn-edit">
                     ✏️ Edit
                 </a>
                 <button type="button" class="btn btn-delete"
@@ -38,7 +38,7 @@
                 </button>
                 <x-delete-modal
                     id="delete-course-{{ $course->id }}"
-                    :action="route('courses.destroy', $course)"
+                    :action="route('admin.courses.destroy', $course)"
                     :itemName="$course->name"
                 />
             </div>
@@ -80,7 +80,7 @@
     </div>
 
     {{-- ── Tombol Kembali ── --}}
-    <a href="{{ route('courses.index') }}" class="back-link">
+    <a href="{{ route('admin.courses.index') }}" class="back-link">
         <span class="back-arrow">←</span>
         Kembali ke Daftar Mata Kuliah
     </a>

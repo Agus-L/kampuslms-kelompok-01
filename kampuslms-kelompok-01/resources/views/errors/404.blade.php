@@ -5,7 +5,7 @@
         <p style="color: #4b5563; margin-bottom: 2rem;">
             Maaf, halaman yang kamu cari tidak ada atau alamat rutenya salah.
         </p>
-        <a href="{{ route('courses.index') }}" 
+        <a href="{{ route('admin.courses.index') }}" 
            style="background-color: #4f46e5; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; font-weight: bold;">
             Kembali ke Daftar Mata Kuliah
         </a>

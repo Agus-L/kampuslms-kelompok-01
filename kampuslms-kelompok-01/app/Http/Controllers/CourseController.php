@@ -60,6 +60,7 @@ class CourseController extends Controller
             ->latest()
             ->paginate(15);
 
+
         return view('courses.index', compact('courses'));
     }
 
@@ -88,7 +89,7 @@ class CourseController extends Controller
 
         Course::create($validated);
 
-        return redirect()->route('courses.index')
+        return redirect()->route('admin.courses.index')
                          ->with('success', 'Mata kuliah berhasil ditambahkan.');
     }
 
@@ -132,7 +133,7 @@ class CourseController extends Controller
 
         $course->update($validated);
 
-        return redirect()->route('courses.show', $course)
+        return redirect()->route('admin.courses.show', $course)
                          ->with('success', 'Mata kuliah berhasil diperbarui.');
     }
 
@@ -149,10 +150,10 @@ class CourseController extends Controller
         try {
             $course->delete();
 
-            return redirect()->route('courses.index')
+            return redirect()->route('admin.courses.index')
                              ->with('success', 'Mata kuliah "' . $course->name . '" berhasil dihapus.');
         } catch (\Illuminate\Database\QueryException $e) {
-            return redirect()->route('courses.index')
+            return redirect()->route('admin.courses.index')
                              ->with('error', 'Gagal menghapus mata kuliah. Pastikan tidak ada data terkait.');
         }
     }

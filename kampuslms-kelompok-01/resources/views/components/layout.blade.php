@@ -49,40 +49,48 @@
         })();
     </script>
 
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @if (file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot')))
+        @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @endif
 </head>
 <body>
     {{-- ── Navbar ── --}}
     <nav class="navbar">
         {{--
-            KENAPA route('courses.index') bukan '/'?
-            → Brand mengarah ke daftar mata kuliah sebagai "beranda" modul ini.
-              Menggunakan helper route() agar tautan tidak pernah "patah"
-              meskipun URI-nya diubah di web.php.
+            Brand mengarah ke daftar mata kuliah (admin) sebagai "beranda" modul.
+            Menggunakan helper route() agar tautan tidak pernah "patah"
+            meskipun URI-nya diubah di web.php.
         --}}
-        <a href="{{ route('courses.index') }}" class="brand">
+        <a href="{{ route('admin.courses.index') }}" class="brand">
             <span class="brand-icon">🎓</span>
             Kampus LMS
         </a>
 
         <div class="nav-links">
             {{--
-                request()->routeIs('courses.index') mengembalikan true
-                jika route saat ini bernama 'courses.index'.
+                request()->routeIs('admin.courses.*') mengembalikan true
+                jika route saat ini cocok dengan pola 'admin.courses.*'.
                 Digunakan untuk memberi class 'active' secara dinamis.
             --}}
-            <a href="{{ route('courses.index') }}"
-               class="nav-link {{ request()->routeIs('courses.*') ? 'active' : '' }}">
+            <a href="{{ route('admin.courses.index') }}"
+               class="nav-link {{ request()->routeIs('admin.courses.*') ? 'active' : '' }}">
                 Mata Kuliah
             </a>
-            <a href="{{ route('users.index') }}"
-               class="nav-link {{ request()->routeIs('users.*') ? 'active' : '' }}">
+            <a href="{{ route('admin.users.index') }}"
+               class="nav-link {{ request()->routeIs('admin.users.*') ? 'active' : '' }}">
                 Pengguna
             </a>
             <a href="{{ route('tentang') }}"
                 class="nav-link {{ request()->routeIs('tentang') ? 'active' : '' }}">
                 Tentang
             </a>
+
+            @if(auth()->check())
+                <div class="auth-user-badge" style="display:inline-flex; align-items:center; gap:0.5rem; padding:0.3rem 0.75rem; border-radius:9999px; background:var(--badge-bg); border:1px solid var(--badge-border); font-size:0.82rem; color:var(--text-main);">
+                    <span>👤 <strong>{{ auth()->user()->name }}</strong> <span style="color:var(--primary-light);">({{ auth()->user()->role }})</span></span>
+                    <a href="{{ route('logout') }}" title="Keluar dari sesi" style="color:#f87171; text-decoration:none; margin-left:0.25rem; font-weight:600;">Keluar</a>
+                </div>
+            @endif
 
             {{-- ── Switch Button Dark / Light Mode (Pojok Kanan Atas) ── --}}
             <div class="theme-switch-wrapper">
