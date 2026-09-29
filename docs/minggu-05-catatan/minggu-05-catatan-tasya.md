@@ -290,11 +290,195 @@ Tidak ada perubahan yang perlu dikembalikan.
 
 ---
 
+## BUILD
+
+### BUILD #4 — Route Bersarang dengan `->shallow()` dan `scopeBindings()`
+
+> BUILD #1, #2, dan #3 dikerjakan oleh anggota lain. Bagian ini hanya mendokumentasikan BUILD #4.
+
+#### Kondisi Sebelum BUILD #4
+
+Setelah BUILD #1–#3, struktur routing di `routes/web.php` sudah memiliki:
+
+- Route group berdasarkan peran (`admin`, `dosen`, `mahasiswa`) dengan prefix dan name prefix (**BUILD #1**)
+- Middleware `EnsureUserHasRole` terdaftar di `bootstrap/app.php` sebagai alias `role` (**BUILD #2**)
+- Route model binding di controller Admin (menghilangkan `findOrFail($id)` manual) (**BUILD #3**)
+- `->shallow()` sudah diterapkan pada nested resource routes (`courses.materials`, `courses.assignments`, `assignments.submissions`, `submissions.grades`)
+- `->scopeBindings()` sudah diterapkan pada level route group untuk grup Dosen dan Mahasiswa
+
+**Masalah yang ditemukan:**
+
+Model `Material` (`app/Models/Material.php`) **tidak memiliki relasi `course()`** (`BelongsTo`). Padahal `scopeBindings()` membutuhkan relasi inverse pada model child agar Laravel dapat memvalidasi bahwa child benar-benar milik parent. Tanpa relasi ini, `scopeBindings()` tidak dapat berfungsi penuh pada nested route Material.
+
+Model `Assignment` sudah memiliki relasi `course()` — sehingga `scopeBindings()` pada nested route Assignment sudah berfungsi dengan benar.
+
+#### Perubahan yang Dilakukan
+
+##### 1. Menambahkan relasi `course()` pada model Material
+
+File: `app/Models/Material.php`
+
+```php
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+
+// ...
+
+/**
+ * Mata kuliah tempat materi ini berada.
+ *
+ * Diperlukan agar scopeBindings() pada nested route
+ * /courses/{course}/materials/{material} bisa memvalidasi
+ * bahwa material benar-benar milik course tersebut.
+ */
+public function course(): BelongsTo
+{
+    return $this->belongsTo(Course::class);
+}
+```
+
+##### 2. Konfirmasi `->shallow()` dan `scopeBindings()` pada `routes/web.php`
+
+Tidak ada perubahan pada `routes/web.php` karena `->shallow()` dan `->scopeBindings()` sudah diterapkan oleh anggota sebelumnya. Struktur yang sudah ada:
+
+**Grup Dosen:**
+```php
+Route::middleware('role:dosen')
+    ->prefix('dosen')
+    ->name('dosen.')
+    ->scopeBindings()    // ← memastikan child milik parent
+    ->group(function () {
+
+        // Materi kuliah — CRUD, bersarang di bawah course
+        Route::resource('courses.materials', DosenMaterialController::class)
+            ->shallow();  // ← show/edit/update/destroy tanpa parent di URL
+
+        // Tugas — CRUD, bersarang di bawah course
+        Route::resource('courses.assignments', DosenAssignmentController::class)
+            ->shallow();  // ← show/edit/update/destroy tanpa parent di URL
+    });
+```
+
+**Grup Mahasiswa:**
+```php
+Route::middleware('role:mahasiswa')
+    ->prefix('mahasiswa')
+    ->name('mahasiswa.')
+    ->scopeBindings()    // ← memastikan child milik parent
+    ->group(function () {
+
+        // Materi — read-only
+        Route::resource('courses.materials', MahasiswaMaterialController::class)
+            ->shallow()
+            ->only(['index', 'show']);
+
+        // Tugas — read-only
+        Route::resource('courses.assignments', MahasiswaAssignmentController::class)
+            ->shallow()
+            ->only(['index', 'show']);
+    });
+```
+
+#### Penjelasan `shallow()` dan `scopeBindings()`
+
+**`->shallow()`** membuat route bersarang menjadi lebih ringkas:
+- Route yang memerlukan konteks parent tetap bersarang: `index`, `create`, `store`
+  - Contoh: `GET /dosen/courses/{course}/materials` (index)
+- Route yang cukup dengan ID child saja menjadi "dangkal": `show`, `edit`, `update`, `destroy`
+  - Contoh: `GET /dosen/materials/{material}` (show, bukan `/dosen/courses/{course}/materials/{material}`)
+
+**`->scopeBindings()`** memvalidasi relasi parent-child pada nested route:
+- Tanpa scopeBindings: `/courses/1/assignments/99` bisa diakses meskipun Assignment 99 milik Course 7
+- Dengan scopeBindings: Laravel otomatis menjalankan `$course->assignments()->findOrFail(99)`, sehingga mengembalikan 404 jika Assignment bukan milik Course tersebut
+
+#### Hasil `php artisan route:list --except-vendor`
+
+Total 57 route terdaftar (tidak berubah dari sebelumnya).
+
+Route Material (Dosen) yang relevan:
+
+```
+GET|HEAD  dosen/courses/{course}/materials           dosen.courses.materials.index   (nested)
+POST      dosen/courses/{course}/materials           dosen.courses.materials.store   (nested)
+GET|HEAD  dosen/courses/{course}/materials/create     dosen.courses.materials.create  (nested)
+GET|HEAD  dosen/materials/{material}                  dosen.materials.show            (shallow)
+PUT|PATCH dosen/materials/{material}                  dosen.materials.update          (shallow)
+DELETE    dosen/materials/{material}                  dosen.materials.destroy         (shallow)
+GET|HEAD  dosen/materials/{material}/edit             dosen.materials.edit            (shallow)
+```
+
+Route Assignment (Dosen) yang relevan:
+
+```
+GET|HEAD  dosen/courses/{course}/assignments           dosen.courses.assignments.index   (nested)
+POST      dosen/courses/{course}/assignments           dosen.courses.assignments.store   (nested)
+GET|HEAD  dosen/courses/{course}/assignments/create     dosen.courses.assignments.create  (nested)
+GET|HEAD  dosen/assignments/{assignment}                dosen.assignments.show            (shallow)
+PUT|PATCH dosen/assignments/{assignment}                dosen.assignments.update          (shallow)
+DELETE    dosen/assignments/{assignment}                dosen.assignments.destroy         (shallow)
+GET|HEAD  dosen/assignments/{assignment}/edit           dosen.assignments.edit            (shallow)
+```
+
+Route Material & Assignment (Mahasiswa) yang relevan:
+
+```
+GET|HEAD  mahasiswa/courses/{course}/materials    mahasiswa.courses.materials.index    (nested)
+GET|HEAD  mahasiswa/materials/{material}          mahasiswa.materials.show             (shallow)
+GET|HEAD  mahasiswa/courses/{course}/assignments  mahasiswa.courses.assignments.index  (nested)
+GET|HEAD  mahasiswa/assignments/{assignment}      mahasiswa.assignments.show           (shallow)
+```
+
+#### Hasil Pengujian
+
+##### Pengujian scopeBindings — Nested Route
+
+| # | Skenario | URL | Status | Hasil |
+|---|----------|-----|--------|-------|
+| 1 | Dosen: Material dari course lain | `/dosen/courses/1/materials/4` (Material 4 milik Course 2) | **404** | ✅ scopeBindings memblokir akses |
+| 2 | Dosen: Assignment dari course lain | `/dosen/courses/1/assignments/4` (Assignment 4 milik Course 2) | **404** | ✅ scopeBindings memblokir akses |
+| 3 | Mahasiswa: Material dari course lain | `/mahasiswa/courses/1/materials/4` | **404** | ✅ scopeBindings memblokir akses |
+| 4 | Mahasiswa: Assignment dari course lain | `/mahasiswa/courses/1/assignments/4` | **404** | ✅ scopeBindings memblokir akses |
+
+##### Pengujian shallow — Route Tanpa Parent
+
+| # | Skenario | URL | Status | Hasil |
+|---|----------|-----|--------|-------|
+| 5 | Dosen: Shallow material show | `/dosen/materials/1` | **200** | ✅ shallow berfungsi |
+| 6 | Dosen: Shallow assignment show | `/dosen/assignments/1` | **200** | ✅ shallow berfungsi |
+| 7 | Mahasiswa: Shallow material show | `/mahasiswa/materials/1` | **200** | ✅ shallow berfungsi |
+| 8 | Mahasiswa: Shallow assignment show | `/mahasiswa/assignments/1` | **200** | ✅ shallow berfungsi |
+
+##### Pengujian Nested Route yang Valid
+
+| # | Skenario | URL | Status | Hasil |
+|---|----------|-----|--------|-------|
+| 9 | Dosen: Daftar assignments Course 1 | `/dosen/courses/1/assignments` | **200** | ✅ route nested index berfungsi |
+| 10 | Dosen: Daftar materials Course 1 | `/dosen/courses/1/materials` | **200** | ✅ route nested index berfungsi |
+| 11 | Mahasiswa: Daftar materials Course 1 | `/mahasiswa/courses/1/materials` | **200** | ✅ route nested index berfungsi |
+| 12 | Mahasiswa: Daftar assignments Course 1 | `/mahasiswa/courses/1/assignments` | **200** | ✅ route nested index berfungsi |
+
+#### Verifikasi BUILD #1–#3 Tetap Utuh
+
+- ✅ **BUILD #1**: Route group berdasarkan peran (`admin`, `dosen`, `mahasiswa`) dengan prefix dan name prefix — **tidak berubah**
+- ✅ **BUILD #2**: Middleware `EnsureUserHasRole` terdaftar di `bootstrap/app.php` — **tidak berubah**
+- ✅ **BUILD #3**: Route model binding di controller — **tidak berubah**
+- ✅ File `routes/web.php` — **tidak dimodifikasi** (hanya `app/Models/Material.php` yang diubah)
+
+#### Kesimpulan BUILD #4
+
+1. `->shallow()` sudah diterapkan pada nested resource route untuk Material dan Assignment, baik di grup Dosen maupun Mahasiswa.
+2. `->scopeBindings()` sudah diterapkan pada level route group untuk Dosen dan Mahasiswa.
+3. Model `Material` sebelumnya **tidak memiliki relasi `course()`** yang diperlukan agar `scopeBindings()` berfungsi. Relasi ini sudah ditambahkan.
+4. Model `Assignment` sudah memiliki relasi `course()` sejak awal.
+5. Pengujian membuktikan bahwa `scopeBindings()` berhasil memblokir akses child yang bukan milik parent (HTTP 404), dan `shallow()` berhasil menyediakan URL ringkas untuk aksi yang tidak memerlukan konteks parent (HTTP 200).
+
+---
+
 ## Kesimpulan
 
-Berdasarkan hasil analisis READ dan serangkaian pengujian BREAK pada Minggu 5:
+Berdasarkan hasil analisis READ, serangkaian pengujian BREAK, dan implementasi BUILD #4 pada Minggu 5:
 
 1. **IDOR (*Insecure Direct Object Reference*)** merupakan kerentanan utama saat menggunakan Route Model Binding tanpa otorisasi kepemilikan. Route Model Binding hanya menjamin bahwa data ada di database, tetapi tidak menjamin pengguna yang mengakses berhak atas data tersebut.
-2. **`Route::scopeBindings()`** sangat efektif untuk mengamankan *nested routes* (route bersarang) agar data anak (*child*) dipastikan milik data induk (*parent*), mencegah akses data anak yang terlepas dari konteks parent.
-3. **Pendaftaran Middleware di Laravel 12** berlokasi di `bootstrap/app.php`, bukan lagi di `app/Http/Kernel.php` seperti pada tutorial Laravel versi lama.
-4. **Middleware vs Ownership**: Middleware peran (`role:admin`, `role:dosen`, `role:mahasiswa`) hanya membatasi zona akses umum (pintu masuk), tetapi **tidak cukup** untuk melindungi kepemilikan data spesifik per-objek. Diperlukan pengecekan kepemilikan (*ownership authorization*) di level controller/Policy untuk mencegah serangan IDOR antar pengguna dengan role yang sama.
+2. **`Route::scopeBindings()`** sangat efektif untuk mengamankan *nested routes* (route bersarang) agar data anak (*child*) dipastikan milik data induk (*parent*), mencegah akses data anak yang terlepas dari konteks parent. Namun, `scopeBindings()` memerlukan relasi inverse (`BelongsTo`) pada model child agar berfungsi.
+3. **`->shallow()`** menghasilkan URL yang lebih ringkas untuk route child: `index/create/store` tetap bersarang di bawah parent, sementara `show/edit/update/destroy` menjadi independen (cukup dengan ID child saja).
+4. **Pendaftaran Middleware di Laravel 12** berlokasi di `bootstrap/app.php`, bukan lagi di `app/Http/Kernel.php` seperti pada tutorial Laravel versi lama.
+5. **Middleware vs Ownership**: Middleware peran (`role:admin`, `role:dosen`, `role:mahasiswa`) hanya membatasi zona akses umum (pintu masuk), tetapi **tidak cukup** untuk melindungi kepemilikan data spesifik per-objek. Diperlukan pengecekan kepemilikan (*ownership authorization*) di level controller/Policy untuk mencegah serangan IDOR antar pengguna dengan role yang sama.

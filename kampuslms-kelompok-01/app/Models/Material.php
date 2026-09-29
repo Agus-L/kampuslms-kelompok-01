@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Material extends Model
 {
@@ -43,5 +44,21 @@ class Material extends Model
         return [
             'file_size' => 'integer',
         ];
+    }
+
+    /* ------------------------------------------------------------------ *
+     |  Relations
+     * ------------------------------------------------------------------ */
+
+    /**
+     * Mata kuliah tempat materi ini berada.
+     *
+     * Diperlukan agar scopeBindings() pada nested route
+     * /courses/{course}/materials/{material} bisa memvalidasi
+     * bahwa material benar-benar milik course tersebut.
+     */
+    public function course(): BelongsTo
+    {
+        return $this->belongsTo(Course::class);
     }
 }
