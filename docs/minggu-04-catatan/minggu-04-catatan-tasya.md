@@ -178,7 +178,7 @@ curl.exe -i -s -b cookies.txt -c cookies.txt -X POST http://127.0.0.1:8000/cours
   Eloquent secara otomatis mengabaikan field yang tidak terdaftar dalam whitelist `$fillable`.
 
 ### Kesimpulan
-Mengganti `validated()` menjadi `all()` menghilangkan perlindungan di level HTTP / Controller, sehingga mass assignment berpotensi terjadi jika model menggunakan `protected $guarded = []`. Namun pada project ini, mass assignment tetap dicegah oleh lapisan Model Eloquent melalui whitelist `$fillable`. Ini membuktikan implementasi prinsip *Defense in Depth* (keamanan berlapis) di Laravel.
+Mengganti `validated()` menjadi `all()` menghilangkan perlindungan di level HTTP / Controller, sehingga mass assignment berpotensi terjadi jika model menggunakan `protected $guarded = []`. Namun pada project ini, mass assignment tetap dicegah oleh lapisan Model Eloquent melalui whitelist `$fillable`, `$fillable` adalah property pada Model Eloquent Laravel yang mendefinisikan kolom-kolom mana saja yang boleh diisi secara massal (mass assignment). Itu daftar kolom yang boleh diisi, ibarat satpam yang cuma mengizinkan tamu yang namanya ada di daftar untuk masuk, kalau namanya nggak ada, ditolak. Ini membuktikan implementasi prinsip *Defense in Depth* (keamanan berlapis) di Laravel.
 
 ---
 
