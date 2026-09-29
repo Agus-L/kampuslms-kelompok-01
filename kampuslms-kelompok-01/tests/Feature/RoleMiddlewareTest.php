@@ -10,6 +10,13 @@ class RoleMiddlewareTest extends TestCase
 {
     use DatabaseTransactions;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->withoutVite();
+    }
+
     public function test_guest_is_redirected_to_login_when_accessing_admin_courses(): void
     {
         $response = $this->get('/admin/courses');
