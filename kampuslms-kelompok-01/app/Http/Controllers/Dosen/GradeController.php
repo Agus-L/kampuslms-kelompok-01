@@ -3,62 +3,46 @@
 namespace App\Http\Controllers\Dosen;
 
 use App\Http\Controllers\Controller;
+use App\Models\Grade;
+use App\Models\Submission;
 use Illuminate\Http\Request;
 
+/**
+ * Dosen\GradeController — Memberi dan memperbarui nilai.
+ *
+ * Route model binding diterapkan:
+ * - Route bersarang (store): menerima Submission $submission
+ *   sebagai parent → /dosen/submissions/{submission}/grades
+ * - Route shallow (update): menerima Grade $grade
+ *   langsung → /dosen/grades/{grade}
+ *
+ * Route hanya mendaftarkan: store, update
+ * (lihat ->only(['store', 'update']) di routes/web.php)
+ *
+ * ⚠️ IDOR TINGGI: Dosen A jangan bisa memberi nilai
+ * pada submission di MK dosen B.
+ * → Akan dipindahkan ke Policy di minggu 7.
+ */
 class GradeController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Simpan nilai baru untuk sebuah submission.
+     *
+     * Route: POST /dosen/submissions/{submission}/grades → dosen.submissions.grades.store
+     * Route model binding: {submission} → Submission $submission
      */
-    public function index()
+    public function store(Request $request, Submission $submission)
     {
         //
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Perbarui nilai yang sudah ada (shallow route).
+     *
+     * Route: PUT /dosen/grades/{grade} → dosen.grades.update
+     * Route model binding: {grade} → Grade $grade
      */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
+    public function update(Request $request, Grade $grade)
     {
         //
     }

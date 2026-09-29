@@ -3,12 +3,30 @@
 namespace App\Http\Controllers\Dosen;
 
 use App\Http\Controllers\Controller;
+use App\Models\Course;
 use Illuminate\Http\Request;
 
+/**
+ * Dosen\CourseController — Mata kuliah yang diampu oleh dosen.
+ *
+ * Route model binding diterapkan: parameter {course} di URL
+ * otomatis di-resolve menjadi instance Course oleh Laravel.
+ *
+ * Route hanya mendaftarkan: index, show
+ * (lihat ->only(['index', 'show']) di routes/web.php)
+ * Dosen tidak membuat/edit MK — itu hak admin.
+ *
+ * ⚠️ IDOR TINGGI: Controller harus memfilter
+ * where('lecturer_id', auth()->id()) agar dosen A
+ * tidak bisa melihat MK dosen B.
+ * → Akan dipindahkan ke Policy di minggu 7.
+ */
 class CourseController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Daftar mata kuliah yang diampu dosen ini.
+     *
+     * Route: GET /dosen/courses → dosen.courses.index
      */
     public function index()
     {
@@ -16,49 +34,12 @@ class CourseController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Detail satu mata kuliah yang diampu.
+     *
+     * Route: GET /dosen/courses/{course} → dosen.courses.show
+     * Route model binding: {course} → Course $course
      */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
+    public function show(Course $course)
     {
         //
     }

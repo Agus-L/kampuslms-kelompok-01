@@ -3,62 +3,47 @@
 namespace App\Http\Controllers\Mahasiswa;
 
 use App\Http\Controllers\Controller;
+use App\Models\Assignment;
+use App\Models\Course;
 use Illuminate\Http\Request;
 
+/**
+ * Mahasiswa\AssignmentController — Melihat tugas.
+ *
+ * Route model binding diterapkan:
+ * - Route bersarang (index): menerima Course $course
+ *   sebagai parent → /mahasiswa/courses/{course}/assignments
+ * - Route shallow (show): menerima Assignment $assignment
+ *   langsung → /mahasiswa/assignments/{assignment}
+ *
+ * Route hanya mendaftarkan: index, show
+ * (lihat ->only(['index', 'show']) di routes/web.php)
+ * Mahasiswa hanya melihat tugas, tidak bisa membuat/edit/hapus.
+ *
+ * ⚠️ IDOR TINGGI: Mahasiswa bisa mengakses tugas MK yang
+ * tidak dia ikuti dengan mengganti ID di URL.
+ * → Akan dipindahkan ke Policy di minggu 7.
+ */
 class AssignmentController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Daftar tugas dalam satu mata kuliah.
+     *
+     * Route: GET /mahasiswa/courses/{course}/assignments → mahasiswa.courses.assignments.index
+     * Route model binding: {course} → Course $course
      */
-    public function index()
+    public function index(Course $course)
     {
         //
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Detail satu tugas (shallow route).
+     *
+     * Route: GET /mahasiswa/assignments/{assignment} → mahasiswa.assignments.show
+     * Route model binding: {assignment} → Assignment $assignment
      */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
+    public function show(Assignment $assignment)
     {
         //
     }

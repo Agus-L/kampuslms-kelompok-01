@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Notifications\DatabaseNotification;
 
 class NotificationController extends Controller
 {
@@ -19,15 +20,12 @@ class NotificationController extends Controller
     /**
      * Tandai satu notifikasi sebagai sudah dibaca.
      *
-     * Pencarian melalui relasi user → mencegah IDOR:
-     * user tidak bisa mark-read notifikasi orang lain.
+     * Route model binding: {notification} → DatabaseNotification $notification
+     *
+     * Route: PATCH /notifications/{notification} → notifications.update
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, DatabaseNotification $notification)
     {
-        $notification = $request->user()
-            ->notifications()
-            ->findOrFail($id);
-
         $notification->markAsRead();
 
         return back()->with('success', 'Notifikasi ditandai sudah dibaca.');

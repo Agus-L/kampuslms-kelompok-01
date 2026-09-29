@@ -3,62 +3,101 @@
 namespace App\Http\Controllers\Dosen;
 
 use App\Http\Controllers\Controller;
+use App\Models\Assignment;
+use App\Models\Course;
 use Illuminate\Http\Request;
 
+/**
+ * Dosen\AssignmentController — CRUD tugas oleh Dosen.
+ *
+ * Route model binding diterapkan:
+ * - Route bersarang (index, create, store): menerima Course $course
+ *   sebagai parent → /dosen/courses/{course}/assignments
+ * - Route shallow (show, edit, update, destroy): menerima Assignment $assignment
+ *   langsung → /dosen/assignments/{assignment}
+ *
+ * scopeBindings() pada grup dosen memastikan {assignment}
+ * benar-benar milik {course} tersebut pada route bersarang.
+ *
+ * ⚠️ IDOR TINGGI: Semua method harus memastikan course
+ * milik dosen yang sedang login (lecturer_id === auth()->id()).
+ * → Akan dipindahkan ke Policy di minggu 7.
+ */
 class AssignmentController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Daftar tugas dalam satu mata kuliah.
+     *
+     * Route: GET /dosen/courses/{course}/assignments → dosen.courses.assignments.index
+     * Route model binding: {course} → Course $course
      */
-    public function index()
+    public function index(Course $course)
     {
         //
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Form tambah tugas baru.
+     *
+     * Route: GET /dosen/courses/{course}/assignments/create → dosen.courses.assignments.create
+     * Route model binding: {course} → Course $course
      */
-    public function create()
+    public function create(Course $course)
     {
         //
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Simpan tugas baru ke database.
+     *
+     * Route: POST /dosen/courses/{course}/assignments → dosen.courses.assignments.store
+     * Route model binding: {course} → Course $course
      */
-    public function store(Request $request)
+    public function store(Request $request, Course $course)
     {
         //
     }
 
     /**
-     * Display the specified resource.
+     * Detail satu tugas (shallow route).
+     *
+     * Route: GET /dosen/assignments/{assignment} → dosen.assignments.show
+     * Route model binding: {assignment} → Assignment $assignment
      */
-    public function show(string $id)
+    public function show(Assignment $assignment)
     {
         //
     }
 
     /**
-     * Show the form for editing the specified resource.
+     * Form edit tugas (shallow route).
+     *
+     * Route: GET /dosen/assignments/{assignment}/edit → dosen.assignments.edit
+     * Route model binding: {assignment} → Assignment $assignment
      */
-    public function edit(string $id)
+    public function edit(Assignment $assignment)
     {
         //
     }
 
     /**
-     * Update the specified resource in storage.
+     * Simpan perubahan tugas (shallow route).
+     *
+     * Route: PUT /dosen/assignments/{assignment} → dosen.assignments.update
+     * Route model binding: {assignment} → Assignment $assignment
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, Assignment $assignment)
     {
         //
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Hapus tugas (shallow route).
+     *
+     * Route: DELETE /dosen/assignments/{assignment} → dosen.assignments.destroy
+     * Route model binding: {assignment} → Assignment $assignment
      */
-    public function destroy(string $id)
+    public function destroy(Assignment $assignment)
     {
         //
     }
