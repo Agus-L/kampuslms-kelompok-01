@@ -51,11 +51,7 @@ class Material extends Model
      * ------------------------------------------------------------------ */
 
     /**
-     * Mata kuliah tempat materi ini berada.
-     *
-     * Diperlukan agar scopeBindings() pada nested route
-     * /courses/{course}/materials/{material} bisa memvalidasi
-     * bahwa material benar-benar milik course tersebut.
+     * Mata kuliah tempat materi ini berada.     
      */
     public function course(): BelongsTo
     {

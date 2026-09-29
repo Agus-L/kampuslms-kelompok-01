@@ -41,6 +41,6 @@ class CourseController extends Controller
      */
     public function show(Course $course)
     {
-        //
+        abort_unless($course->lecturer_id === auth()->id(), 403);
     }
 }

@@ -34,7 +34,7 @@ class AssignmentController extends Controller
      */
     public function index(Course $course)
     {
-        //
+        abort_unless($course->students()->where('user_id', auth()->id())->exists(), 403);
     }
 
     /**
@@ -45,6 +45,6 @@ class AssignmentController extends Controller
      */
     public function show(Assignment $assignment)
     {
-        //
+        abort_unless($assignment->course->students()->where('user_id', auth()->id())->exists(), 403);
     }
 }

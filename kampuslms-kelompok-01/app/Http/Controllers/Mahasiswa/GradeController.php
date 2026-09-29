@@ -32,6 +32,6 @@ class GradeController extends Controller
      */
     public function index(Submission $submission)
     {
-        //
+        abort_unless($submission->user_id === auth()->id(), 403);
     }
 }
