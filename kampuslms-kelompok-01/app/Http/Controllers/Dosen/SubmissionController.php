@@ -34,7 +34,7 @@ class SubmissionController extends Controller
      */
     public function index(Assignment $assignment)
     {
-        //
+        abort_unless($assignment->course->lecturer_id === auth()->id(), 403);
     }
 
     /**
@@ -45,6 +45,6 @@ class SubmissionController extends Controller
      */
     public function show(Submission $submission)
     {
-        //
+        abort_unless($submission->assignment->course->lecturer_id === auth()->id(), 403);
     }
 }

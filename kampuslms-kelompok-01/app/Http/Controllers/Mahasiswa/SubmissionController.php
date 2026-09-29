@@ -34,7 +34,7 @@ class SubmissionController extends Controller
      */
     public function index(Assignment $assignment)
     {
-        //
+        abort_unless($assignment->course->students()->where('user_id', auth()->id())->exists(), 403);
     }
 
     /**
@@ -45,7 +45,7 @@ class SubmissionController extends Controller
      */
     public function create(Assignment $assignment)
     {
-        //
+        abort_unless($assignment->course->students()->where('user_id', auth()->id())->exists(), 403);
     }
 
     /**
@@ -56,7 +56,7 @@ class SubmissionController extends Controller
      */
     public function store(Request $request, Assignment $assignment)
     {
-        //
+        abort_unless($assignment->course->students()->where('user_id', auth()->id())->exists(), 403);
     }
 
     /**
@@ -67,7 +67,7 @@ class SubmissionController extends Controller
      */
     public function show(Submission $submission)
     {
-        //
+        abort_unless($submission->user_id === auth()->id(), 403);
     }
 
     /**
@@ -78,7 +78,7 @@ class SubmissionController extends Controller
      */
     public function edit(Submission $submission)
     {
-        //
+        abort_unless($submission->user_id === auth()->id(), 403);
     }
 
     /**
@@ -89,6 +89,6 @@ class SubmissionController extends Controller
      */
     public function update(Request $request, Submission $submission)
     {
-        //
+        abort_unless($submission->user_id === auth()->id(), 403);
     }
 }

@@ -34,7 +34,7 @@ class MaterialController extends Controller
      */
     public function index(Course $course)
     {
-        //
+        abort_unless($course->students()->where('user_id', auth()->id())->exists(), 403);
     }
 
     /**
@@ -45,6 +45,6 @@ class MaterialController extends Controller
      */
     public function show(Material $material)
     {
-        //
+        abort_unless($material->course->students()->where('user_id', auth()->id())->exists(), 403);
     }
 }
