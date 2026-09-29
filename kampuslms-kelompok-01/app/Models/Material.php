@@ -51,7 +51,7 @@ class Material extends Model
      * ------------------------------------------------------------------ */
 
     /**
-     * Mata kuliah tempat materi ini berada.
+     * Mata kuliah tempat materi ini berada.     
      */
     public function course(): BelongsTo
     {
