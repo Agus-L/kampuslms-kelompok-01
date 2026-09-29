@@ -13,9 +13,9 @@
     <div class="form-container">
         {{-- ── Breadcrumb ── --}}
         <nav class="breadcrumb">
-            <a href="{{ route('courses.index') }}" class="breadcrumb-link">Mata Kuliah</a>
+            <a href="{{ route('admin.courses.index') }}" class="breadcrumb-link">Mata Kuliah</a>
             <span class="breadcrumb-separator">›</span>
-            <a href="{{ route('courses.show', $course) }}" class="breadcrumb-link">{{ $course->name }}</a>
+            <a href="{{ route('admin.courses.show', $course) }}" class="breadcrumb-link">{{ $course->name }}</a>
             <span class="breadcrumb-separator">›</span>
             <span class="breadcrumb-current">Edit</span>
         </nav>
@@ -30,7 +30,7 @@
 
         {{-- ── Form ── --}}
         <div class="form-card">
-            <form action="{{ route('courses.update', $course) }}" method="POST" novalidate>
+            <form action="{{ route('admin.courses.update', $course) }}" method="POST" novalidate>
             @csrf
             @method('PUT')
 
@@ -161,7 +161,7 @@
                 <button type="submit" class="btn btn-create">
                     💾 Simpan Perubahan
                 </button>
-                <a href="{{ route('courses.show', $course) }}" class="btn btn-cancel">
+                <a href="{{ route('admin.courses.show', $course) }}" class="btn btn-cancel">
                     ✕ Batal
                 </a>
             </div>

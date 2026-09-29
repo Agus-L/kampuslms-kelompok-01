@@ -31,6 +31,7 @@ class UpdateCourseRequest extends FormRequest
                 'string',
                 'max:20',
                 Rule::unique('courses', 'code')->ignore($course),
+                // 'unique:courses,code',
             ],
             'name' => [
                 'required',
