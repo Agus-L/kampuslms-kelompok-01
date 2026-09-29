@@ -9,7 +9,7 @@
     <div class="form-container">
         {{-- ── Breadcrumb ── --}}
         <nav class="breadcrumb">
-            <a href="{{ route('courses.index') }}" class="breadcrumb-link">Mata Kuliah</a>
+            <a href="{{ route('admin.courses.index') }}" class="breadcrumb-link">Mata Kuliah</a>
             <span class="breadcrumb-separator">›</span>
             <span class="breadcrumb-current">Tambah Baru</span>
         </nav>
@@ -22,7 +22,7 @@
 
         {{-- ── Form ── --}}
         <div class="form-card">
-            <form action="{{ route('courses.store') }}" method="POST" novalidate>
+            <form action="{{ route('admin.courses.store') }}" method="POST" novalidate>
             @csrf
 
             {{-- ── Seksi 1: Identitas ── --}}
@@ -152,7 +152,7 @@
                 <button type="submit" class="btn btn-create">
                     💾 Simpan Mata Kuliah
                 </button>
-                <a href="{{ route('courses.index') }}" class="btn btn-cancel">
+                <a href="{{ route('admin.courses.index') }}" class="btn btn-cancel">
                     ✕ Batal
                 </a>
             </div>
