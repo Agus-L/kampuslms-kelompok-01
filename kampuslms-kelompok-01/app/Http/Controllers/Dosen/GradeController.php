@@ -33,7 +33,7 @@ class GradeController extends Controller
      */
     public function store(Request $request, Submission $submission)
     {
-        //
+        abort_unless($submission->assignment->course->lecturer_id === auth()->id(), 403);
     }
 
     /**
@@ -44,6 +44,6 @@ class GradeController extends Controller
      */
     public function update(Request $request, Grade $grade)
     {
-        //
+        abort_unless($grade->submission->assignment->course->lecturer_id === auth()->id(), 403);
     }
 }

@@ -33,7 +33,7 @@ class MaterialController extends Controller
      */
     public function index(Course $course)
     {
-        //
+        abort_unless($course->lecturer_id === auth()->id(), 403);
     }
 
     /**
@@ -44,7 +44,7 @@ class MaterialController extends Controller
      */
     public function create(Course $course)
     {
-        //
+        abort_unless($course->lecturer_id === auth()->id(), 403);
     }
 
     /**
@@ -55,7 +55,7 @@ class MaterialController extends Controller
      */
     public function store(Request $request, Course $course)
     {
-        //
+        abort_unless($course->lecturer_id === auth()->id(), 403);
     }
 
     /**
@@ -66,7 +66,7 @@ class MaterialController extends Controller
      */
     public function show(Material $material)
     {
-        //
+        abort_unless($material->course->lecturer_id === auth()->id(), 403);
     }
 
     /**
@@ -77,7 +77,7 @@ class MaterialController extends Controller
      */
     public function edit(Material $material)
     {
-        //
+        abort_unless($material->course->lecturer_id === auth()->id(), 403);
     }
 
     /**
@@ -88,7 +88,7 @@ class MaterialController extends Controller
      */
     public function update(Request $request, Material $material)
     {
-        //
+        abort_unless($material->course->lecturer_id === auth()->id(), 403);
     }
 
     /**
@@ -99,6 +99,6 @@ class MaterialController extends Controller
      */
     public function destroy(Material $material)
     {
-        //
+        abort_unless($material->course->lecturer_id === auth()->id(), 403);
     }
 }
