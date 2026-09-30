@@ -40,6 +40,6 @@ class CourseController extends Controller
      */
     public function show(Course $course)
     {
-        //
+        abort_unless($course->students()->where('user_id', auth()->id())->exists(), 403);
     }
 }
