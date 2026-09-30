@@ -231,5 +231,4 @@ Route::middleware('auth')->group(function () {
                 ->shallow()
                 ->only(['index']);
         });
-
 });
