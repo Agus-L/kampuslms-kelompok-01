@@ -12,10 +12,25 @@ class CourseValidationTest extends TestCase
     use DatabaseTransactions;
 
     private User $lecturer;
+    private User $admin;
 
     protected function setUp(): void
     {
         parent::setUp();
+
+        $this->admin = User::firstOrCreate(
+            ['email' => 'admin_test@kampuslms.test'],
+            [
+                'name'     => 'Admin Test',
+                'password' => 'password123',
+                'role'     => 'admin',
+                'nim_nip'  => 'ADM' . rand(1000, 9999),
+            ]
+        );
+        $this->admin->role = 'admin';
+        $this->admin->save();
+
+        $this->actingAs($this->admin);
 
         $this->lecturer = User::create([
             'name'     => 'Dosen Pengampu Test',
@@ -31,7 +46,7 @@ class CourseValidationTest extends TestCase
     {
         $code = 'MK' . rand(100, 999);
 
-        $response = $this->post(route('courses.store'), [
+        $response = $this->post(route('admin.courses.store'), [
             'code'        => $code,
             'name'        => 'Pemrograman Berorientasi Objek',
             'description' => null, // nullable test
@@ -57,7 +72,7 @@ class CourseValidationTest extends TestCase
             'status'      => 'active',
         ]);
 
-        $response = $this->post(route('courses.store'), [
+        $response = $this->post(route('admin.courses.store'), [
             'code'        => $existing->code,
             'name'        => 'Mata Kuliah Baru',
             'sks'         => 2,
@@ -72,7 +87,7 @@ class CourseValidationTest extends TestCase
 
     public function test_store_course_fails_if_sks_exceeds_maximum(): void
     {
-        $response = $this->post(route('courses.store'), [
+        $response = $this->post(route('admin.courses.store'), [
             'code'        => 'SKS7' . rand(10, 99),
             'name'        => 'MK Bobot Berlebih',
             'sks'         => 7, // Max is 6
@@ -96,7 +111,7 @@ class CourseValidationTest extends TestCase
         ]);
 
         // Mengirimkan kode yang sama saat update (jebakan unique terlewati)
-        $response = $this->put(route('courses.update', $course), [
+        $response = $this->put(route('admin.courses.update', $course), [
             'code'        => $course->code,
             'name'        => 'Nama Diperbarui',
             'sks'         => 4,
@@ -131,7 +146,7 @@ class CourseValidationTest extends TestCase
         ]);
 
         // Course B mencoba memakai kode milik Course A
-        $response = $this->put(route('courses.update', $courseB), [
+        $response = $this->put(route('admin.courses.update', $courseB), [
             'code'        => $courseA->code,
             'name'        => 'Course B Ubah Kode',
             'sks'         => 3,

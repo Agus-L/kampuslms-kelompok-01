@@ -11,6 +11,27 @@ class SecurityAttackSimulationTest extends TestCase
 {
     use DatabaseTransactions;
 
+    private User $admin;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->admin = User::firstOrCreate(
+            ['email' => 'admin_sec_test@kampuslms.test'],
+            [
+                'name'     => 'Admin Sec Test',
+                'password' => 'password123',
+                'role'     => 'admin',
+                'nim_nip'  => 'ADM' . rand(1000, 9999),
+            ]
+        );
+        $this->admin->role = 'admin';
+        $this->admin->save();
+
+        $this->actingAs($this->admin);
+    }
+
     /**
      * Skenario 1: Penyerang mencoba menyelipkan lecturer_id milik mahasiswa pada pembuatan mata kuliah.
      * Sistem HARUS menolak karena mahasiswa bukan dosen.
@@ -26,7 +47,7 @@ class SecurityAttackSimulationTest extends TestCase
         $student->role = 'mahasiswa';
         $student->save();
 
-        $response = $this->post(route('courses.store'), [
+        $response = $this->post(route('admin.courses.store'), [
             'code'        => 'SEC' . rand(100, 999),
             'name'        => 'Keamanan Siber Terapan',
             'description' => 'Mata kuliah uji keamanan sistem.',
@@ -56,7 +77,7 @@ class SecurityAttackSimulationTest extends TestCase
         $lecturer->save();
 
         $code = 'SEC' . rand(100, 999);
-        $response = $this->post(route('courses.store'), [
+        $response = $this->post(route('admin.courses.store'), [
             'code'        => $code,
             'name'        => 'Kriptografi Praktis',
             'description' => 'Mata kuliah kriptografi.',
@@ -80,7 +101,7 @@ class SecurityAttackSimulationTest extends TestCase
     {
         $email = 'hacker_' . uniqid() . '@test.com';
 
-        $response = $this->post(route('users.store'), [
+        $response = $this->post(route('admin.users.store'), [
             'name'                  => 'Hacker Injeksi',
             'email'                 => $email,
             'password'              => 'password123',
@@ -127,9 +148,10 @@ class SecurityAttackSimulationTest extends TestCase
         }
 
         $lastAdmin = $admins->first();
+        $this->actingAs($lastAdmin);
 
         // Coba downgrade role ke mahasiswa
-        $response = $this->put(route('users.update', $lastAdmin), [
+        $response = $this->put(route('admin.users.update', $lastAdmin), [
             'name'                  => $lastAdmin->name,
             'email'                 => $lastAdmin->email,
             'role'                  => 'mahasiswa', // Upaya downgrade
@@ -164,8 +186,9 @@ class SecurityAttackSimulationTest extends TestCase
         }
 
         $lastAdmin = $admins->first();
+        $this->actingAs($lastAdmin);
 
-        $response = $this->delete(route('users.destroy', $lastAdmin));
+        $response = $this->delete(route('admin.users.destroy', $lastAdmin));
         $response->assertSessionHas('error');
 
         $this->assertNull($lastAdmin->fresh()->deleted_at);

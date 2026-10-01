@@ -109,7 +109,7 @@ class UserController extends Controller
 
         $user->save();
 
-        return redirect()->route('users.index')
+        return redirect()->route('admin.users.index')
                          ->with('success', 'Pengguna "' . $user->name . '" berhasil ditambahkan.');
     }
 
@@ -175,7 +175,7 @@ class UserController extends Controller
 
         $user->save();
 
-        return redirect()->route('users.index')
+        return redirect()->route('admin.users.index')
                          ->with('success', 'Pengguna "' . $user->name . '" berhasil diperbarui.');
     }
 
@@ -188,7 +188,7 @@ class UserController extends Controller
     {
         // Keamanan: Cegah pengguna menghapus akunnya sendiri jika sedang login
         if (auth()->check() && auth()->id() === $user->id) {
-            return redirect()->route('users.index')
+            return redirect()->route('admin.users.index')
                              ->with('error', 'Anda tidak dapat menghapus akun Anda sendiri yang sedang aktif.');
         }
 
@@ -196,7 +196,7 @@ class UserController extends Controller
         if ($user->role === 'admin') {
             $adminCount = User::where('role', 'admin')->whereNull('deleted_at')->count();
             if ($adminCount <= 1) {
-                return redirect()->route('users.index')
+                return redirect()->route('admin.users.index')
                                  ->with('error', 'Tidak dapat menghapus satu-satunya Administrator yang tersisa.');
             }
         }
@@ -205,10 +205,10 @@ class UserController extends Controller
             $name = $user->name;
             $user->delete();
 
-            return redirect()->route('users.index')
+            return redirect()->route('admin.users.index')
                              ->with('success', 'Pengguna "' . $name . '" berhasil dihapus.');
         } catch (\Illuminate\Database\QueryException $e) {
-            return redirect()->route('users.index')
+            return redirect()->route('admin.users.index')
                              ->with('error', 'Gagal menghapus pengguna. Pastikan tidak ada data terkait.');
         }
     }

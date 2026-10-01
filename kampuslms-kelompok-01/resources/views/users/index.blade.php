@@ -27,7 +27,7 @@
                 </p>
             </div>
             {{-- Tombol Tambah Pengguna --}}
-            <a href="{{ route('users.create') }}" class="btn btn-create">
+            <a href="{{ route('admin.users.create') }}" class="btn btn-create">
                 + Tambah Pengguna
             </a>
         </div>
@@ -44,7 +44,7 @@
            jangan ke session."
     ───────────────────────────────────────────────────────────── --}}
     <div class="search-filter-bar">
-        <form method="GET" action="{{ route('users.index') }}" class="search-filter-form">
+        <form method="GET" action="{{ route('admin.users.index') }}" class="search-filter-form">
             {{-- Input Pencarian --}}
             <div class="search-input-wrapper">
                 <span class="search-icon">🔍</span>
@@ -73,7 +73,7 @@
 
             {{-- Tombol Reset — hanya tampil jika ada filter aktif --}}
             @if (request('q') || request('role'))
-                <a href="{{ route('users.index') }}" class="btn btn-reset" title="Hapus semua filter">
+                <a href="{{ route('admin.users.index') }}" class="btn btn-reset" title="Hapus semua filter">
                     ↺ Reset
                 </a>
             @endif
@@ -172,7 +172,7 @@
                                 </td>
                                 <td>
                                     <div class="table-actions">
-                                        <a href="{{ route('users.edit', $user) }}" class="btn btn-edit" title="Edit">
+                                        <a href="{{ route('admin.users.edit', $user) }}" class="btn btn-edit" title="Edit">
                                             ✏️ Edit
                                         </a>
                                         <button type="button" class="btn btn-delete" title="Hapus"
@@ -181,7 +181,7 @@
                                         </button>
                                         <x-delete-modal
                                             id="delete-user-{{ $user->id }}"
-                                            :action="route('users.destroy', $user)"
+                                            :action="route('admin.users.destroy', $user)"
                                             :itemName="$user->name"
                                         />
                                     </div>
@@ -202,7 +202,7 @@
                         $hasLetter = $targetPage !== null;
                         $currentPage = $users->currentPage();
                         $targetUrl = $hasLetter
-                            ? route('users.index', array_merge(request()->query(), ['page' => $targetPage])) . '#letter-' . $char
+                            ? route('admin.users.index', array_merge(request()->query(), ['page' => $targetPage])) . '#letter-' . $char
                             : '#';
                     @endphp
                     <a href="{{ $targetUrl }}"
@@ -220,10 +220,10 @@
         <div class="empty-state">
             @if (request('q') || request('role'))
                 <p>🔍 Tidak ada pengguna yang cocok dengan pencarian/filter Anda.
-                    <a href="{{ route('users.index') }}">Tampilkan semua</a>.
+                    <a href="{{ route('admin.users.index') }}">Tampilkan semua</a>.
                 </p>
             @else
-                <p>👥 Belum ada pengguna. <a href="{{ route('users.create') }}">Tambah sekarang</a>.</p>
+                <p>👥 Belum ada pengguna. <a href="{{ route('admin.users.create') }}">Tambah sekarang</a>.</p>
             @endif
         </div>
     @endif

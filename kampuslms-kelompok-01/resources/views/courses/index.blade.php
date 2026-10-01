@@ -33,7 +33,7 @@
                 </p>
             </div>
             {{-- Tombol Tambah MK --}}
-            <a href="{{ route('courses.create') }}" class="btn btn-create">
+            <a href="{{ route('admin.courses.create') }}" class="btn btn-create">
                 + Tambah Mata Kuliah
             </a>
         </div>
@@ -50,7 +50,7 @@
            jangan ke session."
     ══════════════════════════════════════════════════════ --}}
     <div class="search-filter-bar">
-        <form method="GET" action="{{ route('courses.index') }}" class="search-filter-form">
+        <form method="GET" action="{{ route('admin.courses.index') }}" class="search-filter-form">
             {{-- Input Pencarian --}}
             <div class="search-input-wrapper">
                 <span class="search-icon">🔍</span>
@@ -79,7 +79,7 @@
 
             {{-- Tombol Reset — hanya tampil jika ada filter aktif --}}
             @if (request('q') || request('status'))
-                <a href="{{ route('courses.index') }}" class="btn btn-reset" title="Hapus semua filter">
+                <a href="{{ route('admin.courses.index') }}" class="btn btn-reset" title="Hapus semua filter">
                     ✕ Reset
                 </a>
             @endif
@@ -152,12 +152,12 @@
 
                 {{-- Tombol Aksi --}}
                 <div class="course-actions">
-                    <a href="{{ route('courses.show', $course) }}" class="course-link">
+                    <a href="{{ route('admin.courses.show', $course) }}" class="course-link">
                         Lihat Detail
                         <span class="course-link-arrow">→</span>
                     </a>
                     <div class="course-actions-secondary">
-                        <a href="{{ route('courses.edit', $course) }}" class="btn btn-edit" title="Edit">
+                        <a href="{{ route('admin.courses.edit', $course) }}" class="btn btn-edit" title="Edit">
                             ✏️ Edit
                         </a>
                         <button type="button" class="btn btn-delete" title="Hapus"
@@ -166,7 +166,7 @@
                         </button>
                         <x-delete-modal
                             id="delete-course-{{ $course->id }}"
-                            :action="route('courses.destroy', $course)"
+                            :action="route('admin.courses.destroy', $course)"
                             :itemName="$course->name"
                         />
                     </div>
@@ -176,10 +176,10 @@
             <div class="empty-state">
                 @if (request('q') || request('status'))
                     <p>📭 Tidak ada mata kuliah yang cocok dengan pencarian/filter Anda.
-                        <a href="{{ route('courses.index') }}">Tampilkan semua</a>.
+                        <a href="{{ route('admin.courses.index') }}">Tampilkan semua</a>.
                     </p>
                 @else
-                    <p>📭 Belum ada mata kuliah. <a href="{{ route('courses.create') }}">Tambah sekarang</a>.</p>
+                    <p>📭 Belum ada mata kuliah. <a href="{{ route('admin.courses.create') }}">Tambah sekarang</a>.</p>
                 @endif
             </div>
         @endforelse

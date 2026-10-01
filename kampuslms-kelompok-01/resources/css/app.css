@@ -2315,3 +2315,106 @@ button.filter-btn.active .stat-value {
         justify-content: center;
     }
 }
+
+/* ══════════════════════════════════════════════════════════
+   CSS Halaman Error (403, 404, dll.)
+   ──────────────────────────────────────────────────────────
+   BUILD nomor 6 — Minggu 5: Halaman error kustom
+   yang informatif tapi tidak membocorkan informasi.
+   ══════════════════════════════════════════════════════════ */
+
+/* ── 9. CSS Halaman Error (403, 404, dll.) ── */
+.error-page {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    min-height: 55vh;
+    padding: 3rem 1.5rem;
+}
+
+.error-page-code {
+    font-size: clamp(3.5rem, 8vw, 6rem);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1;
+    color: #ef4444;
+    margin-bottom: 0.75rem;
+}
+
+.error-page-title {
+    font-size: clamp(1.25rem, 2.5vw, 1.6rem);
+    font-weight: 700;
+    color: var(--text-main);
+    margin-bottom: 0.75rem;
+}
+
+.error-page-message {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    line-height: 1.6;
+    max-width: 460px;
+    margin-bottom: 1.75rem;
+}
+
+/* Action buttons — simple & clean */
+.error-page-actions {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.error-page-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.6rem 1.25rem;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    font-size: 0.9rem;
+    text-decoration: none;
+    transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+    cursor: pointer;
+}
+
+.error-page-btn-primary {
+    background: var(--primary);
+    color: #ffffff;
+    border: 1px solid var(--primary);
+}
+
+.error-page-btn-primary:hover {
+    background: var(--primary-hover);
+    border-color: var(--primary-hover);
+    color: #ffffff;
+}
+
+.error-page-btn-secondary {
+    background: transparent;
+    color: var(--text-main);
+    border: 1px solid var(--card-border);
+}
+
+.error-page-btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+@media (max-width: 480px) {
+    .error-page {
+        padding: 2rem 1rem;
+        min-height: 45vh;
+    }
+
+    .error-page-actions {
+        flex-direction: column;
+        width: 100%;
+        max-width: 280px;
+    }
+
+    .error-page-btn {
+        width: 100%;
+    }
+}
