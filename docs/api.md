@@ -1,10 +1,10 @@
-# 📖 Dokumentasi REST API — KampusLMS (Minggu 6)
+# Dokumentasi REST API — KampusLMS (Minggu 6)
 
 Dokumentasi resmi REST API KampusLMS berbasis Laravel 12 dan Laravel Sanctum sesuai dengan kontrak spesifikasi `spek-week6.md` dan `implementation-plan.md`.
 
 ---
 
-## 📌 Ringkasan Sistem API
+## Ringkasan Sistem API
 
 - **Base URL:** `http://localhost:8000/api/v1` (atau domain lokal Anda, contoh: `http://kampuslms.test/api/v1`)
 - **Autentikasi:** Laravel Sanctum via `Bearer Token` pada HTTP Header `Authorization`.
@@ -18,7 +18,7 @@ Dokumentasi resmi REST API KampusLMS berbasis Laravel 12 dan Laravel Sanctum ses
 
 ---
 
-## 🔑 Akun Demo (Seeder)
+## Akun Demo (Seeder)
 
 Gunakan akun demo berikut yang tersedia pada `DemoAccountSeeder` dan `KampusLMSSeeder` untuk pengujian `curl` atau API Client:
 
@@ -30,7 +30,7 @@ Gunakan akun demo berikut yang tersedia pada `DemoAccountSeeder` dan `KampusLMSS
 
 ---
 
-## 🚦 Kode Status HTTP (HTTP Status Codes)
+## Kode Status HTTP (HTTP Status Codes)
 
 | Kode | Keterangan | Kondisi Penggunaan |
 |---|---|---|
@@ -45,7 +45,7 @@ Gunakan akun demo berikut yang tersedia pada `DemoAccountSeeder` dan `KampusLMSS
 
 ---
 
-## 📑 Daftar Endpoint API
+## Daftar Endpoint API
 
 ### 1. Autentikasi & Profil User
 
