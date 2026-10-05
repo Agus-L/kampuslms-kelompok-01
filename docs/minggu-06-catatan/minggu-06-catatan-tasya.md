@@ -1,8 +1,9 @@
-# Catatan Minggu 6 — Tasya
+# Catatan Minggu 6
 
-Dokumentasi hasil eksperimen dan analisis tugas **PEMROGRAMAN WEB — MINGGU 6: REST API dan Integrasi** pada proyek Laravel 12 KampusLMS.
+## Identitas Mahasiswa
 
----
+Nama: Anastasya Salsabila Khoirunnisa
+NIM: 10241009
 
 ## READ
 
