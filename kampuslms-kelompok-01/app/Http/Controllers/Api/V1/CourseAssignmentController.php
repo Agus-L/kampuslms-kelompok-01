@@ -45,6 +45,7 @@ class CourseAssignmentController extends Controller
 
         // Query assignments dengan filter opsional
         $query = $course->assignments()
+            ->withCount('submissions')
             ->when($request->filled('status'), function ($q) use ($request) {
                 $q->where('status', $request->query('status'));
             })

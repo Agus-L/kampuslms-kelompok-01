@@ -41,7 +41,7 @@ class CourseMaterialController extends Controller
             );
         }
 
-        $materials = $course->materials()->latest()->paginate(15);
+        $materials = $course->materials()->with('uploader')->latest()->paginate(15);
 
         return new MaterialCollection($materials);
     }
