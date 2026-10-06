@@ -16,7 +16,17 @@ class StoreSubmissionRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return true;
+        $user = $this->user();
+        $assignment = $this->route('assignment');
+
+        if (! $assignment) {
+            return false;
+        }
+
+        $assignment->load('course');
+
+        return $user && $user->role === 'mahasiswa' &&
+               $assignment->course->students()->where('user_id', $user->id)->exists();
     }
 
     /**
