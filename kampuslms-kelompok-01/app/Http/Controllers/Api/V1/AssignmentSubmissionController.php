@@ -60,12 +60,8 @@ class AssignmentSubmissionController extends Controller
         // Pastikan relasi course termuat
         $assignment->load('course');
 
-        // Cek: hanya mahasiswa terdaftar di mata kuliah ini
-        abort_unless(
-            $user->role === 'mahasiswa' && $assignment->course->students()->where('user_id', $user->id)->exists(),
-            403,
-            'Anda tidak memiliki akses ke sumber daya ini.'
-        );
+        // Otorisasi sudah dilakukan di StoreSubmissionRequest (403)
+        // Jika sampai ke sini, user adalah mahasiswa terdaftar.
 
         // Cek apakah mahasiswa sudah pernah mengumpulkan tugas ini
         if (Submission::where('assignment_id', $assignment->id)->where('user_id', $user->id)->exists()) {
