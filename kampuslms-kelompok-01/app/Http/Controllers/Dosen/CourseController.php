@@ -6,21 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\Course;
 use Illuminate\Http\Request;
 
-/**
- * Dosen\CourseController — Mata kuliah yang diampu oleh dosen.
- *
- * Route model binding diterapkan: parameter {course} di URL
- * otomatis di-resolve menjadi instance Course oleh Laravel.
- *
- * Route hanya mendaftarkan: index, show
- * (lihat ->only(['index', 'show']) di routes/web.php)
- * Dosen tidak membuat/edit MK — itu hak admin.
- *
- * ⚠️ IDOR TINGGI: Controller harus memfilter
- * where('lecturer_id', auth()->id()) agar dosen A
- * tidak bisa melihat MK dosen B.
- * → Akan dipindahkan ke Policy di minggu 7.
- */
 class CourseController extends Controller
 {
     /**
@@ -42,5 +27,11 @@ class CourseController extends Controller
     public function show(Course $course)
     {
         abort_unless($course->lecturer_id === auth()->id(), 403);
+
+        return response()->json([
+            'dosen_login' => auth()->user()->name,
+            'mata_kuliah' => $course->name,
+            'pengampu'    => $course->lecturer->name,
+        ]);
     }
 }
