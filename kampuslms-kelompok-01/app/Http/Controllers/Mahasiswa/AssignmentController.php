@@ -26,18 +26,22 @@ use Illuminate\Support\Facades\Gate;
 class AssignmentController extends Controller
 {
     /**
-     * Daftar tugas dalam satu mata kuliah.
+     * Daftar tugas dalam satu mata kuliah yang diikuti.
      *
      * Route: GET /mahasiswa/courses/{course}/assignments → mahasiswa.courses.assignments.index
      * Route model binding: {course} → Course $course
      */
-    public function index(Course $course)
+    public function index(Request $request, Course $course)
     {
         Gate::authorize('view', $course);
 
         $assignments = $course->assignments()->latest()->paginate(15);
 
-        return response()->json($assignments);
+        if ($request->wantsJson()) {
+            return response()->json($assignments);
+        }
+
+        return view('assignments.index', compact('course', 'assignments'));
     }
 
     /**
@@ -46,8 +50,21 @@ class AssignmentController extends Controller
      * Route: GET /mahasiswa/assignments/{assignment} → mahasiswa.assignments.show
      * Route model binding: {assignment} → Assignment $assignment
      */
-    public function show(Assignment $assignment)
+    public function show(Request $request, Assignment $assignment)
     {
         Gate::authorize('view', $assignment);
+
+        $assignment->load([
+            'course',
+            'submissions' => function ($query) {
+                $query->where('user_id', auth()->id())->with('grade');
+            },
+        ]);
+
+        if ($request->wantsJson()) {
+            return response()->json($assignment);
+        }
+
+        return view('assignments.show', compact('assignment'));
     }
 }

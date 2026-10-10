@@ -26,18 +26,22 @@ use Illuminate\Support\Facades\Gate;
 class MaterialController extends Controller
 {
     /**
-     * Daftar materi dalam satu mata kuliah.
+     * Daftar materi dalam satu mata kuliah yang diikuti.
      *
      * Route: GET /mahasiswa/courses/{course}/materials → mahasiswa.courses.materials.index
      * Route model binding: {course} → Course $course
      */
-    public function index(Course $course)
+    public function index(Request $request, Course $course)
     {
         Gate::authorize('view', $course);
 
         $materials = $course->materials()->latest()->paginate(15);
 
-        return response()->json($materials);
+        if ($request->wantsJson()) {
+            return response()->json($materials);
+        }
+
+        return view('materials.index', compact('course', 'materials'));
     }
 
     /**
@@ -46,8 +50,16 @@ class MaterialController extends Controller
      * Route: GET /mahasiswa/materials/{material} → mahasiswa.materials.show
      * Route model binding: {material} → Material $material
      */
-    public function show(Material $material)
+    public function show(Request $request, Material $material)
     {
         Gate::authorize('view', $material);
+
+        $material->load('course');
+
+        if ($request->wantsJson()) {
+            return response()->json($material);
+        }
+
+        return view('materials.show', compact('material'));
     }
 }

@@ -59,7 +59,14 @@ class CourseController extends Controller
      */
     public function show(Course $course)
     {
-        //
+        $course->load([
+            'lecturer',
+            'students',
+            'materials' => fn ($q) => $q->latest(),
+            'assignments' => fn ($q) => $q->latest(),
+        ]);
+
+        return view('courses.show', compact('course'));
     }
 
     /**

@@ -55,8 +55,25 @@ class CourseController extends Controller
      * Route: GET /mahasiswa/courses/{course} → mahasiswa.courses.show
      * Route model binding: {course} → Course $course
      */
-    public function show(Course $course)
+    public function show(Request $request, Course $course)
     {
         Gate::authorize('view', $course);
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'mahasiswa_login' => auth()->user()->name,
+                'mata_kuliah'     => $course->name,
+                'pengampu'        => $course->lecturer->name ?? '-',
+            ]);
+        }
+
+        $course->load([
+            'lecturer',
+            'students',
+            'materials' => fn ($q) => $q->latest(),
+            'assignments' => fn ($q) => $q->latest(),
+        ]);
+
+        return view('courses.show', compact('course'));
     }
 }
