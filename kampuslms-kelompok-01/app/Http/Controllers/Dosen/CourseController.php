@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Dosen;
 use App\Http\Controllers\Controller;
 use App\Models\Course;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 
 class CourseController extends Controller
 {
@@ -26,7 +27,7 @@ class CourseController extends Controller
      */
     public function show(Course $course)
     {
-        abort_unless($course->lecturer_id === auth()->id(), 403);
+        Gate::authorize('view', $course);
 
         return response()->json([
             'dosen_login' => auth()->user()->name,

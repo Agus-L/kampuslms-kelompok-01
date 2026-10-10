@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Course;
 use App\Models\Material;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 
 /**
  * Dosen\MaterialController — CRUD materi kuliah oleh Dosen.
@@ -19,9 +20,7 @@ use Illuminate\Http\Request;
  * scopeBindings() pada grup dosen memastikan {material}
  * benar-benar milik {course} tersebut pada route bersarang.
  *
- * ⚠️ IDOR TINGGI: Semua method harus memastikan course
- * milik dosen yang sedang login (lecturer_id === auth()->id()).
- * → Akan dipindahkan ke Policy di minggu 7.
+ * Otorisasi menggunakan MaterialPolicy & CoursePolicy via Gate::authorize.
  */
 class MaterialController extends Controller
 {
@@ -33,7 +32,7 @@ class MaterialController extends Controller
      */
     public function index(Course $course)
     {
-        abort_unless($course->lecturer_id === auth()->id(), 403);
+        Gate::authorize('view', $course);
     }
 
     /**
@@ -44,7 +43,7 @@ class MaterialController extends Controller
      */
     public function create(Course $course)
     {
-        abort_unless($course->lecturer_id === auth()->id(), 403);
+        Gate::authorize('create', [Material::class, $course]);
     }
 
     /**
@@ -55,7 +54,7 @@ class MaterialController extends Controller
      */
     public function store(Request $request, Course $course)
     {
-        abort_unless($course->lecturer_id === auth()->id(), 403);
+        Gate::authorize('create', [Material::class, $course]);
     }
 
     /**
@@ -66,7 +65,7 @@ class MaterialController extends Controller
      */
     public function show(Material $material)
     {
-        abort_unless($material->course->lecturer_id === auth()->id(), 403);
+        Gate::authorize('view', $material);
     }
 
     /**
@@ -77,7 +76,7 @@ class MaterialController extends Controller
      */
     public function edit(Material $material)
     {
-        abort_unless($material->course->lecturer_id === auth()->id(), 403);
+        Gate::authorize('update', $material);
     }
 
     /**
@@ -88,7 +87,7 @@ class MaterialController extends Controller
      */
     public function update(Request $request, Material $material)
     {
-        abort_unless($material->course->lecturer_id === auth()->id(), 403);
+        Gate::authorize('update', $material);
     }
 
     /**
@@ -99,6 +98,6 @@ class MaterialController extends Controller
      */
     public function destroy(Material $material)
     {
-        abort_unless($material->course->lecturer_id === auth()->id(), 403);
+        Gate::authorize('delete', $material);
     }
 }

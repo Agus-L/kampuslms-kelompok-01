@@ -110,15 +110,19 @@
 
                             <div style="display: flex; justify-content: flex-end; margin-top: 0.75rem;">
                                 @if ($sub)
+                                    @can('view', $sub)
                                     <a href="{{ route('mahasiswa.submissions.show', $sub) }}"
                                        style="font-size: 0.8rem; color: var(--primary-light); text-decoration: none; font-weight: 600;">
                                         Lihat Lembar Tugas →
                                     </a>
+                                    @endcan
                                 @else
+                                    @can('create', [\App\Models\Submission::class, $assign])
                                     <a href="{{ route('mahasiswa.assignments.submissions.create', $assign) }}"
                                        style="padding: 0.35rem 0.85rem; background: var(--primary); color: #ffffff; text-decoration: none; border-radius: 0.375rem; font-size: 0.8rem; font-weight: 600;">
                                         Kumpulkan Sekarang
                                     </a>
+                                    @endcan
                                 @endif
                             </div>
                         </div>
@@ -202,10 +206,12 @@
                                 <span>📝 {{ $course->assignments_count }} Tugas</span>
                             </div>
 
+                            @can('view', $course)
                             <a href="{{ route('mahasiswa.courses.show', $course) }}"
                                style="display: block; text-align: center; padding: 0.6rem; background: rgba(79, 70, 229, 0.12); border: 1px solid rgba(99, 102, 241, 0.3); color: var(--primary-light); text-decoration: none; border-radius: 0.5rem; font-weight: 600; font-size: 0.88rem;">
                                 Masuk Kelas →
                             </a>
+                            @endcan
                         </div>
                     </div>
                 @empty

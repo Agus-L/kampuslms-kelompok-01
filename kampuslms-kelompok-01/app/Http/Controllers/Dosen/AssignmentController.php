@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Assignment;
 use App\Models\Course;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 
 /**
  * Dosen\AssignmentController — CRUD tugas oleh Dosen.
@@ -19,9 +20,7 @@ use Illuminate\Http\Request;
  * scopeBindings() pada grup dosen memastikan {assignment}
  * benar-benar milik {course} tersebut pada route bersarang.
  *
- * ⚠️ IDOR TINGGI: Semua method harus memastikan course
- * milik dosen yang sedang login (lecturer_id === auth()->id()).
- * → Akan dipindahkan ke Policy di minggu 7.
+ * Otorisasi menggunakan AssignmentPolicy & CoursePolicy via Gate::authorize.
  */
 class AssignmentController extends Controller
 {
@@ -33,7 +32,7 @@ class AssignmentController extends Controller
      */
     public function index(Course $course)
     {
-        abort_unless($course->lecturer_id === auth()->id(), 403);
+        Gate::authorize('view', $course);
     }
 
     /**
@@ -44,7 +43,7 @@ class AssignmentController extends Controller
      */
     public function create(Course $course)
     {
-        abort_unless($course->lecturer_id === auth()->id(), 403);
+        Gate::authorize('create', [Assignment::class, $course]);
     }
 
     /**
@@ -55,7 +54,7 @@ class AssignmentController extends Controller
      */
     public function store(Request $request, Course $course)
     {
-        abort_unless($course->lecturer_id === auth()->id(), 403);
+        Gate::authorize('create', [Assignment::class, $course]);
     }
 
     /**
@@ -66,7 +65,7 @@ class AssignmentController extends Controller
      */
     public function show(Assignment $assignment)
     {
-        abort_unless($assignment->course->lecturer_id === auth()->id(), 403);
+        Gate::authorize('view', $assignment);
     }
 
     /**
@@ -77,7 +76,7 @@ class AssignmentController extends Controller
      */
     public function edit(Assignment $assignment)
     {
-        abort_unless($assignment->course->lecturer_id === auth()->id(), 403);
+        Gate::authorize('update', $assignment);
     }
 
     /**
@@ -88,7 +87,7 @@ class AssignmentController extends Controller
      */
     public function update(Request $request, Assignment $assignment)
     {
-        abort_unless($assignment->course->lecturer_id === auth()->id(), 403);
+        Gate::authorize('update', $assignment);
     }
 
     /**
@@ -99,6 +98,6 @@ class AssignmentController extends Controller
      */
     public function destroy(Assignment $assignment)
     {
-        abort_unless($assignment->course->lecturer_id === auth()->id(), 403);
+        Gate::authorize('delete', $assignment);
     }
 }

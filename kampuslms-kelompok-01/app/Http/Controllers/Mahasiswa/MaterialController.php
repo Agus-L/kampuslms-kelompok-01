@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Course;
 use App\Models\Material;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 
 /**
  * Mahasiswa\MaterialController — Melihat materi kuliah.
@@ -20,9 +21,7 @@ use Illuminate\Http\Request;
  * (lihat ->only(['index', 'show']) di routes/web.php)
  * Mahasiswa hanya baca materi, tidak bisa CRUD.
  *
- * ⚠️ IDOR TINGGI: Mahasiswa bisa mengakses materi MK yang
- * tidak dia ikuti dengan mengganti ID di URL.
- * → Akan dipindahkan ke Policy di minggu 7.
+ * Otorisasi menggunakan MaterialPolicy & CoursePolicy via Gate::authorize.
  */
 class MaterialController extends Controller
 {
@@ -34,7 +33,7 @@ class MaterialController extends Controller
      */
     public function index(Course $course)
     {
-        abort_unless($course->students()->where('user_id', auth()->id())->exists(), 403);
+        Gate::authorize('view', $course);
     }
 
     /**
@@ -45,6 +44,6 @@ class MaterialController extends Controller
      */
     public function show(Material $material)
     {
-        abort_unless($material->course->students()->where('user_id', auth()->id())->exists(), 403);
+        Gate::authorize('view', $material);
     }
 }

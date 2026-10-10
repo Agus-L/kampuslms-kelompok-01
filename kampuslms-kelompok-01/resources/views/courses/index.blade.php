@@ -33,9 +33,11 @@
                 </p>
             </div>
             {{-- Tombol Tambah MK --}}
+            @can('create', App\Models\Course::class)
             <a href="{{ route('admin.courses.create') }}" class="btn btn-create">
                 + Tambah Mata Kuliah
             </a>
+            @endcan
         </div>
     </div>
 
@@ -157,9 +159,12 @@
                         <span class="course-link-arrow">→</span>
                     </a>
                     <div class="course-actions-secondary">
+                        @can('update', $course)
                         <a href="{{ route('admin.courses.edit', $course) }}" class="btn btn-edit" title="Edit">
                             ✏️ Edit
                         </a>
+                        @endcan
+                        @can('delete', $course)
                         <button type="button" class="btn btn-delete" title="Hapus"
                                 data-modal-target="delete-course-{{ $course->id }}">
                             🗑️ Hapus
@@ -169,6 +174,7 @@
                             :action="route('admin.courses.destroy', $course)"
                             :itemName="$course->name"
                         />
+                        @endcan
                     </div>
                 </div>
             </div>
