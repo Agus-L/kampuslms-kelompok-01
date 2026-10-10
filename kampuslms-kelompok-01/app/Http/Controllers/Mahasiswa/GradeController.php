@@ -31,5 +31,13 @@ class GradeController extends Controller
     public function index(Submission $submission)
     {
         Gate::authorize('view', $submission);
+
+        $grade = $submission->grade;
+
+        return response()->json([
+            'submission_id' => $submission->id,
+            'assignment'    => $submission->assignment->title ?? null,
+            'grade'         => $grade,
+        ]);
     }
 }

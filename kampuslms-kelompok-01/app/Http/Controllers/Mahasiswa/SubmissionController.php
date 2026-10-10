@@ -34,6 +34,13 @@ class SubmissionController extends Controller
     public function index(Assignment $assignment)
     {
         Gate::authorize('view', $assignment);
+
+        $submissions = $assignment->submissions()
+            ->where('user_id', auth()->id())
+            ->with('grade')
+            ->get();
+
+        return response()->json($submissions);
     }
 
     /**

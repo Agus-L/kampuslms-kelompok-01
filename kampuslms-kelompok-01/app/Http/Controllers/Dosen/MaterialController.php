@@ -33,6 +33,10 @@ class MaterialController extends Controller
     public function index(Course $course)
     {
         Gate::authorize('view', $course);
+
+        $materials = $course->materials()->latest()->paginate(15);
+
+        return response()->json($materials);
     }
 
     /**

@@ -34,6 +34,13 @@ class SubmissionController extends Controller
     public function index(Assignment $assignment)
     {
         Gate::authorize('view', $assignment);
+
+        $submissions = $assignment->submissions()
+            ->with(['user', 'grade'])
+            ->latest('submitted_at')
+            ->paginate(20);
+
+        return response()->json($submissions);
     }
 
     /**
