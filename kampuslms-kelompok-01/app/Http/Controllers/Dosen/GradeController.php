@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Grade;
 use App\Models\Submission;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 
 /**
  * Dosen\GradeController — Memberi dan memperbarui nilai.
@@ -19,9 +20,7 @@ use Illuminate\Http\Request;
  * Route hanya mendaftarkan: store, update
  * (lihat ->only(['store', 'update']) di routes/web.php)
  *
- * ⚠️ IDOR TINGGI: Dosen A jangan bisa memberi nilai
- * pada submission di MK dosen B.
- * → Akan dipindahkan ke Policy di minggu 7.
+ * Otorisasi menggunakan GradePolicy via Gate::authorize.
  */
 class GradeController extends Controller
 {
@@ -33,7 +32,7 @@ class GradeController extends Controller
      */
     public function store(Request $request, Submission $submission)
     {
-        abort_unless($submission->assignment->course->lecturer_id === auth()->id(), 403);
+        Gate::authorize('create', [Grade::class, $submission]);
     }
 
     /**
@@ -44,6 +43,6 @@ class GradeController extends Controller
      */
     public function update(Request $request, Grade $grade)
     {
-        abort_unless($grade->submission->assignment->course->lecturer_id === auth()->id(), 403);
+        Gate::authorize('update', $grade);
     }
 }

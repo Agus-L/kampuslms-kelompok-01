@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Assignment;
 use App\Models\Course;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 
 /**
  * Mahasiswa\AssignmentController — Melihat tugas.
@@ -20,9 +21,7 @@ use Illuminate\Http\Request;
  * (lihat ->only(['index', 'show']) di routes/web.php)
  * Mahasiswa hanya melihat tugas, tidak bisa membuat/edit/hapus.
  *
- * ⚠️ IDOR TINGGI: Mahasiswa bisa mengakses tugas MK yang
- * tidak dia ikuti dengan mengganti ID di URL.
- * → Akan dipindahkan ke Policy di minggu 7.
+ * Otorisasi menggunakan AssignmentPolicy & CoursePolicy via Gate::authorize.
  */
 class AssignmentController extends Controller
 {
@@ -34,7 +33,7 @@ class AssignmentController extends Controller
      */
     public function index(Course $course)
     {
-        abort_unless($course->students()->where('user_id', auth()->id())->exists(), 403);
+        Gate::authorize('view', $course);
     }
 
     /**
@@ -45,6 +44,6 @@ class AssignmentController extends Controller
      */
     public function show(Assignment $assignment)
     {
-        abort_unless($assignment->course->students()->where('user_id', auth()->id())->exists(), 403);
+        Gate::authorize('view', $assignment);
     }
 }

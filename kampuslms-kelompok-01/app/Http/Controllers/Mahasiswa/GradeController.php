@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Mahasiswa;
 use App\Http\Controllers\Controller;
 use App\Models\Submission;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 
 /**
  * Mahasiswa\GradeController — Melihat nilai sendiri.
@@ -17,10 +18,7 @@ use Illuminate\Http\Request;
  * (lihat ->only(['index']) di routes/web.php)
  * Mahasiswa hanya bisa melihat nilai, tidak bisa edit.
  *
- * ⚠️ IDOR TINGGI: Route ini harus di-scope ke
- * auth()->user()->submissions agar mahasiswa tidak bisa
- * melihat nilai submission orang lain.
- * → Akan dipindahkan ke Policy di minggu 7.
+ * Otorisasi menggunakan SubmissionPolicy via Gate::authorize.
  */
 class GradeController extends Controller
 {
@@ -32,6 +30,6 @@ class GradeController extends Controller
      */
     public function index(Submission $submission)
     {
-        abort_unless($submission->user_id === auth()->id(), 403);
+        Gate::authorize('view', $submission);
     }
 }

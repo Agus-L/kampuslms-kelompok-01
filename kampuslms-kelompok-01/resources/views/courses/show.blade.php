@@ -29,9 +29,12 @@
             </div>
             {{-- Tombol Aksi --}}
             <div class="detail-actions">
+                @can('update', $course)
                 <a href="{{ route('admin.courses.edit', $course) }}" class="btn btn-edit">
                     ✏️ Edit
                 </a>
+                @endcan
+                @can('delete', $course)
                 <button type="button" class="btn btn-delete"
                         data-modal-target="delete-course-{{ $course->id }}">
                     🗑️ Hapus
@@ -41,6 +44,7 @@
                     :action="route('admin.courses.destroy', $course)"
                     :itemName="$course->name"
                 />
+                @endcan
             </div>
         </div>
         <h1 class="detail-title">{{ $course->name }}</h1>

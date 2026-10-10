@@ -126,10 +126,12 @@
                                         </span>
                                     </td>
                                     <td style="padding: 0.75rem; text-align: right;">
+                                        @can('view', $sub)
                                         <a href="{{ route('dosen.submissions.show', $sub) }}"
                                            style="display: inline-block; padding: 0.4rem 0.85rem; background: var(--primary); color: #ffffff; text-decoration: none; border-radius: 0.375rem; font-weight: 600; font-size: 0.8rem;">
                                             ✏️ Periksa & Nilai
                                         </a>
+                                        @endcan
                                     </td>
                                 </tr>
                             @endforeach
@@ -172,10 +174,12 @@
                                 <span>📝 {{ $course->assignments_count }} Tugas</span>
                             </div>
 
+                            @can('view', $course)
                             <a href="{{ route('dosen.courses.show', $course) }}"
                                style="display: block; text-align: center; padding: 0.6rem; background: rgba(79, 70, 229, 0.12); border: 1px solid rgba(99, 102, 241, 0.3); color: var(--primary-light); text-decoration: none; border-radius: 0.5rem; font-weight: 600; font-size: 0.88rem;">
                                 Buka Kelas →
                             </a>
+                            @endcan
                         </div>
                     </div>
                 @empty

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Mahasiswa;
 use App\Http\Controllers\Controller;
 use App\Models\Course;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 
 /**
  * Mahasiswa\CourseController — Melihat MK yang diikuti.
@@ -16,9 +17,7 @@ use Illuminate\Http\Request;
  * (lihat ->only(['index', 'show']) di routes/web.php)
  * Mahasiswa hanya melihat MK yang dia ikuti, tidak bisa CRUD.
  *
- * ⚠️ IDOR TINGGI: Controller harus memfilter hanya MK yang
- * di-enroll oleh mahasiswa yang sedang login.
- * → Akan dipindahkan ke Policy di minggu 7.
+ * Otorisasi menggunakan CoursePolicy via Gate::authorize.
  */
 class CourseController extends Controller
 {
@@ -40,6 +39,6 @@ class CourseController extends Controller
      */
     public function show(Course $course)
     {
-        abort_unless($course->students()->where('user_id', auth()->id())->exists(), 403);
+        Gate::authorize('view', $course);
     }
 }
