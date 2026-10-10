@@ -52,5 +52,7 @@ class SubmissionController extends Controller
     public function show(Submission $submission)
     {
         Gate::authorize('view', $submission);
+
+        return response()->json($submission);
     }
 }

@@ -96,4 +96,18 @@ class AssignmentSubmissionController extends Controller
             ->response()
             ->setStatusCode(201);
     }
+
+    /**
+     * GET /api/v1/submissions/{submission}
+     *
+     * Detail submission (menguji Policy view — pencegahan IDOR).
+     */
+    public function show(Request $request, Submission $submission)
+    {
+        $submission->load(['student', 'grade.grader', 'assignment.course']);
+
+        \Illuminate\Support\Facades\Gate::authorize('view', $submission);
+
+        return new SubmissionResource($submission);
+    }
 }

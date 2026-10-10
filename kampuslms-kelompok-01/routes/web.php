@@ -99,7 +99,7 @@ Route::match(['get', 'post'], '/logout', [LoginController::class, 'logout'])->na
 // Semua route di bawah ini memerlukan login (auth)
 // ══════════════════════════════════════════════════════
 
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth:sanctum,web'])->group(function () {
 
     // ──────────────────────────────────────────────────
     // GRUP 1 — Authenticated (Semua Peran)
@@ -171,18 +171,6 @@ Route::middleware('auth')->group(function () {
             // shallow(): show/edit/update/destroy cukup /dosen/assignments/{assignment}
             Route::resource('courses.assignments', DosenAssignmentController::class)
                 ->shallow();
-
-            Route::get('courses/{course}/assignments/{assignment}', function (\App\Models\Course $course, \App\Models\Assignment $assignment) {
-                return response()->json([
-                    'status'               => 'Request masuk boskyu!',
-                    'course_di_url'        => $course->name . ' (ID: ' . $course->id . ')',
-                    'assignment_di_url'    => $assignment->title . ' (ID: ' . $assignment->id . ')',
-                    'course_id_sebenarnya' => $assignment->course_id,
-                    'keterangan'           => $course->id !== $assignment->course_id 
-                        ? 'Assignment ini bukan punyamu boskyu' 
-                        : 'Assignment milik Course ini.',
-                ]);
-            });
 
             // Submission — dosen hanya melihat, tidak membuat
             // shallow(): show cukup /dosen/submissions/{submission}
