@@ -35,6 +35,10 @@ class EnrollmentController extends Controller
     public function index(Course $course)
     {
         Gate::authorize('manageEnrollment', $course);
+
+        $students = $course->students()->latest('course_user.created_at')->paginate(15);
+
+        return response()->json($students);
     }
 
     /**

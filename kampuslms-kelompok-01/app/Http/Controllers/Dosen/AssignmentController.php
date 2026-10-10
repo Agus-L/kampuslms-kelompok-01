@@ -33,6 +33,10 @@ class AssignmentController extends Controller
     public function index(Course $course)
     {
         Gate::authorize('view', $course);
+
+        $assignments = $course->assignments()->latest()->paginate(15);
+
+        return response()->json($assignments);
     }
 
     /**
