@@ -61,25 +61,45 @@
             Menggunakan helper route() agar tautan tidak pernah "patah"
             meskipun URI-nya diubah di web.php.
         --}}
-        <a href="{{ route('admin.courses.index') }}" class="brand">
+        <a href="{{ auth()->check() ? route('dashboard') : route('home') }}" class="brand">
             <span class="brand-icon">🎓</span>
             Kampus LMS
         </a>
 
         <div class="nav-links">
-            {{--
-                request()->routeIs('admin.courses.*') mengembalikan true
-                jika route saat ini cocok dengan pola 'admin.courses.*'.
-                Digunakan untuk memberi class 'active' secara dinamis.
-            --}}
-            <a href="{{ route('admin.courses.index') }}"
-               class="nav-link {{ request()->routeIs('admin.courses.*') ? 'active' : '' }}">
-                Mata Kuliah
-            </a>
-            <a href="{{ route('admin.users.index') }}"
-               class="nav-link {{ request()->routeIs('admin.users.*') ? 'active' : '' }}">
-                Pengguna
-            </a>
+            @if(auth()->check())
+                <a href="{{ route('dashboard') }}"
+                   class="nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}">
+                    Dashboard
+                </a>
+
+                @if(auth()->user()->role === 'admin')
+                    <a href="{{ route('admin.courses.index') }}"
+                       class="nav-link {{ request()->routeIs('admin.courses.*') ? 'active' : '' }}">
+                        Mata Kuliah
+                    </a>
+                    <a href="{{ route('admin.users.index') }}"
+                       class="nav-link {{ request()->routeIs('admin.users.*') ? 'active' : '' }}">
+                        Pengguna
+                    </a>
+                @elseif(auth()->user()->role === 'dosen')
+                    <a href="{{ route('dosen.courses.index') }}"
+                       class="nav-link {{ request()->routeIs('dosen.courses.*') ? 'active' : '' }}">
+                        Kelas Saya
+                    </a>
+                @elseif(auth()->user()->role === 'mahasiswa')
+                    <a href="{{ route('mahasiswa.courses.index') }}"
+                       class="nav-link {{ request()->routeIs('mahasiswa.courses.*') ? 'active' : '' }}">
+                        Mata Kuliah
+                    </a>
+                @endif
+            @else
+                <a href="{{ route('home') }}"
+                   class="nav-link {{ request()->routeIs('home') ? 'active' : '' }}">
+                    Beranda
+                </a>
+            @endif
+
             <a href="{{ route('tentang') }}"
                 class="nav-link {{ request()->routeIs('tentang') ? 'active' : '' }}">
                 Tentang
@@ -87,9 +107,18 @@
 
             @if(auth()->check())
                 <div class="auth-user-badge" style="display:inline-flex; align-items:center; gap:0.5rem; padding:0.3rem 0.75rem; border-radius:9999px; background:var(--badge-bg); border:1px solid var(--badge-border); font-size:0.82rem; color:var(--text-main);">
-                    <span>👤 <strong>{{ auth()->user()->name }}</strong> <span style="color:var(--primary-light);">({{ auth()->user()->role }})</span></span>
-                    <a href="{{ route('logout') }}" title="Keluar dari sesi" style="color:#f87171; text-decoration:none; margin-left:0.25rem; font-weight:600;">Keluar</a>
+                    <span>👤 <strong>{{ auth()->user()->name }}</strong> <span style="color:var(--primary-light); text-transform:capitalize;">({{ auth()->user()->role }})</span></span>
+                    <form action="{{ route('logout') }}" method="POST" style="display:inline; margin:0; padding:0;">
+                        @csrf
+                        <button type="submit" title="Keluar dari sesi" style="background:none; border:none; color:#f87171; cursor:pointer; font-weight:600; font-size:0.82rem; padding:0 0.25rem;">
+                            Keluar
+                        </button>
+                    </form>
                 </div>
+            @else
+                <a href="{{ route('login') }}" class="nav-link {{ request()->routeIs('login') ? 'active' : '' }}" style="background:var(--primary); color:#ffffff; padding:0.4rem 0.9rem; border-radius:0.5rem; font-weight:600;">
+                    Masuk
+                </a>
             @endif
 
             {{-- ── Switch Button Dark / Light Mode (Pojok Kanan Atas) ── --}}
