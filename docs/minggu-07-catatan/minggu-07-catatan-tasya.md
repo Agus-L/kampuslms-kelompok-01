@@ -7,15 +7,13 @@ NIM: 10241009
 
 ---
 
-## READ
-
-### 1. BAGIAN READ — Bedah Starter Kit & Mekanisme Autentikasi
+## READ — Bedah Starter Kit & Mekanisme Autentikasi
 
 Berdasarkan penelusuran arsitektur Laravel 12 pada proyek KampusLMS, berikut analisis mendalam terhadap 6 pertanyaan telaah mekanisme autentikasi:
 
 ---
 
-#### 1. Controller & Method Penangan Login
+### 1. Controller & Method Penangan Login
 - **Berkas Controller:**  
   [`kampuslms-kelompok-01/app/Http/Controllers/Auth/LoginController.php`](file:///c:/Proweb/kampuslms-kelompok-01/kampuslms-kelompok-01/app/Http/Controllers/Auth/LoginController.php#L26-L60)
 - **Method Penangan:**  
@@ -30,7 +28,7 @@ Berdasarkan penelusuran arsitektur Laravel 12 pada proyek KampusLMS, berikut ana
 
 ---
 
-#### 2. Verifikasi Kredensial
+### 2. Verifikasi Kredensial
 - **Lokasi Kode:**  
   [`app/Http/Controllers/Auth/LoginController.php`](file:///c:/Proweb/kampuslms-kelompok-01/kampuslms-kelompok-01/app/Http/Controllers/Auth/LoginController.php#L47) baris 47:
   ```php
@@ -55,7 +53,7 @@ Berdasarkan penelusuran arsitektur Laravel 12 pada proyek KampusLMS, berikut ana
 
 ---
 
-#### 3. Session Fixation Prevention
+### 3. Session Fixation Prevention
 - **Lokasi Kode:**  
   [`app/Http/Controllers/Auth/LoginController.php`](file:///c:/Proweb/kampuslms-kelompok-01/kampuslms-kelompok-01/app/Http/Controllers/Auth/LoginController.php#L48) baris 48:
   ```php
@@ -71,7 +69,7 @@ Berdasarkan penelusuran arsitektur Laravel 12 pada proyek KampusLMS, berikut ana
 
 ---
 
-#### 4. Hashing Kata Sandi
+### 4. Hashing Kata Sandi
 - **Lokasi Kode:**  
   [`kampuslms-kelompok-01/app/Models/User.php`](file:///c:/Proweb/kampuslms-kelompok-01/kampuslms-kelompok-01/app/Models/User.php#L46-L53) baris 46–53:
   ```php
@@ -93,7 +91,7 @@ Berdasarkan penelusuran arsitektur Laravel 12 pada proyek KampusLMS, berikut ana
 
 ---
 
-#### 5. Analisis Cookie Session
+### 5. Analisis Cookie Session
 - **Kondisi Sebelum Login (Guest / Tamu):**  
   Ketika pengguna membuka halaman `/login` pertama kali:
   - Server mengirimkan header HTTP response: `Set-Cookie: laravel_session=eyJpdiI6...; path=/; httponly; samesite=lax`.
@@ -111,7 +109,7 @@ Berdasarkan penelusuran arsitektur Laravel 12 pada proyek KampusLMS, berikut ana
 
 ---
 
-#### 6. Siklus Session vs Browser Cache
+### 6. Siklus Session vs Browser Cache
 - **Perilaku Saat Logout:**  
   Method `LoginController::logout()` memanggil:
   ```php
@@ -139,15 +137,13 @@ Berdasarkan penelusuran arsitektur Laravel 12 pada proyek KampusLMS, berikut ana
 
 ---
 
-## BREAK
+## BREAK — Delapan Kerusakan 
 
-### 2. BAGIAN BREAK — Delapan Kerusakan (Diperkaya Konsep Prompt Pack 7.2)
-
-Eksperimen delapan skenario kerusakan dilakukan untuk menguji ketahanan sistem keamanan KampusLMS, menghubungkan analisis praktis dengan konsep arsitektur Laravel 12 dan panduan *Prompt Pack 7.2 (B, C, D)*.
+Eksperimen delapan skenario kerusakan dilakukan untuk menguji ketahanan sistem keamanan KampusLMS
 
 ---
 
-### BREAK 1 — Session Fixation Terbuka
+### 1. Session Fixation Terbuka
 
 - **Prediksi Sebelum Mencoba:**  
   Jika baris `session()->regenerate()` dihapus dari proses login, pengguna tetap dapat masuk ke dashboard, namun ID session yang diterbitkan pada status tamu (*guest*) tidak akan diperbarui. Nilai cookie `laravel_session` akan sama persis sebelum dan sesudah login.
@@ -178,7 +174,7 @@ Eksperimen delapan skenario kerusakan dilakukan untuk menguji ketahanan sistem k
 
 ---
 
-### BREAK 2 — UI Obfuscation vs Enforced Security (Kaitan Prompt Pack 7.2 B)
+### 2. UI Obfuscation vs Enforced Security (Kaitan Prompt Pack 7.2 B)
 
 - **Prediksi Sebelum Mencoba:**  
   Menyembunyikan tombol menggunakan direktif `@can` di Blade hanyalah rekayasa visual (*UI Obfuscation*). Jika `Gate::authorize()` di controller dihapus, pengguna yang tidak memiliki hak akses tetap dapat menembus endpoint backend secara langsung menggunakan cURL atau Postman.
@@ -210,7 +206,7 @@ Eksperimen delapan skenario kerusakan dilakukan untuk menguji ketahanan sistem k
 
 ---
 
-### BREAK 3 — Uji Tembus Dosen A ke Data Dosen B (Kaitan Prompt Pack 7.2 D)
+### 3. Uji Tembus Dosen A ke Data Dosen B (Kaitan Prompt Pack 7.2 D)
 
 - **Prediksi Sebelum Mencoba:**  
   Ketika `CoursePolicy` aktif dan dipanggil melalui `Gate::authorize()`, request manipulasi data dari Dosen A ke mata kuliah milik Dosen B akan ditolak mentah-mentah dengan status HTTP `403 Forbidden`.
@@ -245,7 +241,7 @@ Eksperimen delapan skenario kerusakan dilakukan untuk menguji ketahanan sistem k
 
 ---
 
-### BREAK 4 — Uji Tembus IDOR Mahasiswa pada Submission (Kaitan Minggu 5 & Prompt Pack 7.2 D)
+### 4. Uji Tembus IDOR Mahasiswa pada Submission (Kaitan Minggu 5 & Prompt Pack 7.2 D)
 
 - **Prediksi Sebelum Mencoba:**  
   Pada Minggu 5, endpoint `/mahasiswa/submissions/{id}` rentan IDOR karena mahasiswa hanya dicek loginnya tanpa validasi kepemilikan submission. Pada Minggu 7, implementasi `SubmissionPolicy::view` akan menutup celah ini dan merespon dengan status HTTP `403 Forbidden`.
@@ -281,7 +277,7 @@ Eksperimen delapan skenario kerusakan dilakukan untuk menguji ketahanan sistem k
 
 ---
 
-### BREAK 5 — Kebocoran di Tingkat Daftar / Collection (Kaitan Prompt Pack 7.2 C)
+### 5. Kebocoran di Tingkat Daftar / Collection (Kaitan Prompt Pack 7.2 C)
 
 - **Prediksi Sebelum Mencoba:**  
   Jika method `index` controller memanggil `Course::paginate()` secara polos tanpa penyaringan peran di tingkat query database, mahasiswa akan dapat melihat seluruh mata kuliah yang ada di universitas (termasuk mata kuliah prodi lain atau yang belum dibuka).
@@ -320,7 +316,7 @@ Eksperimen delapan skenario kerusakan dilakukan untuk menguji ketahanan sistem k
 
 ---
 
-### BREAK 6 — Mass Assignment Manipulasi Role
+### 6. Mass Assignment Manipulasi Role
 
 - **Prediksi Sebelum Mencoba:**  
   Jika atribut `role` tidak didaftarkan pada `$fillable` model `User`, upaya pengguna menyuntikkan parameter `role=admin` melalui form pembaruan profil akan diabaikan secara diam-diam oleh Eloquent, sehingga role pengguna tidak berubah.
@@ -356,7 +352,7 @@ Eksperimen delapan skenario kerusakan dilakukan untuk menguji ketahanan sistem k
 
 ---
 
-### BREAK 7 — Kata Sandi Plaintext di Database
+### 7. Kata Sandi Plaintext di Database
 
 - **Prediksi Sebelum Mencoba:**  
   Jika cast `'password' => 'hashed'` dihapus dari model `User`, pembuatan user baru menggunakan Eloquent tanpa enkripsi manual akan menyimpan kata sandi apa adanya (*plaintext*) ke dalam kolom `password` di tabel `users`.
@@ -395,7 +391,7 @@ Eksperimen delapan skenario kerusakan dilakukan untuk menguji ketahanan sistem k
 
 ---
 
-### BREAK 8 — Pembajakan Cookie Session
+### 8. Pembajakan Cookie Session
 
 - **Prediksi Sebelum Mencoba:**  
   Jika nilai cookie `laravel_session` disalin dari browser yang sudah login lalu disuntikkan ke peramban lain yang bersih (*incognito*), peramban kedua akan langsung memperoleh akses ke dashboard tanpa melalui proses login.
