@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Assignment;
 use App\Models\Course;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 
 /**
  * Mahasiswa\AssignmentController — Melihat tugas.
@@ -20,21 +21,27 @@ use Illuminate\Http\Request;
  * (lihat ->only(['index', 'show']) di routes/web.php)
  * Mahasiswa hanya melihat tugas, tidak bisa membuat/edit/hapus.
  *
- * ⚠️ IDOR TINGGI: Mahasiswa bisa mengakses tugas MK yang
- * tidak dia ikuti dengan mengganti ID di URL.
- * → Akan dipindahkan ke Policy di minggu 7.
+ * Otorisasi menggunakan AssignmentPolicy & CoursePolicy via Gate::authorize.
  */
 class AssignmentController extends Controller
 {
     /**
-     * Daftar tugas dalam satu mata kuliah.
+     * Daftar tugas dalam satu mata kuliah yang diikuti.
      *
      * Route: GET /mahasiswa/courses/{course}/assignments → mahasiswa.courses.assignments.index
      * Route model binding: {course} → Course $course
      */
-    public function index(Course $course)
+    public function index(Request $request, Course $course)
     {
-        abort_unless($course->students()->where('user_id', auth()->id())->exists(), 403);
+        Gate::authorize('view', $course);
+
+        $assignments = $course->assignments()->latest()->paginate(15);
+
+        if ($request->wantsJson()) {
+            return response()->json($assignments);
+        }
+
+        return view('assignments.index', compact('course', 'assignments'));
     }
 
     /**
@@ -43,8 +50,21 @@ class AssignmentController extends Controller
      * Route: GET /mahasiswa/assignments/{assignment} → mahasiswa.assignments.show
      * Route model binding: {assignment} → Assignment $assignment
      */
-    public function show(Assignment $assignment)
+    public function show(Request $request, Assignment $assignment)
     {
-        abort_unless($assignment->course->students()->where('user_id', auth()->id())->exists(), 403);
+        Gate::authorize('view', $assignment);
+
+        $assignment->load([
+            'course',
+            'submissions' => function ($query) {
+                $query->where('user_id', auth()->id())->with('grade');
+            },
+        ]);
+
+        if ($request->wantsJson()) {
+            return response()->json($assignment);
+        }
+
+        return view('assignments.show', compact('assignment'));
     }
 }

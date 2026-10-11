@@ -3,10 +3,17 @@
 use Illuminate\Support\Facades\Route;
 
 // ──────────────────────────────────────────────────────
+// Import Controller — Auth
+// ──────────────────────────────────────────────────────
+use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Auth\PasswordResetController;
+
+// ──────────────────────────────────────────────────────
 // Import Controller — Umum
 // ──────────────────────────────────────────────────────
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\NotificationController;
+use App\Livewire\Courses\CourseList;
 
 // ──────────────────────────────────────────────────────
 // Import Controller — Admin
@@ -65,45 +72,34 @@ Route::get('/tentang', function () {
     return view('tentang');
 })->name('tentang');
 
+Route::get('/courses', CourseList::class)->name('courses.index');
+
 // ──────────────────────────────────────────────────────
-// Route Login Sementara (Development Helper)
+// Autentikasi Web & Pemulihan Kata Sandi
 // ──────────────────────────────────────────────────────
-// Middleware 'auth' akan redirect ke route('login') jika user belum login.
-// Secara default, otomatis login sebagai Admin KampusLMS agar Anda bisa
-// langsung mengakses & menguji fitur tanpa terhalang autentikasi.
-// Tersedia parameter ?role=dosen atau ?role=mahasiswa untuk menguji proteksi 403.
-Route::get('/login', function (\Illuminate\Http\Request $request) {
-    $role = $request->query('role', 'admin');
-    $user = \App\Models\User::where('role', $role)->first();
+Route::middleware('guest')->group(function () {
+    Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
+    Route::post('/login', [LoginController::class, 'login']);
 
-    if ($user) {
-        \Illuminate\Support\Facades\Auth::login($user);
-    }
+    Route::get('/forgot-password', [PasswordResetController::class, 'showForgotPasswordForm'])->name('password.request');
+    Route::post('/forgot-password', [PasswordResetController::class, 'sendResetLink'])->name('password.email');
+    Route::get('/reset-password/{token}', [PasswordResetController::class, 'showResetForm'])->name('password.reset');
+    Route::post('/reset-password', [PasswordResetController::class, 'resetPassword'])->name('password.update');
 
-    if ($role === 'dosen') {
-        return redirect()->route('dosen.courses.index');
-    }
+    // Registrasi Publik ditiadakan (Khusus Admin yang mendaftarkan melalui modul Pengguna)
+    Route::get('/register', function () {
+        return redirect()->route('login')->with('error', 'Pendaftaran akun baru hanya dapat dilakukan oleh Administrator Kampus.');
+    })->name('register');
+});
 
-    if ($role === 'mahasiswa') {
-        return redirect()->route('mahasiswa.courses.index');
-    }
-
-    return redirect()->route('admin.courses.index');
-})->name('login');
-
-Route::get('/logout', function () {
-    \Illuminate\Support\Facades\Auth::logout();
-    request()->session()->invalidate();
-    request()->session()->regenerateToken();
-    return redirect()->route('home');
-})->name('logout');
+Route::match(['get', 'post'], '/logout', [LoginController::class, 'logout'])->name('logout');
 
 
 // ══════════════════════════════════════════════════════
 // Semua route di bawah ini memerlukan login (auth)
 // ══════════════════════════════════════════════════════
 
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth:sanctum,web'])->group(function () {
 
     // ──────────────────────────────────────────────────
     // GRUP 1 — Authenticated (Semua Peran)
@@ -175,18 +171,6 @@ Route::middleware('auth')->group(function () {
             // shallow(): show/edit/update/destroy cukup /dosen/assignments/{assignment}
             Route::resource('courses.assignments', DosenAssignmentController::class)
                 ->shallow();
-
-            Route::get('courses/{course}/assignments/{assignment}', function (\App\Models\Course $course, \App\Models\Assignment $assignment) {
-                return response()->json([
-                    'status'               => 'Request masuk boskyu!',
-                    'course_di_url'        => $course->name . ' (ID: ' . $course->id . ')',
-                    'assignment_di_url'    => $assignment->title . ' (ID: ' . $assignment->id . ')',
-                    'course_id_sebenarnya' => $assignment->course_id,
-                    'keterangan'           => $course->id !== $assignment->course_id 
-                        ? 'Assignment ini bukan punyamu boskyu' 
-                        : 'Assignment milik Course ini.',
-                ]);
-            });
 
             // Submission — dosen hanya melihat, tidak membuat
             // shallow(): show cukup /dosen/submissions/{submission}

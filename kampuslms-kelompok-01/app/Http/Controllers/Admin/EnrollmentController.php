@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Course;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 
 /**
  * Admin\EnrollmentController — Kelola enrollment (pendaftaran mahasiswa ke MK).
@@ -33,7 +34,11 @@ class EnrollmentController extends Controller
      */
     public function index(Course $course)
     {
-        //
+        Gate::authorize('manageEnrollment', $course);
+
+        $students = $course->students()->latest('course_user.created_at')->paginate(15);
+
+        return response()->json($students);
     }
 
     /**
@@ -44,7 +49,7 @@ class EnrollmentController extends Controller
      */
     public function create(Course $course)
     {
-        //
+        Gate::authorize('manageEnrollment', $course);
     }
 
     /**
@@ -55,7 +60,7 @@ class EnrollmentController extends Controller
      */
     public function store(Request $request, Course $course)
     {
-        //
+        Gate::authorize('manageEnrollment', $course);
     }
 
     /**

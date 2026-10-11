@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Assignment;
 use App\Models\Submission;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 
 /**
  * Mahasiswa\SubmissionController — Mengumpulkan dan melihat tugas.
@@ -20,9 +21,7 @@ use Illuminate\Http\Request;
  * (lihat ->except(['destroy']) di routes/web.php)
  * Submission yang sudah dikumpulkan tidak boleh dihapus.
  *
- * ⚠️ IDOR SANGAT KRITIS: Mahasiswa Budi bisa ganti ID untuk
- * melihat submission mahasiswa Ani beserta nilainya.
- * → Akan dipindahkan ke Policy di minggu 7.
+ * Otorisasi menggunakan SubmissionPolicy & AssignmentPolicy via Gate::authorize.
  */
 class SubmissionController extends Controller
 {
@@ -34,7 +33,14 @@ class SubmissionController extends Controller
      */
     public function index(Assignment $assignment)
     {
-        abort_unless($assignment->course->students()->where('user_id', auth()->id())->exists(), 403);
+        Gate::authorize('view', $assignment);
+
+        $submissions = $assignment->submissions()
+            ->where('user_id', auth()->id())
+            ->with('grade')
+            ->get();
+
+        return response()->json($submissions);
     }
 
     /**
@@ -45,7 +51,7 @@ class SubmissionController extends Controller
      */
     public function create(Assignment $assignment)
     {
-        abort_unless($assignment->course->students()->where('user_id', auth()->id())->exists(), 403);
+        Gate::authorize('create', [Submission::class, $assignment]);
     }
 
     /**
@@ -56,7 +62,7 @@ class SubmissionController extends Controller
      */
     public function store(Request $request, Assignment $assignment)
     {
-        abort_unless($assignment->course->students()->where('user_id', auth()->id())->exists(), 403);
+        Gate::authorize('create', [Submission::class, $assignment]);
     }
 
     /**
@@ -67,7 +73,9 @@ class SubmissionController extends Controller
      */
     public function show(Submission $submission)
     {
-        abort_unless($submission->user_id === auth()->id(), 403);
+        Gate::authorize('view', $submission);
+
+        return response()->json($submission);
     }
 
     /**
@@ -78,7 +86,7 @@ class SubmissionController extends Controller
      */
     public function edit(Submission $submission)
     {
-        abort_unless($submission->user_id === auth()->id(), 403);
+        Gate::authorize('update', $submission);
     }
 
     /**
@@ -89,6 +97,6 @@ class SubmissionController extends Controller
      */
     public function update(Request $request, Submission $submission)
     {
-        abort_unless($submission->user_id === auth()->id(), 403);
+        Gate::authorize('update', $submission);
     }
 }

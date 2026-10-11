@@ -7,6 +7,7 @@ use App\Http\Requests\UpdateCourseRequest;
 use App\Models\Course;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 
 /**
  * CourseController — CRUD lengkap untuk modul Mata Kuliah.
@@ -72,6 +73,8 @@ class CourseController extends Controller
      */
     public function create()
     {
+        Gate::authorize('create', Course::class);
+
         $lecturers = User::where('role', 'dosen')->orderBy('name')->get();
 
         return view('courses.create', compact('lecturers'));
@@ -85,6 +88,8 @@ class CourseController extends Controller
      */
     public function store(StoreCourseRequest $request)
     {
+        Gate::authorize('create', Course::class);
+
         $validated = $request->validated();
 
         Course::create($validated);
@@ -102,6 +107,8 @@ class CourseController extends Controller
      */
     public function show(Course $course)
     {
+        Gate::authorize('view', $course);
+
         // Eager-load relasi yang dibutuhkan di halaman detail
         $course->load('lecturer', 'students');
 
@@ -115,6 +122,8 @@ class CourseController extends Controller
      */
     public function edit(Course $course)
     {
+        Gate::authorize('update', $course);
+
         $lecturers = User::where('role', 'dosen')->orderBy('name')->get();
 
         return view('courses.edit', compact('course', 'lecturers'));
@@ -129,6 +138,8 @@ class CourseController extends Controller
      */
     public function update(UpdateCourseRequest $request, Course $course)
     {
+        Gate::authorize('update', $course);
+
         $validated = $request->validated();
 
         $course->update($validated);
@@ -147,6 +158,8 @@ class CourseController extends Controller
      */
     public function destroy(Course $course)
     {
+        Gate::authorize('delete', $course);
+
         try {
             $course->delete();
 

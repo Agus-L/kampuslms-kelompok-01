@@ -5,13 +5,13 @@ namespace Tests\Feature;
 use App\Models\Assignment;
 use App\Models\Course;
 use App\Models\User;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
 
 class ApiV1FullContractTest extends TestCase
 {
-    use DatabaseTransactions;
+    use RefreshDatabase;
 
     private User $dosen1;
     private User $dosen2;

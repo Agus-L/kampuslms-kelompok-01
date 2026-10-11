@@ -56,6 +56,9 @@ Route::prefix('v1')->group(function () {
         Route::get('/assignments/{assignment}/submissions', [AssignmentSubmissionController::class, 'index']);
         Route::post('/assignments/{assignment}/submissions', [AssignmentSubmissionController::class, 'store']);
 
+        // Submission detail & IDOR check
+        Route::get('/submissions/{submission}', [AssignmentSubmissionController::class, 'show']);
+
         // Submission → Grade (upsert)
         Route::put('/submissions/{submission}/grade', [SubmissionGradeController::class, 'update']);
 

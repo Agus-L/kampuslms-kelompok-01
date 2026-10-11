@@ -44,6 +44,11 @@ class AuthController extends Controller
             'data' => [
                 'token'      => $token,
                 'token_type' => 'Bearer',
+
+                // MODEL MENTAH
+                // 'user'       => $user,
+
+                //  AMAN boskyu
                 'user'       => new UserResource($user),
             ],
         ]);
@@ -64,8 +69,14 @@ class AuthController extends Controller
     /**
      * GET /api/v1/me
      */
-    public function me(Request $request): UserResource
+    public function me(Request $request): mixed
     {
+
+        // Raw Model
+        // return response()->json($request->user()->makeVisible(['password', 'remember_token']));
+        // return response()->json($request->user());
+
+        // Secure (API Resource)
         return new UserResource($request->user());
     }
 }
