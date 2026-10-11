@@ -55,7 +55,9 @@ class CourseController extends Controller
         $user = $request->user();
 
         // Scope check — pastikan user berhak akses course ini
-        if ($user->role === 'dosen') {
+        if ($user->role === 'admin') {
+            // Admin berhak melihat detail semua mata kuliah
+        } elseif ($user->role === 'dosen') {
             abort_unless(
                 $course->lecturer_id === $user->id,
                 403,
