@@ -77,23 +77,23 @@
             {{-- ── Quick Demo Login Picker (Sangat Berguna untuk Evaluasi Dosen / Interview) ── --}}
             <div style="margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--card-border);">
                 <p style="font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700; color: var(--text-muted); text-align: center; margin-bottom: 0.85rem;">
-                    ⚡ Akses Cepat Akun Demo (Interview)
+                    Akses Cepat Akun Demo
                 </p>
                 <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem;">
                     <button type="button"
                             onclick="fillDemo('admin@kampuslms.test', 'password')"
                             style="padding: 0.5rem; background: rgba(79, 70, 229, 0.12); border: 1px solid rgba(99, 102, 241, 0.3); border-radius: 0.5rem; color: #a5b4fc; font-size: 0.78rem; font-weight: 600; cursor: pointer; text-align: center;">
-                        🔑 Admin
+                        Admin
                     </button>
                     <button type="button"
                             onclick="fillDemo('dosen@kampuslms.test', 'password')"
                             style="padding: 0.5rem; background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 0.5rem; color: #6ee7b7; font-size: 0.78rem; font-weight: 600; cursor: pointer; text-align: center;">
-                        👨‍🏫 Dosen
+                        Dosen
                     </button>
                     <button type="button"
                             onclick="fillDemo('mahasiswa@kampuslms.test', 'password')"
                             style="padding: 0.5rem; background: rgba(6, 182, 212, 0.12); border: 1px solid rgba(6, 182, 212, 0.3); border-radius: 0.5rem; color: #67e8f9; font-size: 0.78rem; font-weight: 600; cursor: pointer; text-align: center;">
-                        🎓 Mhs
+                        Mahasiswa
                     </button>
                 </div>
             </div>
