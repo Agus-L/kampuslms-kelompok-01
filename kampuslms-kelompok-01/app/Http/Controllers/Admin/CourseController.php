@@ -22,7 +22,13 @@ class CourseController extends Controller
      */
     public function index()
     {
-        //
+        $courses = Course::with('lecturer')->latest()->paginate(15);
+
+        if (request()->wantsJson()) {
+            return response()->json($courses);
+        }
+
+        return view('courses.index', compact('courses'));
     }
 
     /**
@@ -53,7 +59,14 @@ class CourseController extends Controller
      */
     public function show(Course $course)
     {
-        //
+        $course->load([
+            'lecturer',
+            'students',
+            'materials' => fn ($q) => $q->latest(),
+            'assignments' => fn ($q) => $q->latest(),
+        ]);
+
+        return view('courses.show', compact('course'));
     }
 
     /**

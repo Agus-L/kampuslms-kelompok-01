@@ -18,9 +18,11 @@
                 <a href="{{ route('admin.users.create') }}" style="display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.65rem 1.25rem; background: var(--primary); color: #ffffff; text-decoration: none; border-radius: var(--radius); font-weight: 600; font-size: 0.9rem; box-shadow: 0 4px 12px var(--primary-glow);">
                     ➕ Daftarkan Pengguna
                 </a>
+                @can('create', App\Models\Course::class)
                 <a href="{{ route('admin.courses.create') }}" style="display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.65rem 1.25rem; background: rgba(255, 255, 255, 0.08); border: 1px solid var(--card-border); color: var(--text-main); text-decoration: none; border-radius: var(--radius); font-weight: 600; font-size: 0.9rem;">
                     📚 Tambah Mata Kuliah
                 </a>
+                @endcan
             </div>
         </div>
 

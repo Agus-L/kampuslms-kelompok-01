@@ -3,18 +3,28 @@
 namespace Tests\Feature;
 
 use App\Models\User;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class RoleMiddlewareTest extends TestCase
 {
-    use DatabaseTransactions;
+    use RefreshDatabase;
 
     protected function setUp(): void
     {
         parent::setUp();
 
         $this->withoutVite();
+
+        if (! User::where('role', 'admin')->exists()) {
+            User::factory()->create(['role' => 'admin', 'password' => 'password']);
+        }
+        if (! User::where('role', 'mahasiswa')->exists()) {
+            User::factory()->create(['role' => 'mahasiswa', 'password' => 'password']);
+        }
+        if (! User::where('role', 'dosen')->exists()) {
+            User::factory()->create(['role' => 'dosen', 'password' => 'password']);
+        }
     }
 
     public function test_guest_is_redirected_to_login_when_accessing_admin_courses(): void
@@ -24,11 +34,16 @@ class RoleMiddlewareTest extends TestCase
         $response->assertRedirect('/login');
     }
 
-    public function test_login_route_authenticates_admin_by_default(): void
+    public function test_login_authenticates_admin_successfully(): void
     {
-        $response = $this->get('/login');
+        $admin = User::where('role', 'admin')->first();
 
-        $response->assertRedirect('/admin/courses');
+        $response = $this->post('/login', [
+            'login'    => $admin->email,
+            'password' => 'password',
+        ]);
+
+        $response->assertRedirect('/dashboard');
         $this->assertAuthenticated();
         $this->assertEquals('admin', auth()->user()->role);
     }

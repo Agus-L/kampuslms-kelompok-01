@@ -26,6 +26,8 @@ class NotificationController extends Controller
      */
     public function update(Request $request, DatabaseNotification $notification)
     {
+        abort_unless($notification->notifiable_id === $request->user()->id, 403, 'Akses ditolak: notifikasi bukan milik Anda.');
+
         $notification->markAsRead();
 
         return back()->with('success', 'Notifikasi ditandai sudah dibaca.');

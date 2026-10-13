@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Mahasiswa;
 use App\Http\Controllers\Controller;
 use App\Models\Course;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 
 /**
  * Mahasiswa\CourseController — Melihat MK yang diikuti.
@@ -16,9 +17,7 @@ use Illuminate\Http\Request;
  * (lihat ->only(['index', 'show']) di routes/web.php)
  * Mahasiswa hanya melihat MK yang dia ikuti, tidak bisa CRUD.
  *
- * ⚠️ IDOR TINGGI: Controller harus memfilter hanya MK yang
- * di-enroll oleh mahasiswa yang sedang login.
- * → Akan dipindahkan ke Policy di minggu 7.
+ * Otorisasi menggunakan CoursePolicy via Gate::authorize.
  */
 class CourseController extends Controller
 {
@@ -27,9 +26,27 @@ class CourseController extends Controller
      *
      * Route: GET /mahasiswa/courses → mahasiswa.courses.index
      */
-    public function index()
+    public function index(Request $request)
     {
-        //
+        $courses = $request->user()->courses()
+            ->with('lecturer')
+            ->withCount(['materials', 'assignments'])
+            ->when($request->filled('q'), fn ($query) =>
+                $query->where(function ($q) use ($request) {
+                    $q->where('name', 'like', '%' . $request->q . '%')
+                      ->orWhere('code', 'like', '%' . $request->q . '%');
+                }))
+            ->when($request->filled('status'), fn ($query) =>
+                $query->where('status', $request->status))
+            ->latest()
+            ->paginate(15)
+            ->withQueryString();
+
+        if ($request->wantsJson()) {
+            return response()->json($courses);
+        }
+
+        return view('courses.index', compact('courses'));
     }
 
     /**
@@ -38,8 +55,25 @@ class CourseController extends Controller
      * Route: GET /mahasiswa/courses/{course} → mahasiswa.courses.show
      * Route model binding: {course} → Course $course
      */
-    public function show(Course $course)
+    public function show(Request $request, Course $course)
     {
-        abort_unless($course->students()->where('user_id', auth()->id())->exists(), 403);
+        Gate::authorize('view', $course);
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'mahasiswa_login' => auth()->user()->name,
+                'mata_kuliah'     => $course->name,
+                'pengampu'        => $course->lecturer->name ?? '-',
+            ]);
+        }
+
+        $course->load([
+            'lecturer',
+            'students',
+            'materials' => fn ($q) => $q->latest(),
+            'assignments' => fn ($q) => $q->latest(),
+        ]);
+
+        return view('courses.show', compact('course'));
     }
 }

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Assignment;
 use App\Models\Submission;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 
 /**
  * Dosen\SubmissionController — Melihat submission mahasiswa.
@@ -20,9 +21,7 @@ use Illuminate\Http\Request;
  * (lihat ->only(['index', 'show']) di routes/web.php)
  * Dosen tidak membuat submission — itu hak mahasiswa.
  *
- * ⚠️ IDOR TINGGI: Dosen A jangan bisa melihat submission
- * di MK dosen B. Perlu cek kepemilikan.
- * → Akan dipindahkan ke Policy di minggu 7.
+ * Otorisasi menggunakan SubmissionPolicy & AssignmentPolicy via Gate::authorize.
  */
 class SubmissionController extends Controller
 {
@@ -34,7 +33,14 @@ class SubmissionController extends Controller
      */
     public function index(Assignment $assignment)
     {
-        abort_unless($assignment->course->lecturer_id === auth()->id(), 403);
+        Gate::authorize('view', $assignment);
+
+        $submissions = $assignment->submissions()
+            ->with(['user', 'grade'])
+            ->latest('submitted_at')
+            ->paginate(20);
+
+        return response()->json($submissions);
     }
 
     /**
@@ -45,6 +51,8 @@ class SubmissionController extends Controller
      */
     public function show(Submission $submission)
     {
-        abort_unless($submission->assignment->course->lecturer_id === auth()->id(), 403);
+        Gate::authorize('view', $submission);
+
+        return response()->json($submission);
     }
 }

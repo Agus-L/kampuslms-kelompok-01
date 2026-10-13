@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Course;
 use App\Models\Material;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 
 /**
  * Mahasiswa\MaterialController — Melihat materi kuliah.
@@ -20,21 +21,27 @@ use Illuminate\Http\Request;
  * (lihat ->only(['index', 'show']) di routes/web.php)
  * Mahasiswa hanya baca materi, tidak bisa CRUD.
  *
- * ⚠️ IDOR TINGGI: Mahasiswa bisa mengakses materi MK yang
- * tidak dia ikuti dengan mengganti ID di URL.
- * → Akan dipindahkan ke Policy di minggu 7.
+ * Otorisasi menggunakan MaterialPolicy & CoursePolicy via Gate::authorize.
  */
 class MaterialController extends Controller
 {
     /**
-     * Daftar materi dalam satu mata kuliah.
+     * Daftar materi dalam satu mata kuliah yang diikuti.
      *
      * Route: GET /mahasiswa/courses/{course}/materials → mahasiswa.courses.materials.index
      * Route model binding: {course} → Course $course
      */
-    public function index(Course $course)
+    public function index(Request $request, Course $course)
     {
-        abort_unless($course->students()->where('user_id', auth()->id())->exists(), 403);
+        Gate::authorize('view', $course);
+
+        $materials = $course->materials()->latest()->paginate(15);
+
+        if ($request->wantsJson()) {
+            return response()->json($materials);
+        }
+
+        return view('materials.index', compact('course', 'materials'));
     }
 
     /**
@@ -43,8 +50,16 @@ class MaterialController extends Controller
      * Route: GET /mahasiswa/materials/{material} → mahasiswa.materials.show
      * Route model binding: {material} → Material $material
      */
-    public function show(Material $material)
+    public function show(Request $request, Material $material)
     {
-        abort_unless($material->course->students()->where('user_id', auth()->id())->exists(), 403);
+        Gate::authorize('view', $material);
+
+        $material->load('course');
+
+        if ($request->wantsJson()) {
+            return response()->json($material);
+        }
+
+        return view('materials.show', compact('material'));
     }
 }

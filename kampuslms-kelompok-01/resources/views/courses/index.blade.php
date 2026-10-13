@@ -33,9 +33,11 @@
                 </p>
             </div>
             {{-- Tombol Tambah MK --}}
+            @can('create', App\Models\Course::class)
             <a href="{{ route('admin.courses.create') }}" class="btn btn-create">
                 + Tambah Mata Kuliah
             </a>
+            @endcan
         </div>
     </div>
 
@@ -49,8 +51,16 @@
          → Sesuai prinsip modul 4.1: "filter dan pencarian ke query string,
            jangan ke session."
     ══════════════════════════════════════════════════════ --}}
+    @php
+        $role = auth()->user()->role ?? 'guest';
+        $courseIndexRoute = match($role) {
+            'dosen' => route('dosen.courses.index'),
+            'mahasiswa' => route('mahasiswa.courses.index'),
+            default => route('admin.courses.index'),
+        };
+    @endphp
     <div class="search-filter-bar">
-        <form method="GET" action="{{ route('admin.courses.index') }}" class="search-filter-form">
+        <form method="GET" action="{{ $courseIndexRoute }}" class="search-filter-form">
             {{-- Input Pencarian --}}
             <div class="search-input-wrapper">
                 <span class="search-icon">🔍</span>
@@ -79,7 +89,7 @@
 
             {{-- Tombol Reset — hanya tampil jika ada filter aktif --}}
             @if (request('q') || request('status'))
-                <a href="{{ route('admin.courses.index') }}" class="btn btn-reset" title="Hapus semua filter">
+                <a href="{{ $courseIndexRoute }}" class="btn btn-reset" title="Hapus semua filter">
                     ✕ Reset
                 </a>
             @endif
@@ -143,43 +153,70 @@
                     👤 {{ $course->lecturer->name ?? 'Belum ditentukan' }}
                 </p>
 
-                {{-- Meta info: SKS --}}
-                <div class="course-meta">
+                {{-- Meta info: SKS & Count --}}
+                <div class="course-meta" style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
                     <span class="course-meta-item">
                         ⏱ <span class="course-meta-value">{{ $course->sks }}</span> SKS
                     </span>
+                    @if(isset($course->materials_count))
+                    <span class="course-meta-item">
+                        📑 <span class="course-meta-value">{{ $course->materials_count }}</span> Materi
+                    </span>
+                    @endif
+                    @if(isset($course->assignments_count))
+                    <span class="course-meta-item">
+                        📝 <span class="course-meta-value">{{ $course->assignments_count }}</span> Tugas
+                    </span>
+                    @endif
                 </div>
 
                 {{-- Tombol Aksi --}}
+                @php
+                    $showRoute = match($role) {
+                        'dosen' => route('dosen.courses.show', $course),
+                        'mahasiswa' => route('mahasiswa.courses.show', $course),
+                        default => route('admin.courses.show', $course),
+                    };
+                @endphp
                 <div class="course-actions">
-                    <a href="{{ route('admin.courses.show', $course) }}" class="course-link">
+                    <a href="{{ $showRoute }}" class="course-link">
                         Lihat Detail
                         <span class="course-link-arrow">→</span>
                     </a>
-                    <div class="course-actions-secondary">
-                        <a href="{{ route('admin.courses.edit', $course) }}" class="btn btn-edit" title="Edit">
-                            ✏️ Edit
-                        </a>
-                        <button type="button" class="btn btn-delete" title="Hapus"
-                                data-modal-target="delete-course-{{ $course->id }}">
-                            🗑️ Hapus
-                        </button>
-                        <x-delete-modal
-                            id="delete-course-{{ $course->id }}"
-                            :action="route('admin.courses.destroy', $course)"
-                            :itemName="$course->name"
-                        />
-                    </div>
+                    @if($role === 'admin')
+                        <div class="course-actions-secondary">
+                            @can('update', $course)
+                            <a href="{{ route('admin.courses.edit', $course) }}" class="btn btn-edit" title="Edit">
+                                ✏️ Edit
+                            </a>
+                            @endcan
+                            @can('delete', $course)
+                            <button type="button" class="btn btn-delete" title="Hapus"
+                                    data-modal-target="delete-course-{{ $course->id }}">
+                                🗑️ Hapus
+                            </button>
+                            <x-delete-modal
+                                id="delete-course-{{ $course->id }}"
+                                :action="route('admin.courses.destroy', $course)"
+                                :itemName="$course->name"
+                            />
+                            @endcan
+                        </div>
+                    @endif
                 </div>
             </div>
         @empty
             <div class="empty-state">
                 @if (request('q') || request('status'))
                     <p>📭 Tidak ada mata kuliah yang cocok dengan pencarian/filter Anda.
-                        <a href="{{ route('admin.courses.index') }}">Tampilkan semua</a>.
+                        <a href="{{ $courseIndexRoute }}">Tampilkan semua</a>.
                     </p>
                 @else
-                    <p>📭 Belum ada mata kuliah. <a href="{{ route('admin.courses.create') }}">Tambah sekarang</a>.</p>
+                    <p>📭 Belum ada mata kuliah.
+                        @if($role === 'admin')
+                            <a href="{{ route('admin.courses.create') }}">Tambah sekarang</a>.
+                        @endif
+                    </p>
                 @endif
             </div>
         @endforelse
