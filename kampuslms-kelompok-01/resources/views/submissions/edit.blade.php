@@ -48,7 +48,7 @@
                             style="width: 100%; padding: 0.75rem; background: var(--bg); border: 1px dashed var(--card-border, #334155);"
                         >
                         <p style="font-size: 0.8rem; color: var(--text-muted, #94a3b8); margin-top: 0.35rem;">
-                            Format yang didukung: PDF, DOCX, ZIP, RAR, XLS, PPTX, gambar (Maks. 20 MB).
+                            Format yang didukung: PDF, DOC, DOCX (Maks. 5 MB).
                         </p>
                         @error('file')
                             <div style="color: #f87171; font-size: 0.82rem; margin-top: 0.25rem;">{{ $message }}</div>

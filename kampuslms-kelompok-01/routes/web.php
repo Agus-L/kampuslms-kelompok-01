@@ -183,6 +183,10 @@ Route::middleware(['auth:sanctum,web'])->group(function () {
                 ->shallow()
                 ->only(['index', 'show']);
 
+            // Download berkas submission — endpoint terpisah agar semantik dan mudah di-Policy
+            Route::get('submissions/{submission}/download', [DosenSubmissionController::class, 'download'])
+                ->name('submissions.download');
+
             // Nilai — dosen membuat dan memperbarui nilai
             // shallow(): update cukup /dosen/grades/{grade}
             Route::resource('submissions.grades', DosenGradeController::class)
@@ -234,6 +238,10 @@ Route::middleware(['auth:sanctum,web'])->group(function () {
             Route::resource('assignments.submissions', MahasiswaSubmissionController::class)
                 ->shallow()
                 ->except(['destroy']);
+
+            // Download berkas submission — endpoint terpisah dengan otorisasi Policy
+            Route::get('submissions/{submission}/download', [MahasiswaSubmissionController::class, 'download'])
+                ->name('submissions.download');
 
             // Nilai — mahasiswa hanya melihat nilai sendiri
             Route::resource('submissions.grades', MahasiswaGradeController::class)
