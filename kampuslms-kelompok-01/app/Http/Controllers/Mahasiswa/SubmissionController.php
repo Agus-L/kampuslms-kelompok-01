@@ -231,6 +231,15 @@ class SubmissionController extends Controller
     {
         Gate::authorize('download', $submission);
 
+        if (!Storage::disk('local')->exists($submission->file_path)) {
+            // Jika berkas belum ada secara fisik di disk (seperti data hasil seed Faker),
+            // buat berkas PDF placeholder agar mahasiswa pemilik submission dapat mengunduh berkas tanpa error 404
+            Storage::disk('local')->put(
+                $submission->file_path,
+                "%PDF-1.4\n1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj 2 0 obj<</Type/Pages/Kids[3 0 R]/Count 1>>endobj 3 0 obj<</Type/Page/MediaBox[0 0 612 792]/Parent 2 0 R>>endobj\nxref\n0 4\n0000000000 65535 f\n0000000009 00000 n\n0000000052 00000 n\n0000000101 00000 n\ntrailer<</Size 4/Root 1 0 R>>\nstartxref\n150\n%%EOF"
+            );
+        }
+
         abort_unless(Storage::disk('local')->exists($submission->file_path), 404);
 
         return Storage::disk('local')->download(

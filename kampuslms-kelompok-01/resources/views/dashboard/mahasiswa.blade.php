@@ -90,7 +90,9 @@
                             <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.4rem;">
                                 <div>
                                     <div style="font-weight: 700; color: var(--text-main); font-size: 0.95rem;">
-                                        {{ $assign->title }}
+                                        <a href="{{ route('mahasiswa.assignments.show', $assign) }}" style="color: var(--text-main); text-decoration: none;" onmouseover="this.style.color='#818cf8'" onmouseout="this.style.color='var(--text-main)'">
+                                            {{ $assign->title }}
+                                        </a>
                                     </div>
                                     <div style="font-size: 0.8rem; color: var(--text-muted);">
                                         {{ $assign->course->name ?? '' }} · Tenggat: {{ $assign->due_at ? $assign->due_at->format('d M Y, H:i') : 'Tanpa batas' }}
@@ -108,19 +110,22 @@
                                 @endif
                             </div>
 
-                            <div style="display: flex; justify-content: flex-end; margin-top: 0.75rem;">
+                            <div style="display: flex; justify-content: flex-end; align-items: center; gap: 0.6rem; margin-top: 0.75rem;">
                                 @if ($sub)
-                                    @can('view', $sub)
                                     <a href="{{ route('mahasiswa.submissions.show', $sub) }}"
                                        style="font-size: 0.8rem; color: var(--primary-light); text-decoration: none; font-weight: 600;">
                                         Lihat Lembar Tugas →
                                     </a>
-                                    @endcan
                                 @else
                                     @can('create', [\App\Models\Submission::class, $assign])
                                     <a href="{{ route('mahasiswa.assignments.submissions.create', $assign) }}"
                                        style="padding: 0.35rem 0.85rem; background: var(--primary); color: #ffffff; text-decoration: none; border-radius: 0.375rem; font-size: 0.8rem; font-weight: 600;">
                                         Kumpulkan Sekarang
+                                    </a>
+                                    @else
+                                    <a href="{{ route('mahasiswa.assignments.show', $assign) }}"
+                                       style="padding: 0.35rem 0.85rem; background: rgba(255, 255, 255, 0.08); color: var(--text-muted); text-decoration: none; border-radius: 0.375rem; font-size: 0.8rem; font-weight: 600;">
+                                        Lihat Detail Tugas →
                                     </a>
                                     @endcan
                                 @endif
