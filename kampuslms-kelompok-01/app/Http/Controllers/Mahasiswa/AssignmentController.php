@@ -35,11 +35,10 @@ class AssignmentController extends Controller
     {
         Gate::authorize('view', $course);
 
-        $assignments = $course->assignments()->latest()->paginate(15);
-
-        if ($request->wantsJson()) {
-            return response()->json($assignments);
-        }
+        $assignments = $course->assignments()
+            ->where('status', 'published')
+            ->latest()
+            ->paginate(15);
 
         return view('assignments.index', compact('course', 'assignments'));
     }
@@ -60,10 +59,6 @@ class AssignmentController extends Controller
                 $query->where('user_id', auth()->id())->with('grade');
             },
         ]);
-
-        if ($request->wantsJson()) {
-            return response()->json($assignment);
-        }
 
         return view('assignments.show', compact('assignment'));
     }

@@ -48,7 +48,10 @@ class CourseAssignmentController extends Controller
         // Query assignments dengan filter opsional
         $query = $course->assignments()
             ->withCount('submissions')
-            ->when($request->filled('status'), function ($q) use ($request) {
+            ->when($user->role === 'mahasiswa', function ($q) {
+                $q->where('status', 'published');
+            })
+            ->when($user->role !== 'mahasiswa' && $request->filled('status'), function ($q) use ($request) {
                 $q->where('status', $request->query('status'));
             })
             ->latest();

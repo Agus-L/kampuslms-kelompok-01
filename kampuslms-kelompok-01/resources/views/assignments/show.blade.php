@@ -26,7 +26,7 @@
                         {{ $assignment->title }}
                     </h1>
                     <div style="display: flex; gap: 1rem; font-size: 0.85rem; color: var(--text-muted, #94a3b8); margin-top: 0.5rem;">
-                        <span>⏰ Deadline: <strong style="color: #f87171;">{{ $assignment->due_at->format('d F Y, H:i') }}</strong></span>
+                        <span>⏰ Deadline: <strong style="color: #f87171;">{{ $assignment->due_at->format('d F Y, H:i') }} WITA</strong></span>
                         <span>•</span>
                         <span>🎯 Skor Maks: <strong>{{ $assignment->max_score }}</strong></span>
                         <span>•</span>

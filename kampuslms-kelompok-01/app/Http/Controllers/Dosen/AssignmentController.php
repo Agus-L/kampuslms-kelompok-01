@@ -38,10 +38,6 @@ class AssignmentController extends Controller
 
         $assignments = $course->assignments()->latest()->paginate(15);
 
-        if ($request->wantsJson()) {
-            return response()->json($assignments);
-        }
-
         return view('assignments.index', compact('course', 'assignments'));
     }
 
@@ -54,10 +50,6 @@ class AssignmentController extends Controller
     public function create(Request $request, Course $course)
     {
         Gate::authorize('create', [Assignment::class, $course]);
-
-        if ($request->wantsJson()) {
-            return response()->json(['course' => $course]);
-        }
 
         return view('assignments.create', compact('course'));
     }
@@ -88,13 +80,6 @@ class AssignmentController extends Controller
 
         $assignment->save();
 
-        if ($request->wantsJson()) {
-            return response()->json([
-                'message'    => 'Tugas berhasil dibuat.',
-                'assignment' => $assignment,
-            ], 201);
-        }
-
         return redirect()->route('dosen.courses.assignments.index', $course)
             ->with('success', 'Tugas berhasil dibuat.');
     }
@@ -111,10 +96,6 @@ class AssignmentController extends Controller
 
         $assignment->load(['course', 'submissions.student']);
 
-        if ($request->wantsJson()) {
-            return response()->json($assignment);
-        }
-
         return view('assignments.show', compact('assignment'));
     }
 
@@ -129,10 +110,6 @@ class AssignmentController extends Controller
         Gate::authorize('update', $assignment);
 
         $assignment->load('course');
-
-        if ($request->wantsJson()) {
-            return response()->json($assignment);
-        }
 
         return view('assignments.edit', compact('assignment'));
     }
@@ -155,13 +132,6 @@ class AssignmentController extends Controller
 
         $assignment->update($data);
 
-        if ($request->wantsJson()) {
-            return response()->json([
-                'message'    => 'Tugas berhasil diperbarui.',
-                'assignment' => $assignment,
-            ]);
-        }
-
         return redirect()->route('dosen.courses.assignments.index', $assignment->course_id)
             ->with('success', 'Tugas berhasil diperbarui.');
     }
@@ -178,12 +148,6 @@ class AssignmentController extends Controller
 
         $course = $assignment->course;
         $assignment->delete();
-
-        if ($request->wantsJson()) {
-            return response()->json([
-                'message' => 'Tugas berhasil dihapus.',
-            ], 200);
-        }
 
         return redirect()->route('dosen.courses.assignments.index', $course)
             ->with('success', 'Tugas berhasil dihapus.');

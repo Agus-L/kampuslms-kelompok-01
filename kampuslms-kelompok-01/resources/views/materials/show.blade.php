@@ -26,7 +26,7 @@
                         {{ $material->title }}
                     </h1>
                     <p style="color: var(--text-muted, #94a3b8); font-size: 0.85rem; margin: 0;">
-                        🕒 Diunggah pada: {{ $material->created_at->format('d F Y, H:i') }}
+                        🕒 Diunggah pada: {{ $material->created_at->format('d F Y, H:i') }} WITA
                     </p>
                 </div>
 

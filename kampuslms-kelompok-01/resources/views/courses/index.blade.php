@@ -78,8 +78,10 @@
             <select name="status" class="filter-select" aria-label="Filter berdasarkan status">
                 <option value="">Semua Status</option>
                 <option value="active" {{ request('status') === 'active' ? 'selected' : '' }}>Active</option>
-                <option value="draft" {{ request('status') === 'draft' ? 'selected' : '' }}>Draft</option>
-                <option value="archived" {{ request('status') === 'archived' ? 'selected' : '' }}>Archived</option>
+                @if($role !== 'mahasiswa')
+                    <option value="draft" {{ request('status') === 'draft' ? 'selected' : '' }}>Draft</option>
+                    <option value="archived" {{ request('status') === 'archived' ? 'selected' : '' }}>Archived</option>
+                @endif
             </select>
 
             {{-- Tombol Cari --}}
@@ -124,11 +126,13 @@
             <span class="stat-value">{{ $courses->where('status', 'active')->count() }}</span>
             <span class="stat-label">Aktif</span>
         </div>
+        @if($role !== 'mahasiswa')
         <div class="stat-item">
             <span class="stat-icon">📝</span>
             <span class="stat-value">{{ $courses->where('status', 'draft')->count() }}</span>
             <span class="stat-label">Draft</span>
         </div>
+        @endif
     </div>
 
     {{-- ── Grid Kartu Mata Kuliah ── --}}

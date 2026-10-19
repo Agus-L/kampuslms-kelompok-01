@@ -30,7 +30,7 @@ class CourseController extends Controller
     {
         $courses = $request->user()->courses()
             ->with('lecturer')
-            ->withCount(['materials', 'assignments'])
+            ->withCount(['materials', 'assignments' => fn ($q) => $q->where('status', 'published')])
             ->when($request->filled('q'), fn ($query) =>
                 $query->where(function ($q) use ($request) {
                     $q->where('name', 'like', '%' . $request->q . '%')
@@ -41,10 +41,6 @@ class CourseController extends Controller
             ->latest()
             ->paginate(15)
             ->withQueryString();
-
-        if ($request->wantsJson()) {
-            return response()->json($courses);
-        }
 
         return view('courses.index', compact('courses'));
     }
@@ -59,19 +55,11 @@ class CourseController extends Controller
     {
         Gate::authorize('view', $course);
 
-        if ($request->wantsJson()) {
-            return response()->json([
-                'mahasiswa_login' => auth()->user()->name,
-                'mata_kuliah'     => $course->name,
-                'pengampu'        => $course->lecturer->name ?? '-',
-            ]);
-        }
-
         $course->load([
             'lecturer',
             'students',
             'materials' => fn ($q) => $q->latest(),
-            'assignments' => fn ($q) => $q->latest(),
+            'assignments' => fn ($q) => $q->where('status', 'published')->latest(),
         ]);
 
         return view('courses.show', compact('course'));

@@ -37,10 +37,6 @@ class MaterialController extends Controller
 
         $materials = $course->materials()->latest()->paginate(15);
 
-        if ($request->wantsJson()) {
-            return response()->json($materials);
-        }
-
         return view('materials.index', compact('course', 'materials'));
     }
 
@@ -55,10 +51,6 @@ class MaterialController extends Controller
         Gate::authorize('view', $material);
 
         $material->load('course');
-
-        if ($request->wantsJson()) {
-            return response()->json($material);
-        }
 
         return view('materials.show', compact('material'));
     }

@@ -78,6 +78,13 @@
             <div class="info-card-icon">👥</div>
             <div class="info-card-label">Mahasiswa Terdaftar</div>
             <div class="info-card-value">{{ $course->students->count() }} Orang</div>
+            @can('manageEnrollment', $course)
+                <div style="margin-top: 0.35rem;">
+                    <a href="#mahasiswa-terdaftar" style="font-size: 0.78rem; color: var(--primary-light); font-weight: 600; text-decoration: underline;">
+                        Kelola Mahasiswa ↓
+                    </a>
+                </div>
+            @endcan
         </div>
         <div class="info-card">
             <div class="info-card-icon">📋</div>
@@ -176,13 +183,18 @@
     </div>
 
     {{-- ── Modul Penugasan ── --}}
+    @php
+        $assignmentsList = $role === 'mahasiswa'
+            ? $course->assignments->where('status', 'published')
+            : $course->assignments;
+    @endphp
     <div style="background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 1rem; padding: 1.5rem; margin-top: 1.5rem;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
             <div>
                 <h2 style="font-size: 1.3rem; font-weight: 700; color: var(--text-main); margin: 0 0 0.25rem 0;">
                     📝 Daftar Penugasan
                     <span style="font-size: 0.85rem; font-weight: 600; padding: 0.15rem 0.55rem; background: rgba(99, 102, 241, 0.15); color: var(--primary-light); border-radius: 9999px;">
-                        {{ $course->assignments->count() }}
+                        {{ $assignmentsList->count() }}
                     </span>
                 </h2>
                 <p style="font-size: 0.85rem; color: var(--text-muted); margin: 0;">
@@ -202,7 +214,7 @@
             </div>
         </div>
 
-        @if ($course->assignments->isEmpty())
+        @if ($assignmentsList->isEmpty())
             <div style="text-align: center; padding: 2.5rem 1rem; background: var(--bg); border: 1px dashed var(--card-border); border-radius: 0.75rem; color: var(--text-muted);">
                 <div style="font-size: 2rem; margin-bottom: 0.35rem;">📋</div>
                 <p style="margin: 0; font-size: 0.95rem;">Belum ada penugasan yang diberikan untuk kelas ini.</p>
@@ -214,19 +226,21 @@
             </div>
         @else
             <div style="display: grid; gap: 0.75rem;">
-                @foreach ($course->assignments->take(5) as $assignment)
+                @foreach ($assignmentsList->take(5) as $assignment)
                     <div style="background: var(--bg); border: 1px solid var(--card-border); border-radius: 0.65rem; padding: 1rem 1.25rem; display: flex; justify-content: space-between; align-items: center;">
                         <div>
                             <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem;">
                                 <h3 style="font-size: 0.98rem; font-weight: 700; color: var(--text-main); margin: 0;">
                                     {{ $assignment->title }}
                                 </h3>
-                                <span style="font-size: 0.7rem; padding: 0.1rem 0.45rem; border-radius: 9999px; background: rgba(34, 197, 94, 0.15); color: #22c55e; font-weight: 600;">
+                                @if($role !== 'mahasiswa')
+                                <span style="font-size: 0.7rem; padding: 0.1rem 0.45rem; border-radius: 9999px; background: {{ $assignment->status === 'published' ? 'rgba(34, 197, 94, 0.15)' : 'rgba(234, 179, 8, 0.15)' }}; color: {{ $assignment->status === 'published' ? '#22c55e' : '#eab308' }}; font-weight: 600;">
                                     {{ ucfirst($assignment->status) }}
                                 </span>
+                                @endif
                             </div>
                             <div style="font-size: 0.82rem; color: var(--text-muted); display: flex; gap: 1rem; align-items: center;">
-                                <span>📅 Tenggat: <strong>{{ $assignment->due_at ? $assignment->due_at->format('d M Y, H:i') : 'Tanpa batas waktu' }}</strong></span>
+                                <span>📅 Tenggat: <strong>{{ $assignment->due_at ? $assignment->due_at->format('d M Y, H:i') . ' WITA' : 'Tanpa batas waktu' }}</strong></span>
                                 <span>🎯 Nilai Max: <strong>{{ $assignment->max_score }}</strong></span>
                             </div>
                         </div>
@@ -244,15 +258,22 @@
                     </div>
                 @endforeach
             </div>
-            @if ($course->assignments->count() > 5)
+            @if ($assignmentsList->count() > 5)
                 <div style="text-align: center; margin-top: 1rem;">
                     <a href="{{ route($role . '.courses.assignments.index', $course) }}" style="color: var(--primary-light); font-size: 0.88rem; font-weight: 600;">
-                        Lihat {{ $course->assignments->count() - 5 }} tugas lainnya →
+                        Lihat {{ $assignmentsList->count() - 5 }} tugas lainnya →
                     </a>
                 </div>
             @endif
         @endif
     </div>
+
+    {{-- ── Modul Mahasiswa Terdaftar (Peserta Kelas) ── --}}
+    @can('manageEnrollment', $course)
+    <div id="mahasiswa-terdaftar" style="margin-top: 1.5rem;">
+        <livewire:courses.enrollment-manager :course="$course" />
+    </div>
+    @endcan
 
     {{-- ── Tombol Kembali ── --}}
     <div style="margin-top: 2rem;">

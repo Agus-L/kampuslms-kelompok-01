@@ -30,10 +30,6 @@ class CourseController extends Controller
             ->paginate(15)
             ->withQueryString();
 
-        if ($request->wantsJson()) {
-            return response()->json($courses);
-        }
-
         return view('courses.index', compact('courses'));
     }
 
@@ -46,14 +42,6 @@ class CourseController extends Controller
     public function show(Request $request, Course $course)
     {
         Gate::authorize('view', $course);
-
-        if ($request->wantsJson()) {
-            return response()->json([
-                'dosen_login' => auth()->user()->name,
-                'mata_kuliah' => $course->name,
-                'pengampu'    => $course->lecturer->name,
-            ]);
-        }
 
         $course->load([
             'lecturer',

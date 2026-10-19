@@ -38,10 +38,6 @@ class MaterialController extends Controller
 
         $materials = $course->materials()->latest()->paginate(15);
 
-        if ($request->wantsJson()) {
-            return response()->json($materials);
-        }
-
         return view('materials.index', compact('course', 'materials'));
     }
 
@@ -54,10 +50,6 @@ class MaterialController extends Controller
     public function create(Request $request, Course $course)
     {
         Gate::authorize('create', [Material::class, $course]);
-
-        if ($request->wantsJson()) {
-            return response()->json(['course' => $course]);
-        }
 
         return view('materials.create', compact('course'));
     }
@@ -88,13 +80,6 @@ class MaterialController extends Controller
 
         $material->save();
 
-        if ($request->wantsJson()) {
-            return response()->json([
-                'message'  => 'Materi berhasil ditambahkan.',
-                'material' => $material,
-            ], 201);
-        }
-
         return redirect()->route('dosen.courses.materials.index', $course)
             ->with('success', 'Materi berhasil ditambahkan.');
     }
@@ -111,10 +96,6 @@ class MaterialController extends Controller
 
         $material->load('course');
 
-        if ($request->wantsJson()) {
-            return response()->json($material);
-        }
-
         return view('materials.show', compact('material'));
     }
 
@@ -129,10 +110,6 @@ class MaterialController extends Controller
         Gate::authorize('update', $material);
 
         $material->load('course');
-
-        if ($request->wantsJson()) {
-            return response()->json($material);
-        }
 
         return view('materials.edit', compact('material'));
     }
@@ -151,13 +128,6 @@ class MaterialController extends Controller
         $data['description'] = $data['description'] ?? '';
         $material->update($data);
 
-        if ($request->wantsJson()) {
-            return response()->json([
-                'message'  => 'Materi berhasil diperbarui.',
-                'material' => $material,
-            ]);
-        }
-
         return redirect()->route('dosen.courses.materials.index', $material->course_id)
             ->with('success', 'Materi berhasil diperbarui.');
     }
@@ -174,12 +144,6 @@ class MaterialController extends Controller
 
         $course = $material->course;
         $material->delete();
-
-        if ($request->wantsJson()) {
-            return response()->json([
-                'message' => 'Materi berhasil dihapus.',
-            ], 200);
-        }
 
         return redirect()->route('dosen.courses.materials.index', $course)
             ->with('success', 'Materi berhasil dihapus.');
