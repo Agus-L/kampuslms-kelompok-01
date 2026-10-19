@@ -168,6 +168,10 @@ Route::middleware(['auth:sanctum,web'])->group(function () {
             Route::resource('courses.materials', DosenMaterialController::class)
                 ->shallow();
 
+            // Download berkas materi — endpoint terpisah agar semantik dan mudah di-Policy
+            Route::get('materials/{material}/download', [DosenMaterialController::class, 'download'])
+                ->name('materials.download');
+
             // Tugas — CRUD, bersarang di bawah course
             // shallow(): show/edit/update/destroy cukup /dosen/assignments/{assignment}
             Route::resource('courses.assignments', DosenAssignmentController::class)
@@ -216,6 +220,10 @@ Route::middleware(['auth:sanctum,web'])->group(function () {
             Route::resource('courses.materials', MahasiswaMaterialController::class)
                 ->shallow()
                 ->only(['index', 'show']);
+
+            // Download berkas materi — endpoint terpisah dengan otorisasi Policy
+            Route::get('materials/{material}/download', [MahasiswaMaterialController::class, 'download'])
+                ->name('materials.download');
 
             // Tugas — read-only
             Route::resource('courses.assignments', MahasiswaAssignmentController::class)

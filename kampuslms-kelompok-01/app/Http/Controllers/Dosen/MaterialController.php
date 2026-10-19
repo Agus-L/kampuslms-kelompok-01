@@ -9,6 +9,7 @@ use App\Models\Course;
 use App\Models\Material;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Storage;
 
 /**
  * Dosen\MaterialController — CRUD materi kuliah oleh Dosen.
@@ -23,6 +24,11 @@ use Illuminate\Support\Facades\Gate;
  * benar-benar milik {course} tersebut pada route bersarang.
  *
  * Otorisasi menggunakan MaterialPolicy & CoursePolicy via Gate::authorize.
+ *
+ * Penyimpanan berkas (Minggu 9):
+ * - Berkas disimpan di disk `local` (storage/app/private/materials/courses/{course_id}/)
+ * - Nama berkas fisik menggunakan hash acak; nama asli disimpan di kolom `original_name`
+ * - Berkas TIDAK disimpan di storage/app/public untuk mencegah akses langsung tanpa otorisasi
  */
 class MaterialController extends Controller
 {
@@ -55,10 +61,16 @@ class MaterialController extends Controller
     }
 
     /**
-     * Simpan materi baru ke database.
+     * Simpan materi baru ke database beserta berkas fisiknya.
      *
      * Route: POST /dosen/courses/{course}/materials → dosen.courses.materials.store
      * Route model binding: {course} → Course $course
+     *
+     * Alur penyimpanan berkas:
+     * 1. Validasi mimes (pdf, pptx, doc, docx) dan ukuran (max 20 MB) di StoreMaterialRequest
+     * 2. Simpan berkas ke disk `local` dengan nama acak (hashName) di folder materials/courses/{id}/
+     * 3. Simpan nama asli (getClientOriginalName) ke kolom `original_name` agar pengguna
+     *    melihat nama yang familiar saat mengunduh
      */
     public function store(StoreMaterialRequest $request, Course $course)
     {
@@ -70,12 +82,30 @@ class MaterialController extends Controller
         $material->course_id = $course->id;
         $material->uploaded_by = auth()->id();
 
-        // Metadata berkas (Minggu 7 metadata-only, sebelum upload fisik Minggu 9)
-        if ($material->type === 'file' && empty($material->file_path)) {
-            $material->original_name = $material->original_name ?: $material->title . '.pdf';
-            $material->file_path = $material->file_path ?: 'materials/' . $material->original_name;
-            $material->mime_type = $material->mime_type ?: 'application/pdf';
-            $material->file_size = $material->file_size ?: 102400; // 100 KB default metadata
+        // ─── Upload berkas fisik ke disk privat ───
+        if ($material->type === 'file' && $request->hasFile('file')) {
+            $uploadedFile = $request->file('file');
+
+            // Simpan ke disk `local` (storage/app/private/materials/courses/{course_id}/)
+            // storeAs() dengan hashName() menghasilkan nama acak, mencegah tebakan URL
+            $directory = 'materials/courses/' . $course->id;
+            $storedPath = $uploadedFile->store($directory, 'local');
+
+            $material->file_path     = $storedPath;
+            $material->original_name = $uploadedFile->getClientOriginalName();
+            $material->file_size     = $uploadedFile->getSize();
+            $material->mime_type     = $uploadedFile->getClientMimeType();
+
+            // Bersihkan field yang tidak relevan untuk tipe file
+            $material->external_url = null;
+        }
+
+        // ─── Tipe link: bersihkan field berkas ───
+        if ($material->type === 'link') {
+            $material->file_path     = null;
+            $material->original_name = null;
+            $material->file_size     = null;
+            $material->mime_type     = null;
         }
 
         $material->save();
@@ -119,6 +149,11 @@ class MaterialController extends Controller
      *
      * Route: PUT /dosen/materials/{material} → dosen.materials.update
      * Route model binding: {material} → Material $material
+     *
+     * Jika dosen mengunggah berkas pengganti:
+     * 1. Hapus berkas lama dari disk privat
+     * 2. Simpan berkas baru dengan nama acak
+     * 3. Perbarui metadata (original_name, file_size, mime_type)
      */
     public function update(UpdateMaterialRequest $request, Material $material)
     {
@@ -126,6 +161,39 @@ class MaterialController extends Controller
 
         $data = $request->validated();
         $data['description'] = $data['description'] ?? '';
+
+        // ─── Upload berkas pengganti (jika ada) ───
+        if ($request->hasFile('file')) {
+            // Hapus berkas lama dari disk privat (jika ada)
+            if ($material->file_path && Storage::disk('local')->exists($material->file_path)) {
+                Storage::disk('local')->delete($material->file_path);
+            }
+
+            $uploadedFile = $request->file('file');
+            $directory = 'materials/courses/' . $material->course_id;
+            $storedPath = $uploadedFile->store($directory, 'local');
+
+            $data['file_path']     = $storedPath;
+            $data['original_name'] = $uploadedFile->getClientOriginalName();
+            $data['file_size']     = $uploadedFile->getSize();
+            $data['mime_type']     = $uploadedFile->getClientMimeType();
+            $data['external_url']  = null;
+        }
+
+        // ─── Perubahan ke tipe link: hapus berkas fisik ───
+        if (($data['type'] ?? $material->type) === 'link') {
+            if ($material->file_path && Storage::disk('local')->exists($material->file_path)) {
+                Storage::disk('local')->delete($material->file_path);
+            }
+            $data['file_path']     = null;
+            $data['original_name'] = null;
+            $data['file_size']     = null;
+            $data['mime_type']     = null;
+        }
+
+        // Jangan mass-assign field `file` (itu UploadedFile, bukan kolom DB)
+        unset($data['file']);
+
         $material->update($data);
 
         return redirect()->route('dosen.courses.materials.index', $material->course_id)
@@ -133,7 +201,7 @@ class MaterialController extends Controller
     }
 
     /**
-     * Hapus materi (shallow route).
+     * Hapus materi beserta berkas fisiknya (shallow route).
      *
      * Route: DELETE /dosen/materials/{material} → dosen.materials.destroy
      * Route model binding: {material} → Material $material
@@ -142,10 +210,44 @@ class MaterialController extends Controller
     {
         Gate::authorize('delete', $material);
 
+        // Hapus berkas fisik dari disk privat sebelum menghapus record
+        if ($material->file_path && Storage::disk('local')->exists($material->file_path)) {
+            Storage::disk('local')->delete($material->file_path);
+        }
+
         $course = $material->course;
         $material->delete();
 
         return redirect()->route('dosen.courses.materials.index', $course)
             ->with('success', 'Materi berhasil dihapus.');
+    }
+
+    /**
+     * Unduh berkas materi (shallow route) — khusus dosen pengampu.
+     *
+     * Route: GET /dosen/materials/{material}/download → dosen.materials.download
+     * Route model binding: {material} → Material $material
+     *
+     * Berkas dikirim dari disk privat melalui controller (streamed response),
+     * sehingga Policy tetap berlaku dan web server tidak bisa diakses langsung.
+     */
+    public function download(Request $request, Material $material)
+    {
+        Gate::authorize('download', $material);
+
+        // Pastikan materi bertipe file dan berkas ada di disk
+        if ($material->type !== 'file' || !$material->file_path) {
+            abort(404, 'Berkas materi tidak tersedia.');
+        }
+
+        if (!Storage::disk('local')->exists($material->file_path)) {
+            abort(404, 'Berkas tidak ditemukan di server.');
+        }
+
+        // Kirim berkas dengan nama asli yang user-friendly
+        return Storage::disk('local')->download(
+            $material->file_path,
+            $material->original_name
+        );
     }
 }
