@@ -8,6 +8,8 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 
+use Illuminate\Support\Facades\DB;
+
 /**
  * Admin\EnrollmentController — Kelola enrollment (pendaftaran mahasiswa ke MK).
  *
@@ -16,13 +18,6 @@ use Illuminate\Support\Facades\Gate;
  *   mengandung {course} → /admin/courses/{course}/enrollments
  * - destroy: menerima string $enrollment (pivot ID) karena shallow()
  *   → /admin/enrollments/{enrollment}
- *
- * Catatan: Enrollment adalah pivot table (course_user), bukan model Eloquent
- * standar. Untuk destroy, kita akan mencari record pivot berdasarkan ID-nya
- * secara manual karena pivot table tidak memiliki model tersendiri.
- *
- * Route hanya mendaftarkan: index, create, store, destroy
- * (lihat ->only([...]) di routes/web.php)
  */
 class EnrollmentController extends Controller
 {
@@ -36,9 +31,16 @@ class EnrollmentController extends Controller
     {
         Gate::authorize('manageEnrollment', $course);
 
-        $students = $course->students()->latest('course_user.created_at')->paginate(15);
+        $students = $course->students()
+            ->latest('course_user.created_at')
+            ->paginate(15);
 
-        return response()->json($students);
+        $availableStudents = User::where('role', 'mahasiswa')
+            ->whereNotIn('id', $course->students()->pluck('users.id'))
+            ->orderBy('name')
+            ->get();
+
+        return view('enrollments.index', compact('course', 'students', 'availableStudents'));
     }
 
     /**
@@ -50,6 +52,13 @@ class EnrollmentController extends Controller
     public function create(Course $course)
     {
         Gate::authorize('manageEnrollment', $course);
+
+        $availableStudents = User::where('role', 'mahasiswa')
+            ->whereNotIn('id', $course->students()->pluck('users.id'))
+            ->orderBy('name')
+            ->get();
+
+        return view('enrollments.create', compact('course', 'availableStudents'));
     }
 
     /**
@@ -61,20 +70,52 @@ class EnrollmentController extends Controller
     public function store(Request $request, Course $course)
     {
         Gate::authorize('manageEnrollment', $course);
+
+        $validated = $request->validate([
+            'user_id' => ['required', 'exists:users,id'],
+        ], [
+            'user_id.required' => 'Silakan pilih mahasiswa yang akan didaftarkan.',
+            'user_id.exists'   => 'Mahasiswa tidak valid.',
+        ]);
+
+        $student = User::where('id', $validated['user_id'])->where('role', 'mahasiswa')->firstOrFail();
+
+        if ($course->students()->where('user_id', $student->id)->exists()) {
+            return back()->with('error', "Mahasiswa {$student->name} sudah terdaftar pada mata kuliah ini.");
+        }
+
+        $course->students()->attach($student->id, [
+            'enrolled_at' => now(),
+            'created_at'  => now(),
+            'updated_at'  => now(),
+        ]);
+
+        return back()->with('success', "Mahasiswa {$student->name} berhasil didaftarkan ke mata kuliah {$course->name}.");
     }
 
     /**
      * Hapus pendaftaran mahasiswa dari mata kuliah.
      *
      * Route: DELETE /admin/enrollments/{enrollment} → admin.enrollments.destroy
-     *
-     * Catatan: {enrollment} adalah ID dari record di pivot table course_user.
-     * Karena tidak ada model Enrollment, parameter tetap string dan dicari manual.
-     * Ini adalah pengecualian — pivot table tanpa model tersendiri tidak bisa
-     * menggunakan route model binding otomatis.
      */
     public function destroy(string $enrollment)
     {
-        //
+        $pivot = DB::table('course_user')->where('id', $enrollment)->first();
+        if (!$pivot) {
+            $pivot = DB::table('course_user')->where('user_id', $enrollment)->first();
+        }
+
+        if (!$pivot) {
+            abort(404, 'Data pendaftaran mahasiswa tidak ditemukan.');
+        }
+
+        $course = Course::findOrFail($pivot->course_id);
+        Gate::authorize('manageEnrollment', $course);
+
+        $student = User::find($pivot->user_id);
+        $course->students()->detach($pivot->user_id);
+
+        $studentName = $student->name ?? 'Mahasiswa';
+        return back()->with('success', "{$studentName} berhasil dikeluarkan dari mata kuliah {$course->name}.");
     }
 }

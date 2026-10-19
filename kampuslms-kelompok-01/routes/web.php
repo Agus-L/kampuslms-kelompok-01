@@ -30,6 +30,7 @@ use App\Http\Controllers\Dosen\MaterialController    as DosenMaterialController;
 use App\Http\Controllers\Dosen\AssignmentController  as DosenAssignmentController;
 use App\Http\Controllers\Dosen\SubmissionController  as DosenSubmissionController;
 use App\Http\Controllers\Dosen\GradeController       as DosenGradeController;
+use App\Http\Controllers\Dosen\EnrollmentController  as DosenEnrollmentController;
 
 // ──────────────────────────────────────────────────────
 // Import Controller — Mahasiswa
@@ -92,7 +93,7 @@ Route::middleware('guest')->group(function () {
     })->name('register');
 });
 
-Route::match(['get', 'post'], '/logout', [LoginController::class, 'logout'])->name('logout');
+Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
 
 // ══════════════════════════════════════════════════════
@@ -183,6 +184,11 @@ Route::middleware(['auth:sanctum,web'])->group(function () {
             Route::resource('submissions.grades', DosenGradeController::class)
                 ->shallow()
                 ->only(['store', 'update']);
+
+            // Enrollment — dosen mendaftarkan dan mengelola mahasiswa di kelasnya
+            Route::resource('courses.enrollments', DosenEnrollmentController::class)
+                ->shallow()
+                ->only(['index', 'create', 'store', 'destroy']);
         });
 
 

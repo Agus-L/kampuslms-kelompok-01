@@ -42,25 +42,24 @@ class CourseController extends Controller
         // KODE RUSAK (CP NOMOR 4 — FILTER DISIMPAN KE SESSION / STICKY FILTER):
         // -------------------------------------------------------------------------
         // 1. Simpan pencarian ke session jika ada input di URL
-        if ($request->has('q')) {
-            session(['course_search' => $request->q]);
-        }
-        if ($request->has('status')) {
-            session(['course_status' => $request->status]);
-        }
-        // 2. Baca filter DARI SESSION (bukan dari URL), menyebabkan filter menempel terus
-        $search = session('course_search');
-        $status = session('course_status');
-        $courses = Course::query()
-            ->with('lecturer')
-            ->when($search, fn ($query) =>
-                $query->where('name', 'like', '%' . $search . '%')
-                      ->orWhere('code', 'like', '%' . $search . '%'))
-            ->when($status, fn ($query) =>
-                $query->where('status', $status))
-            ->latest()
-            ->paginate(15);
-
+        // if ($request->has('q')) {
+        //     session(['course_search' => $request->q]);
+        // }
+        // if ($request->has('status')) {
+        //     session(['course_status' => $request->status]);
+        // }
+        // // 2. Baca filter DARI SESSION (bukan dari URL), menyebabkan filter menempel terus
+        // $search = session('course_search');
+        // $status = session('course_status');
+        // $courses = Course::query()
+        //     ->with('lecturer')
+        //     ->when($search, fn ($query) =>
+        //         $query->where('name', 'like', '%' . $search . '%')
+        //               ->orWhere('code', 'like', '%' . $search . '%'))
+        //     ->when($status, fn ($query) =>
+        //         $query->where('status', $status))
+        //     ->latest()
+        //     ->paginate(15);
 
         return view('courses.index', compact('courses'));
     }
@@ -109,8 +108,17 @@ class CourseController extends Controller
     {
         Gate::authorize('view', $course);
 
+        $role = auth()->user()->role ?? 'guest';
+
         // Eager-load relasi yang dibutuhkan di halaman detail
-        $course->load('lecturer', 'students');
+        $course->load([
+            'lecturer',
+            'students',
+            'materials' => fn ($q) => $q->latest(),
+            'assignments' => $role === 'mahasiswa'
+                ? fn ($q) => $q->where('status', 'published')->latest()
+                : fn ($q) => $q->latest(),
+        ]);
 
         return view('courses.show', compact('course'));
     }

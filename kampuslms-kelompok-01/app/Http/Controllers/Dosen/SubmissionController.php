@@ -36,11 +36,11 @@ class SubmissionController extends Controller
         Gate::authorize('view', $assignment);
 
         $submissions = $assignment->submissions()
-            ->with(['user', 'grade'])
+            ->with(['student', 'grade'])
             ->latest('submitted_at')
             ->paginate(20);
 
-        return response()->json($submissions);
+        return view('submissions.index', compact('assignment', 'submissions'));
     }
 
     /**
@@ -53,6 +53,8 @@ class SubmissionController extends Controller
     {
         Gate::authorize('view', $submission);
 
-        return response()->json($submission);
+        $submission->load(['student', 'assignment.course', 'grade.grader']);
+
+        return view('submissions.show', compact('submission'));
     }
 }
