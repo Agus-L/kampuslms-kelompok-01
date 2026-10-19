@@ -7,6 +7,7 @@ use App\Models\Assignment;
 use App\Models\Submission;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Storage;
 
 /**
  * Dosen\SubmissionController — Melihat submission mahasiswa.
@@ -14,10 +15,10 @@ use Illuminate\Support\Facades\Gate;
  * Route model binding diterapkan:
  * - Route bersarang (index): menerima Assignment $assignment
  *   sebagai parent → /dosen/assignments/{assignment}/submissions
- * - Route shallow (show): menerima Submission $submission
+ * - Route shallow (show, download): menerima Submission $submission
  *   langsung → /dosen/submissions/{submission}
  *
- * Route hanya mendaftarkan: index, show
+ * Route hanya mendaftarkan: index, show + custom download
  * (lihat ->only(['index', 'show']) di routes/web.php)
  * Dosen tidak membuat submission — itu hak mahasiswa.
  *
@@ -56,5 +57,28 @@ class SubmissionController extends Controller
         $submission->load(['student', 'assignment.course', 'grade.grader']);
 
         return view('submissions.show', compact('submission'));
+    }
+
+    /**
+     * Unduh berkas submission (endpoint terpisah dengan otorisasi Policy).
+     *
+     * Route: GET /dosen/submissions/{submission}/download → dosen.submissions.download
+     * Route model binding: {submission} → Submission $submission
+     *
+     * Akses dikendalikan oleh SubmissionPolicy@download:
+     * - Dosen hanya bisa mengunduh berkas submission dari mata kuliah yang diampunya
+     * - Berkas dikirim dari disk privat (storage/app/private) melalui PHP,
+     *   sehingga web server tidak bisa melayani berkas secara langsung
+     */
+    public function download(Submission $submission)
+    {
+        Gate::authorize('download', $submission);
+
+        abort_unless(Storage::disk('local')->exists($submission->file_path), 404);
+
+        return Storage::disk('local')->download(
+            $submission->file_path,
+            $submission->original_name
+        );
     }
 }

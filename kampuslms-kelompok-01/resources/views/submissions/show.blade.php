@@ -80,11 +80,17 @@
                         <div style="display: flex; align-items: center; gap: 0.5rem;">
                             <span style="font-size: 1.2rem;">📎</span>
                             <div>
-                                <a href="{{ asset('storage/' . $submission->file_path) }}" target="_blank" download="{{ $submission->original_name }}" style="color: #38bdf8; font-weight: 700; text-decoration: underline;">
+                                <a href="{{ auth()->user()->role === 'dosen'
+                                    ? route('dosen.submissions.download', $submission)
+                                    : route('mahasiswa.submissions.download', $submission) }}" style="color: #38bdf8; font-weight: 700; text-decoration: underline;">
                                     {{ $submission->original_name }}
                                 </a>
                                 <span style="font-size: 0.75rem; color: var(--text-muted); display: block;">
-                                    ({{ number_format($submission->file_size / 1024, 1) }} KB)
+                                    @if($submission->file_size >= 1048576)
+                                        ({{ number_format($submission->file_size / 1048576, 1) }} MB)
+                                    @else
+                                        ({{ number_format($submission->file_size / 1024, 1) }} KB)
+                                    @endif
                                 </span>
                             </div>
                         </div>

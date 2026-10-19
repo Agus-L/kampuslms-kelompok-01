@@ -6,10 +6,26 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Support\Facades\Storage;
 
 class Submission extends Model
 {
     use HasFactory;
+
+    /**
+     * Boot model events.
+     *
+     * Event `deleting` menghapus berkas fisik dari disk privat saat record dihapus.
+     * Catatan: cascadeOnDelete dari database level TIDAK memicu event ini —
+     * jika assignment dihapus, berkas submission tetap tertinggal dan harus
+     * dihapus secara eksplisit di controller sebelum menghapus induknya.
+     */
+    protected static function booted(): void
+    {
+        static::deleting(function (Submission $submission) {
+            Storage::disk('local')->delete($submission->file_path);
+        });
+    }
 
     /**
      * The attributes that are mass assignable.
@@ -25,6 +41,7 @@ class Submission extends Model
      */
     protected $fillable = [
         'assignment_id',
+        'user_id',
         'file_path',
         'original_name',
         'file_size',

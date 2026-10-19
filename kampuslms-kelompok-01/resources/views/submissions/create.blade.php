@@ -28,9 +28,15 @@
                 </div>
 
                 @if(now()->isAfter($assignment->due_at))
-                    <div style="background: rgba(239, 68, 68, 0.15); border: 1px solid #ef4444; color: #fca5a5; padding: 0.85rem 1.25rem; border-radius: 0.5rem; margin-bottom: 1.5rem; font-size: 0.9rem;">
-                        ⚠️ <strong>Peringatan Batas Waktu:</strong> Batas waktu pengumpulan tugas ini telah terlewati ({{ $assignment->due_at->diffForHumans() }}). Tugas Anda akan dicatat sebagai <em>Terlambat</em>.
-                    </div>
+                    @if(!$assignment->allow_late)
+                        <div style="background: rgba(239, 68, 68, 0.15); border: 1px solid #ef4444; color: #fca5a5; padding: 0.85rem 1.25rem; border-radius: 0.5rem; margin-bottom: 1.5rem; font-size: 0.9rem;">
+                            🚫 <strong>Pengumpulan Ditutup:</strong> Batas waktu pengumpulan tugas ini telah terlewati ({{ $assignment->due_at->diffForHumans() }}) dan tugas ini <strong>tidak mengizinkan keterlambatan</strong>.
+                        </div>
+                    @else
+                        <div style="background: rgba(239, 68, 68, 0.15); border: 1px solid #ef4444; color: #fca5a5; padding: 0.85rem 1.25rem; border-radius: 0.5rem; margin-bottom: 1.5rem; font-size: 0.9rem;">
+                            ⚠️ <strong>Peringatan Batas Waktu:</strong> Batas waktu pengumpulan tugas ini telah terlewati ({{ $assignment->due_at->diffForHumans() }}). Tugas Anda akan dicatat sebagai <em>Terlambat</em>.
+                        </div>
+                    @endif
                 @endif
 
                 <div style="background: rgba(255, 255, 255, 0.02); border: 1px solid var(--card-border, #334155); border-radius: 0.5rem; padding: 1rem; margin-bottom: 1.5rem;">
@@ -56,7 +62,7 @@
                             style="width: 100%; padding: 0.75rem; background: var(--bg); border: 1px dashed var(--card-border, #334155);"
                         >
                         <p style="font-size: 0.8rem; color: var(--text-muted, #94a3b8); margin-top: 0.35rem;">
-                            Format yang didukung: PDF, DOCX, ZIP, RAR, XLS, PPTX, gambar (Maks. 20 MB).
+                            Format yang didukung: PDF, DOC, DOCX (Maks. 5 MB).
                         </p>
                         @error('file')
                             <div style="color: #f87171; font-size: 0.82rem; margin-top: 0.25rem;">{{ $message }}</div>
