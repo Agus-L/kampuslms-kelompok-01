@@ -109,6 +109,12 @@ class PolicyAuthorizationTest extends TestCase
         $this->assertTrue($this->mhs1->can('view', $material1));
         $this->assertFalse($this->mhs2->can('view', $material1)); // mhs luar kelas ditolak
 
+        $this->assertTrue($this->admin->can('download', $material1));
+        $this->assertTrue($this->dosen1->can('download', $material1));
+        $this->assertFalse($this->dosen2->can('download', $material1));
+        $this->assertTrue($this->mhs1->can('download', $material1));
+        $this->assertFalse($this->mhs2->can('download', $material1));
+
         // create
         $this->assertTrue($this->admin->can('create', [Material::class, $this->course1]));
         $this->assertTrue($this->dosen1->can('create', [Material::class, $this->course1]));

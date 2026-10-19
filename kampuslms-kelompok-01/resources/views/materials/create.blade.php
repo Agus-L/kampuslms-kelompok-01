@@ -17,7 +17,8 @@
 
         {{-- Form Card --}}
         <div class="form-card">
-            <form action="{{ route('dosen.courses.materials.store', $course) }}" method="POST" novalidate>
+            {{-- enctype="multipart/form-data" WAJIB agar berkas dapat dikirim ke server --}}
+            <form action="{{ route('dosen.courses.materials.store', $course) }}" method="POST" enctype="multipart/form-data" novalidate>
                 @csrf
 
                 <div class="form-section-title">📄 Informasi Materi</div>
@@ -48,17 +49,32 @@
                 <div class="form-group" style="margin-bottom: 1.25rem;">
                     <label for="type" class="form-label">Tipe Materi <span class="required">*</span></label>
                     <select id="type" name="type" class="form-input @error('type') form-input-error @enderror" required>
-                        <option value="file" {{ old('type') === 'file' ? 'selected' : '' }}>Berkas Dokumen (PDF, PPT, DOCX) — Metadata</option>
-                        <option value="link" {{ old('type') === 'link' ? 'selected' : '' }}>Tautan Eksternal (URL Website / Video)</option>
+                        <option value="file" {{ old('type', 'file') === 'file' ? 'selected' : '' }}>📁 Unggah Berkas (PDF, PPT, DOCX)</option>
+                        <option value="link" {{ old('type') === 'link' ? 'selected' : '' }}>🔗 Tautan Eksternal (URL Website / Video)</option>
                     </select>
                     @error('type')
                         <p class="form-error">{{ $message }}</p>
                     @enderror
                 </div>
 
+                {{-- Upload Berkas (jika tipe file) --}}
+                <div id="file-upload-section" class="form-group" style="margin-bottom: 1.25rem;">
+                    <label for="file" class="form-label">Unggah Berkas Dokumen <span class="required">*</span></label>
+                    <input type="file" id="file" name="file"
+                           class="form-input @error('file') form-input-error @enderror"
+                           accept=".pdf,.ppt,.pptx,.doc,.docx"
+                           style="padding: 0.6rem;">
+                    <p class="form-hint" style="font-size: 0.8rem; color: var(--text-muted, #94a3b8); margin-top: 0.35rem;">
+                        Format yang diterima: PDF, PPT, PPTX, DOC, DOCX. Ukuran maksimal: <strong>20 MB</strong>.
+                    </p>
+                    @error('file')
+                        <p class="form-error">{{ $message }}</p>
+                    @enderror
+                </div>
+
                 {{-- URL Eksternal (jika tipe link) --}}
-                <div class="form-group" style="margin-bottom: 1.25rem;">
-                    <label for="external_url" class="form-label">URL Tautan Eksternal (Jika memilih Link)</label>
+                <div id="link-section" class="form-group" style="margin-bottom: 1.25rem; display: none;">
+                    <label for="external_url" class="form-label">URL Tautan Eksternal <span class="required">*</span></label>
                     <input type="url" id="external_url" name="external_url"
                            class="form-input @error('external_url') form-input-error @enderror"
                            value="{{ old('external_url') }}" placeholder="https://laravel.com/docs/12.x">
@@ -67,15 +83,6 @@
                     @else
                         <p class="form-hint" style="font-size: 0.8rem; color: var(--text-muted, #94a3b8);">Wajib diisi jika tipe yang dipilih adalah link.</p>
                     @enderror
-                </div>
-
-                {{-- Nama Dokumen Metadata (jika tipe file) --}}
-                <div class="form-group" style="margin-bottom: 1.5rem;">
-                    <label for="original_name" class="form-label">Nama Berkas Metadata (Opsional)</label>
-                    <input type="text" id="original_name" name="original_name"
-                           class="form-input @error('original_name') form-input-error @enderror"
-                           value="{{ old('original_name') }}" placeholder="modul-pertemuan-1.pdf">
-                    <p class="form-hint" style="font-size: 0.8rem; color: var(--text-muted, #94a3b8);">Sesuai spesifikasi minggu 7: cukup metadata berkas terlebih dahulu.</p>
                 </div>
 
                 {{-- Actions --}}
@@ -90,4 +97,26 @@
             </form>
         </div>
     </div>
+
+    {{-- Toggle visibility antara upload file dan input URL berdasarkan tipe --}}
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const typeSelect   = document.getElementById('type');
+            const fileSection  = document.getElementById('file-upload-section');
+            const linkSection  = document.getElementById('link-section');
+
+            function toggleSections() {
+                if (typeSelect.value === 'file') {
+                    fileSection.style.display = 'block';
+                    linkSection.style.display = 'none';
+                } else {
+                    fileSection.style.display = 'none';
+                    linkSection.style.display = 'block';
+                }
+            }
+
+            typeSelect.addEventListener('change', toggleSections);
+            toggleSections(); // Jalankan saat halaman dimuat (untuk handle old() value)
+        });
+    </script>
 </x-layout>
