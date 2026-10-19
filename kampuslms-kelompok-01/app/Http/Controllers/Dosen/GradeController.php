@@ -33,6 +33,22 @@ class GradeController extends Controller
     public function store(Request $request, Submission $submission)
     {
         Gate::authorize('create', [Grade::class, $submission]);
+
+        $maxScore = $submission->assignment->max_score ?? 100;
+
+        $validated = $request->validate([
+            'score'    => ['required', 'numeric', 'min:0', "max:{$maxScore}"],
+            'feedback' => ['nullable', 'string', 'max:2000'],
+        ]);
+
+        $grade = Grade::firstOrNew(['submission_id' => $submission->id]);
+        $grade->graded_by = auth()->id();
+        $grade->score     = $validated['score'];
+        $grade->feedback  = $validated['feedback'] ?? null;
+        $grade->graded_at = now();
+        $grade->save();
+
+        return back()->with('success', 'Nilai dan umpan balik berhasil disimpan.');
     }
 
     /**
@@ -44,5 +60,20 @@ class GradeController extends Controller
     public function update(Request $request, Grade $grade)
     {
         Gate::authorize('update', $grade);
+
+        $maxScore = $grade->submission->assignment->max_score ?? 100;
+
+        $validated = $request->validate([
+            'score'    => ['required', 'numeric', 'min:0', "max:{$maxScore}"],
+            'feedback' => ['nullable', 'string', 'max:2000'],
+        ]);
+
+        $grade->graded_by = auth()->id();
+        $grade->score     = $validated['score'];
+        $grade->feedback  = $validated['feedback'] ?? null;
+        $grade->graded_at = now();
+        $grade->save();
+
+        return back()->with('success', 'Nilai berhasil diperbarui.');
     }
 }

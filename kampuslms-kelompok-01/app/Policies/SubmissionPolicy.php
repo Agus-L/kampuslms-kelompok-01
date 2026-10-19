@@ -59,6 +59,10 @@ class SubmissionPolicy
         }
 
         if ($assignment) {
+            if ($assignment->status !== 'published') {
+                return false;
+            }
+
             $isEnrolled = $assignment->course
                 && $assignment->course->students()->where('user_id', $user->id)->exists();
 

@@ -79,7 +79,7 @@
                                 {{ Str::limit($material->description, 120) }}
                             </p>
                             <div style="font-size: 0.75rem; color: var(--text-muted, #94a3b8);">
-                                🕒 Diunggah: {{ $material->created_at->format('d M Y, H:i') }}
+                                🕒 Diunggah: {{ $material->created_at->format('d M Y, H:i') }} WITA
                             </div>
                         </div>
 
