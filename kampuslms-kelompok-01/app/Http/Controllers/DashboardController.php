@@ -100,8 +100,8 @@ class DashboardController extends Controller
         $upcomingAssignments = Assignment::whereIn('course_id', $courseIds)
             ->where('status', 'published')
             ->with('course')
-            ->orderBy('due_at', 'asc')
-            ->take(8)
+            ->orderBy('due_at', 'desc')
+            ->take(20)
             ->get();
 
         // Kumpulan submission yang sudah dikumpulkan mahasiswa
