@@ -64,6 +64,35 @@ class Material extends Model
     }
 
     /* ------------------------------------------------------------------ *
+     |  Helpers — BUILD Minggu 9 No. 7
+     * ------------------------------------------------------------------ */
+
+    /**
+     * Tampilkan ukuran berkas dalam format terbaca manusia.
+     *
+     * Contoh keluaran: "512 Bytes", "12,3 KB", "2,1 MB".
+     * Digunakan di seluruh Blade view agar logika konversi tidak diulang inline.
+     */
+    public function humanReadableSize(): string
+    {
+        $bytes = $this->file_size;
+
+        if ($bytes === null || $bytes === 0) {
+            return '0 Bytes';
+        }
+
+        if ($bytes >= 1048576) {
+            return number_format($bytes / 1048576, 1) . ' MB';
+        }
+
+        if ($bytes >= 1024) {
+            return number_format($bytes / 1024, 1) . ' KB';
+        }
+
+        return $bytes . ' Bytes';
+    }
+
+    /* ------------------------------------------------------------------ *
      |  Relations
      * ------------------------------------------------------------------ */
 

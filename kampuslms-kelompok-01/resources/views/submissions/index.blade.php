@@ -159,9 +159,7 @@
                                             📎 <a href="{{ route('dosen.submissions.download', $submission) }}" style="color: #38bdf8; text-decoration: underline; font-weight: 600;" title="Unduh berkas submission">
                                                 {{ $submission->original_name }}
                                             </a>
-                                            ({{ $submission->file_size >= 1048576
-                                                ? number_format($submission->file_size / 1048576, 1) . ' MB'
-                                                : number_format($submission->file_size / 1024, 1) . ' KB' }})
+                                            ({{ $submission->humanReadableSize() }})
                                         </div>
                                     @else
                                         <div style="margin-top: 0.35rem; font-size: 0.8rem; color: var(--text-muted, #64748b);">
@@ -253,9 +251,7 @@
                                         📎 <a href="{{ route('mahasiswa.submissions.download', $submission) }}" style="color: #38bdf8; text-decoration: underline; font-weight: 600;" title="Unduh berkas submission">
                                             {{ $submission->original_name }}
                                         </a>
-                                        ({{ $submission->file_size >= 1048576
-                                            ? number_format($submission->file_size / 1048576, 1) . ' MB'
-                                            : number_format($submission->file_size / 1024, 1) . ' KB' }})
+                                        ({{ $submission->humanReadableSize() }})
                                     </div>
                                 </div>
                             </div>

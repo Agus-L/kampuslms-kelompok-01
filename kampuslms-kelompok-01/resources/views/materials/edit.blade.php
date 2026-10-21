@@ -68,7 +68,7 @@
                                         📄 {{ $material->original_name }}
                                     </span>
                                     <span style="font-size: 0.8rem; color: var(--text-muted, #94a3b8); margin-left: 0.5rem;">
-                                        ({{ number_format($material->file_size / 1024, 1) }} KB)
+                                        ({{ $material->humanReadableSize() }})
                                     </span>
                                 </div>
                                 <a href="{{ route('dosen.materials.download', $material) }}" class="btn btn-secondary" style="font-size: 0.8rem; padding: 0.3rem 0.7rem;">
