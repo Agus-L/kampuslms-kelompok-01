@@ -86,11 +86,7 @@
                                     {{ $submission->original_name }}
                                 </a>
                                 <span style="font-size: 0.75rem; color: var(--text-muted); display: block;">
-                                    @if($submission->file_size >= 1048576)
-                                        ({{ number_format($submission->file_size / 1048576, 1) }} MB)
-                                    @else
-                                        ({{ number_format($submission->file_size / 1024, 1) }} KB)
-                                    @endif
+                                    ({{ $submission->humanReadableSize() }})
                                 </span>
                             </div>
                         </div>

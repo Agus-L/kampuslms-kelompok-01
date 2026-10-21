@@ -64,11 +64,7 @@
                             </span>
                             @if ($material->file_size)
                                 <span style="font-size: 0.8rem; color: var(--text-muted, #94a3b8); margin-left: 0.5rem;">
-                                    @if ($material->file_size >= 1048576)
-                                        ({{ number_format($material->file_size / 1048576, 1) }} MB)
-                                    @else
-                                        ({{ number_format($material->file_size / 1024, 1) }} KB)
-                                    @endif
+                                    ({{ $material->humanReadableSize() }})
                                 </span>
                             @endif
                             @if ($material->mime_type)

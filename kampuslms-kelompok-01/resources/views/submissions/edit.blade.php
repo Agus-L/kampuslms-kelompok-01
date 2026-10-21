@@ -28,7 +28,7 @@
                 <div style="background: rgba(255, 255, 255, 0.02); border: 1px solid var(--card-border, #334155); border-radius: 0.5rem; padding: 1rem; margin-bottom: 1.5rem; font-size: 0.85rem;">
                     <div style="color: var(--text-muted); margin-bottom: 0.25rem;">Berkas yang sudah dikumpulkan sebelumnya:</div>
                     <div style="font-weight: 700; color: #38bdf8;">
-                        📎 {{ $submission->original_name }} ({{ number_format($submission->file_size / 1024, 1) }} KB)
+                        📎 {{ $submission->original_name }} ({{ $submission->humanReadableSize() }})
                     </div>
                 </div>
 
