@@ -105,7 +105,28 @@ class SubmissionController extends Controller
 
         $file = $request->file('file');
 
-        // Simpan di disk privat dengan nama acak (store() otomatis)
+        // =========================================================================================
+        // [PERAGAAN KEBOCORAN JIKA DISIMPAN DI 'storage/app/public']:
+        //
+        // // 1. Kodingan yang RENTAN / MEMICU KEBOCORAN:
+        // // $path = $file->store("submissions/{$assignment->id}", 'public'); // Disimpan di storage/app/public
+        //
+        // // 2. Jalur Kebocoran (Direct Object Access):
+        // // Folder storage/app/public terhubung melalui symlink ke public/storage.
+        // // Berkas fisik otomatis memiliki URL web statis:
+        // // http://lms.test/storage/submissions/{$assignment->id}/{hashName}.pdf
+        //
+        // // 3. Hasil & Dampak Kebocoran:
+        // // Web Server (Nginx/Apache) menyajikan berkas ini secara langsung dari filesystem.
+        // // Permintaan sama sekali TIDAK MELEWATI index.php Laravel. Akibatnya:
+        // // - Middleware 'auth' TIDAK BERJALAN (Guest / pengguna belum login bisa mendownload).
+        // // - Gate::authorize() & SubmissionPolicy DI-BYPASS TOTAL.
+        // // - Mahasiswa lain dapat mencuri dan memplagiasi jawaban tugas mahasiswa ini.
+        // =========================================================================================
+
+        // [KODE YANG BENAR & AMAN]:
+        // Simpan di disk privat ('local' -> storage/app/private) dengan nama acak.
+        // Web server tidak dapat mengakses direktori ini secara publik dari URL browser.
         $path = $file->store("submissions/{$assignment->id}", 'local');
 
         // Hapus berkas lama jika ada (untuk kasus updateOrCreate menimpa)
@@ -229,6 +250,17 @@ class SubmissionController extends Controller
      */
     public function download(Submission $submission)
     {
+        // =========================================================================================
+        // [PERAGAAN KEBOCORAN PADA SISI UNDUH BERKAS]:
+        //
+        // // Jika berkas disimpan di disk 'public', Gate::authorize() di bawah ini menjadi TIDAK BERGUNA.
+        // // Penyerang / Mahasiswa lain tidak perlu mengakses rute ini (/mahasiswa/submissions/{id}/download),
+        // // melainkan cukup mengakses tautan statis /storage/submissions/... langsung di browser.
+        // =========================================================================================
+
+        // [PENGAMANAN MUTLAK]:
+        // Karena berkas berada di storage/app/private (disk 'local'), satu-satunya cara mengakses berkas
+        // adalah melalui Controller ini, di mana hak akses diperiksa ketat oleh SubmissionPolicy.
         Gate::authorize('download', $submission);
 
         if (!Storage::disk('local')->exists($submission->file_path)) {
