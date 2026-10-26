@@ -57,6 +57,10 @@ class SubmissionGradedNotification extends Notification implements ShouldQueue
     /**
      * Payload yang disimpan ke tabel `notifications` (kolom `data`, JSON).
      *
+     * Sesuai ketentuan Modul Minggu 10 (Deliverable 8):
+     * Payload database HANYA menyimpan ID dan judul, TIDAK MEMUAT nilai (score)
+     * atau umpan balik (feedback) untuk mencegah kebocoran data sensitif.
+     *
      * @return array<string, mixed>
      */
     public function toArray(object $notifiable): array
@@ -70,10 +74,7 @@ class SubmissionGradedNotification extends Notification implements ShouldQueue
             'submission_id'    => $submission->id,
             'assignment_title' => $assignment->title,
             'course_name'      => $course->name,
-            'score'            => $this->grade->score,
-            'max_score'        => $assignment->max_score,
-            'feedback'         => $this->grade->feedback,
-            'message'          => "Tugas '{$assignment->title}' Anda telah dinilai dengan skor {$this->grade->score}/{$assignment->max_score}.",
+            'message'          => "Tugas '{$assignment->title}' pada mata kuliah {$course->name} telah dinilai oleh dosen.",
             'action_url'       => route('mahasiswa.submissions.grades.index', $submission->id),
         ];
     }

@@ -70,7 +70,7 @@ class AssignmentPublishedNotification extends Notification implements ShouldQueu
             'title'         => $this->assignment->title,
             'due_at'        => $this->assignment->due_at?->toIso8601String(),
             'message'       => "Tugas baru '{$this->assignment->title}' telah dipublikasikan di mata kuliah {$course->name}.",
-            'action_url'    => route('mahasiswa.courses.assignments.index', $course->id),
+            'action_url'    => route('mahasiswa.assignments.show', $this->assignment->id),
         ];
     }
 
@@ -90,7 +90,7 @@ class AssignmentPublishedNotification extends Notification implements ShouldQueu
             ->line("Tugas baru telah dipublikasikan di mata kuliah **{$course->name}**.")
             ->line("**Judul:** {$this->assignment->title}")
             ->line("**Tenggat:** {$dueLabel}")
-            ->action('Lihat Tugas', route('mahasiswa.courses.assignments.index', $course->id))
+            ->action('Lihat Tugas', route('mahasiswa.assignments.show', $this->assignment->id))
             ->line('Segera kerjakan sebelum batas waktu berakhir.');
     }
 
