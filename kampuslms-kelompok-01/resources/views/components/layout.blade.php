@@ -108,6 +108,9 @@
             </a>
 
             @if(auth()->check())
+                {{-- ── Lonceng Notifikasi Realtime Polling (Minggu 10 - Milestone M3) ── --}}
+                <livewire:notification-bell />
+
                 <div class="auth-user-badge" style="display:inline-flex; align-items:center; gap:0.5rem; padding:0.3rem 0.75rem; border-radius:9999px; background:var(--badge-bg); border:1px solid var(--badge-border); font-size:0.82rem; color:var(--text-main);">
                     <span>👤 <strong>{{ auth()->user()->name }}</strong> <span style="color:var(--primary-light); text-transform:capitalize;">({{ auth()->user()->role }})</span></span>
                     <form action="{{ route('logout') }}" method="POST" style="display:inline; margin:0; padding:0;">

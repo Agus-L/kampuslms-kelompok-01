@@ -28,12 +28,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        /* ------------------------------------------------------------------ *
-         |  Event → Listener mapping (Notifikasi LMS — Minggu 10)
-         * ------------------------------------------------------------------ */
-        Event::listen(AssignmentPublished::class, SendAssignmentPublishedNotification::class);
-        Event::listen(SubmissionGraded::class, SendSubmissionGradedNotification::class);
-
         // Rate limiting umum: 60/menit per user/IP
         RateLimiter::for('api', function (Request $request) {
             return Limit::perMinute(60)->by($request->user()?->id ?: $request->ip());

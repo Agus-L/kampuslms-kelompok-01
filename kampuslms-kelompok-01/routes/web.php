@@ -116,6 +116,9 @@ Route::middleware(['auth:sanctum,web'])->group(function () {
     Route::patch('/notifications/{notification}', [NotificationController::class, 'update'])
         ->name('notifications.update');
 
+    Route::post('/notifications/mark-all-read', [NotificationController::class, 'markAllAsRead'])
+        ->name('notifications.mark-all-read');
+
 
     // ──────────────────────────────────────────────────
     // GRUP 2 — Admin
