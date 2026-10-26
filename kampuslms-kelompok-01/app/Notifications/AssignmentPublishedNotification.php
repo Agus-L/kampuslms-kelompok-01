@@ -1,0 +1,84 @@
+<?php
+
+namespace App\Notifications;
+
+use App\Models\Assignment;
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Notifications\Messages\MailMessage;
+use Illuminate\Notifications\Notification;
+
+/**
+ * Notifikasi tugas baru dipublikasikan.
+ *
+ * Dikirim ke seluruh mahasiswa yang terdaftar di mata kuliah terkait.
+ *
+ * Saluran:
+ * - database → insert ke tabel `notifications` (lonceng in-app)
+ * - mail     → email ke inbox mahasiswa
+ *
+ * Implements ShouldQueue agar pengiriman ke banyak mahasiswa
+ * tidak memblokir response HTTP dosen.
+ */
+class AssignmentPublishedNotification extends Notification implements ShouldQueue
+{
+    use Queueable;
+
+    /**
+     * Create a new notification instance.
+     */
+    public function __construct(public Assignment $assignment)
+    {
+        //
+    }
+
+    /**
+     * Saluran pengiriman notifikasi.
+     *
+     * @return array<int, string>
+     */
+    public function via(object $notifiable): array
+    {
+        return ['database', 'mail'];
+    }
+
+    /**
+     * Payload yang disimpan ke tabel `notifications` (kolom `data`, JSON).
+     *
+     * @return array<string, mixed>
+     */
+    public function toArray(object $notifiable): array
+    {
+        $course = $this->assignment->course;
+
+        return [
+            'assignment_id' => $this->assignment->id,
+            'course_id'     => $course->id,
+            'course_name'   => $course->name,
+            'title'         => $this->assignment->title,
+            'due_at'        => $this->assignment->due_at?->toIso8601String(),
+            'message'       => "Tugas baru '{$this->assignment->title}' telah dipublikasikan di mata kuliah {$course->name}.",
+            'action_url'    => route('mahasiswa.courses.assignments.index', $course->id),
+        ];
+    }
+
+    /**
+     * Representasi email notifikasi.
+     */
+    public function toMail(object $notifiable): MailMessage
+    {
+        $course = $this->assignment->course;
+        $dueLabel = $this->assignment->due_at
+            ? $this->assignment->due_at->translatedFormat('l, d F Y – H:i')
+            : 'Tidak ada batas waktu';
+
+        return (new MailMessage)
+            ->subject("[LMS] Tugas Baru: {$this->assignment->title} – {$course->name}")
+            ->greeting("Halo, {$notifiable->name}!")
+            ->line("Tugas baru telah dipublikasikan di mata kuliah **{$course->name}**.")
+            ->line("**Judul:** {$this->assignment->title}")
+            ->line("**Tenggat:** {$dueLabel}")
+            ->action('Lihat Tugas', route('mahasiswa.courses.assignments.index', $course->id))
+            ->line('Segera kerjakan sebelum batas waktu berakhir.');
+    }
+}

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Dosen;
 
+use App\Events\SubmissionGraded;
 use App\Http\Controllers\Controller;
 use App\Models\Grade;
 use App\Models\Submission;
@@ -48,6 +49,9 @@ class GradeController extends Controller
         $grade->graded_at = now();
         $grade->save();
 
+        // Dispatch event → notifikasi ke mahasiswa pemilik submission
+        event(new SubmissionGraded($grade));
+
         return back()->with('success', 'Nilai dan umpan balik berhasil disimpan.');
     }
 
@@ -73,6 +77,9 @@ class GradeController extends Controller
         $grade->feedback  = $validated['feedback'] ?? null;
         $grade->graded_at = now();
         $grade->save();
+
+        // Dispatch event → notifikasi ke mahasiswa pemilik submission
+        event(new SubmissionGraded($grade));
 
         return back()->with('success', 'Nilai berhasil diperbarui.');
     }
