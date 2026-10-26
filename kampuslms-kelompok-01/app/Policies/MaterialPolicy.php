@@ -44,6 +44,23 @@ class MaterialPolicy
     }
 
     /**
+     * Tentukan apakah pengguna dapat mengunduh berkas materi dari disk privat.
+     *
+     * Logika sama dengan `view`: hanya pengguna yang berhak melihat materi
+     * yang juga berhak mengunduh berkasnya. Dipisah sebagai metode tersendiri
+     * agar Gate::authorize('download', $material) dapat dipanggil secara eksplisit
+     * di controller download, memberikan kejelasan semantik pada kode.
+     *
+     * Admin: Diizinkan mengunduh berkas materi apa pun.
+     * Dosen: Diizinkan HANYA jika materi berada di mata kuliah yang ia ampu.
+     * Mahasiswa: Diizinkan HANYA jika terdaftar di mata kuliah tempat materi berada.
+     */
+    public function download(User $user, Material $material): bool
+    {
+        return $this->view($user, $material);
+    }
+
+    /**
      * Tentukan apakah pengguna dapat membuat materi baru.
      *
      * Admin: Diizinkan membuat materi di mata kuliah mana pun.

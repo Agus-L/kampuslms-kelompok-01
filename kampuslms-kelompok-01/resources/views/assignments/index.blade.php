@@ -79,7 +79,7 @@
                                 {{ Str::limit($assignment->instructions, 120) }}
                             </p>
                             <div style="display: flex; gap: 1rem; font-size: 0.78rem; color: var(--text-muted, #94a3b8);">
-                                <span>⏰ Tenggat: <strong style="color: #f87171;">{{ $assignment->due_at->format('d M Y, H:i') }}</strong></span>
+                                <span>⏰ Tenggat: <strong style="color: #f87171;">{{ $assignment->due_at->format('d M Y, H:i') }} WITA</strong></span>
                                 <span>Status: <strong style="color: var(--text-main, #f8fafc);">{{ ucfirst($assignment->status) }}</strong></span>
                             </div>
                         </div>

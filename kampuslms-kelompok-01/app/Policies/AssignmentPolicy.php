@@ -37,7 +37,9 @@ class AssignmentPolicy
         }
 
         if ($user->role === 'mahasiswa') {
-            return $assignment->course && $assignment->course->students()->where('user_id', $user->id)->exists();
+            return $assignment->status === 'published'
+                && $assignment->course
+                && $assignment->course->students()->where('user_id', $user->id)->exists();
         }
 
         return false;

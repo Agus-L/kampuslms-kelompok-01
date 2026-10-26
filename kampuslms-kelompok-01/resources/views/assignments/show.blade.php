@@ -26,7 +26,7 @@
                         {{ $assignment->title }}
                     </h1>
                     <div style="display: flex; gap: 1rem; font-size: 0.85rem; color: var(--text-muted, #94a3b8); margin-top: 0.5rem;">
-                        <span>⏰ Deadline: <strong style="color: #f87171;">{{ $assignment->due_at->format('d F Y, H:i') }}</strong></span>
+                        <span>⏰ Deadline: <strong style="color: #f87171;">{{ $assignment->due_at->format('d F Y, H:i') }} WITA</strong></span>
                         <span>•</span>
                         <span>🎯 Skor Maks: <strong>{{ $assignment->max_score }}</strong></span>
                         <span>•</span>
@@ -75,12 +75,21 @@
                             <div style="font-size: 0.85rem; color: #f59e0b;">⏳ Menunggu penilaian dari dosen pengampu.</div>
                         @endif
                     @else
-                        <div style="color: #f87171; font-weight: 600; margin-bottom: 0.5rem;">
-                            ⚠️ Belum Mengumpulkan Tugas
-                        </div>
-                        <a href="{{ route('mahasiswa.assignments.submissions.create', $assignment) }}" class="btn btn-primary" style="display: inline-block; font-size: 0.85rem; padding: 0.45rem 1rem;">
-                            📤 Kumpulkan Tugas Sekarang
-                        </a>
+                        @if(now()->gt($assignment->due_at) && !$assignment->allow_late)
+                            <div style="background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 0.5rem; padding: 0.85rem; color: #f87171; font-size: 0.88rem;">
+                                ⛔ <strong>Pengumpulan Ditutup:</strong> Batas waktu pengumpulan telah terlewati dan penugasan ini tidak mengizinkan pengumpulan terlambat.
+                            </div>
+                        @else
+                            <div style="color: #f87171; font-weight: 600; margin-bottom: 0.5rem;">
+                                ⚠️ Belum Mengumpulkan Tugas
+                                @if(now()->gt($assignment->due_at))
+                                    <span style="font-size: 0.8rem; color: #f59e0b; font-weight: normal;">(Melewati batas waktu, keterlambatan diperbolehkan)</span>
+                                @endif
+                            </div>
+                            <a href="{{ route('mahasiswa.assignments.submissions.create', $assignment) }}" class="btn btn-primary" style="display: inline-block; font-size: 0.85rem; padding: 0.45rem 1rem;">
+                                📤 Kumpulkan Tugas Sekarang
+                            </a>
+                        @endif
                     @endif
                 </div>
             @endif

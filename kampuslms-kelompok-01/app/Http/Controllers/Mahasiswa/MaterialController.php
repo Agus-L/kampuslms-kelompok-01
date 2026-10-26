@@ -7,19 +7,19 @@ use App\Models\Course;
 use App\Models\Material;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Storage;
 
 /**
- * Mahasiswa\MaterialController — Melihat materi kuliah.
+ * Mahasiswa\MaterialController — Melihat dan mengunduh materi kuliah.
  *
  * Route model binding diterapkan:
  * - Route bersarang (index): menerima Course $course
  *   sebagai parent → /mahasiswa/courses/{course}/materials
- * - Route shallow (show): menerima Material $material
+ * - Route shallow (show, download): menerima Material $material
  *   langsung → /mahasiswa/materials/{material}
  *
- * Route hanya mendaftarkan: index, show
- * (lihat ->only(['index', 'show']) di routes/web.php)
- * Mahasiswa hanya baca materi, tidak bisa CRUD.
+ * Route hanya mendaftarkan: index, show + custom download
+ * Mahasiswa hanya baca dan unduh materi, tidak bisa CRUD.
  *
  * Otorisasi menggunakan MaterialPolicy & CoursePolicy via Gate::authorize.
  */
@@ -37,10 +37,6 @@ class MaterialController extends Controller
 
         $materials = $course->materials()->latest()->paginate(15);
 
-        if ($request->wantsJson()) {
-            return response()->json($materials);
-        }
-
         return view('materials.index', compact('course', 'materials'));
     }
 
@@ -56,10 +52,37 @@ class MaterialController extends Controller
 
         $material->load('course');
 
-        if ($request->wantsJson()) {
-            return response()->json($material);
+        return view('materials.show', compact('material'));
+    }
+
+    /**
+     * Unduh berkas materi (shallow route).
+     *
+     * Route: GET /mahasiswa/materials/{material}/download → mahasiswa.materials.download
+     * Route model binding: {material} → Material $material
+     *
+     * Akses dikendalikan oleh MaterialPolicy@download:
+     * - Mahasiswa hanya bisa mengunduh berkas materi dari mata kuliah yang diikutinya
+     * - Berkas dikirim dari disk privat (storage/app/private) melalui PHP,
+     *   sehingga web server tidak bisa melayani berkas secara langsung
+     */
+    public function download(Request $request, Material $material)
+    {
+        Gate::authorize('download', $material);
+
+        // Pastikan materi bertipe file dan berkas ada di disk
+        if ($material->type !== 'file' || !$material->file_path) {
+            abort(404, 'Berkas materi tidak tersedia.');
         }
 
-        return view('materials.show', compact('material'));
+        if (!Storage::disk('local')->exists($material->file_path)) {
+            abort(404, 'Berkas tidak ditemukan di server.');
+        }
+
+        // Kirim berkas dengan nama asli yang user-friendly
+        return Storage::disk('local')->download(
+            $material->file_path,
+            $material->original_name
+        );
     }
 }

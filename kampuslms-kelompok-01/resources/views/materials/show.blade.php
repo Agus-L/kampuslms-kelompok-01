@@ -26,7 +26,7 @@
                         {{ $material->title }}
                     </h1>
                     <p style="color: var(--text-muted, #94a3b8); font-size: 0.85rem; margin: 0;">
-                        🕒 Diunggah pada: {{ $material->created_at->format('d F Y, H:i') }}
+                        🕒 Diunggah pada: {{ $material->created_at->format('d F Y, H:i') }} WITA
                     </p>
                 </div>
 
@@ -57,13 +57,40 @@
                         {{ $material->external_url }} ↗
                     </a>
                 @else
-                    <div style="display: flex; align-items: center; justify-content: space-between;">
-                        <span style="color: var(--text-main, #f8fafc); font-family: monospace;">
-                            📄 {{ $material->original_name ?: $material->title . '.pdf' }}
-                        </span>
-                        <span style="font-size: 0.8rem; color: #10b981; font-weight: 600;">
-                            ✓ Terverifikasi (Metadata)
-                        </span>
+                    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.75rem;">
+                        <div>
+                            <span style="color: var(--text-main, #f8fafc); font-family: monospace; font-weight: 600;">
+                                📄 {{ $material->original_name ?: $material->title . '.pdf' }}
+                            </span>
+                            @if ($material->file_size)
+                                <span style="font-size: 0.8rem; color: var(--text-muted, #94a3b8); margin-left: 0.5rem;">
+                                    ({{ $material->humanReadableSize() }})
+                                </span>
+                            @endif
+                            @if ($material->mime_type)
+                                <span style="font-size: 0.75rem; padding: 0.15rem 0.5rem; border-radius: 9999px; background: rgba(16, 185, 129, 0.12); color: #10b981; font-weight: 600; margin-left: 0.5rem;">
+                                    {{ strtoupper(str_replace('application/', '', $material->mime_type)) }}
+                                </span>
+                            @endif
+                        </div>
+
+                        {{-- Tombol Unduh — memanggil endpoint download yang melewati Policy --}}
+                        @if ($material->file_path)
+                            @php
+                                $downloadRoute = auth()->user()->role === 'dosen'
+                                    ? route('dosen.materials.download', $material)
+                                    : route('mahasiswa.materials.download', $material);
+                            @endphp
+                            <a href="{{ $downloadRoute }}"
+                               class="btn btn-primary"
+                               style="font-size: 0.85rem; padding: 0.5rem 1rem; display: inline-flex; align-items: center; gap: 0.4rem;">
+                                ⬇️ Unduh Berkas
+                            </a>
+                        @else
+                            <span style="font-size: 0.8rem; color: #f59e0b; font-weight: 600;">
+                                ⚠️ Berkas belum diunggah
+                            </span>
+                        @endif
                     </div>
                 @endif
             </div>

@@ -30,6 +30,7 @@ use App\Http\Controllers\Dosen\MaterialController    as DosenMaterialController;
 use App\Http\Controllers\Dosen\AssignmentController  as DosenAssignmentController;
 use App\Http\Controllers\Dosen\SubmissionController  as DosenSubmissionController;
 use App\Http\Controllers\Dosen\GradeController       as DosenGradeController;
+use App\Http\Controllers\Dosen\EnrollmentController  as DosenEnrollmentController;
 
 // ──────────────────────────────────────────────────────
 // Import Controller — Mahasiswa
@@ -92,7 +93,7 @@ Route::middleware('guest')->group(function () {
     })->name('register');
 });
 
-Route::match(['get', 'post'], '/logout', [LoginController::class, 'logout'])->name('logout');
+Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
 
 // ══════════════════════════════════════════════════════
@@ -167,6 +168,10 @@ Route::middleware(['auth:sanctum,web'])->group(function () {
             Route::resource('courses.materials', DosenMaterialController::class)
                 ->shallow();
 
+            // Download berkas materi — endpoint terpisah agar semantik dan mudah di-Policy
+            Route::get('materials/{material}/download', [DosenMaterialController::class, 'download'])
+                ->name('materials.download');
+
             // Tugas — CRUD, bersarang di bawah course
             // shallow(): show/edit/update/destroy cukup /dosen/assignments/{assignment}
             Route::resource('courses.assignments', DosenAssignmentController::class)
@@ -178,11 +183,20 @@ Route::middleware(['auth:sanctum,web'])->group(function () {
                 ->shallow()
                 ->only(['index', 'show']);
 
+            // Download berkas submission — endpoint terpisah agar semantik dan mudah di-Policy
+            Route::get('submissions/{submission}/download', [DosenSubmissionController::class, 'download'])
+                ->name('submissions.download');
+
             // Nilai — dosen membuat dan memperbarui nilai
             // shallow(): update cukup /dosen/grades/{grade}
             Route::resource('submissions.grades', DosenGradeController::class)
                 ->shallow()
                 ->only(['store', 'update']);
+
+            // Enrollment — dosen mendaftarkan dan mengelola mahasiswa di kelasnya
+            Route::resource('courses.enrollments', DosenEnrollmentController::class)
+                ->shallow()
+                ->only(['index', 'create', 'store', 'destroy']);
         });
 
 
@@ -211,6 +225,10 @@ Route::middleware(['auth:sanctum,web'])->group(function () {
                 ->shallow()
                 ->only(['index', 'show']);
 
+            // Download berkas materi — endpoint terpisah dengan otorisasi Policy
+            Route::get('materials/{material}/download', [MahasiswaMaterialController::class, 'download'])
+                ->name('materials.download');
+
             // Tugas — read-only
             Route::resource('courses.assignments', MahasiswaAssignmentController::class)
                 ->shallow()
@@ -220,6 +238,10 @@ Route::middleware(['auth:sanctum,web'])->group(function () {
             Route::resource('assignments.submissions', MahasiswaSubmissionController::class)
                 ->shallow()
                 ->except(['destroy']);
+
+            // Download berkas submission — endpoint terpisah dengan otorisasi Policy
+            Route::get('submissions/{submission}/download', [MahasiswaSubmissionController::class, 'download'])
+                ->name('submissions.download');
 
             // Nilai — mahasiswa hanya melihat nilai sendiri
             Route::resource('submissions.grades', MahasiswaGradeController::class)

@@ -24,10 +24,6 @@ class CourseController extends Controller
     {
         $courses = Course::with('lecturer')->latest()->paginate(15);
 
-        if (request()->wantsJson()) {
-            return response()->json($courses);
-        }
-
         return view('courses.index', compact('courses'));
     }
 

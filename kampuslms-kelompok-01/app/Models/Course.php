@@ -7,10 +7,39 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Storage;
 
 class Course extends Model
 {
     use HasFactory;
+
+    /**
+     * Boot model events.
+     *
+     * Event `deleting` menghapus seluruh berkas fisik anak saat mata kuliah dihapus.
+     * cascadeOnDelete di database menghapus baris tabel anak, tetapi TIDAK
+     * memicu event Eloquent — sehingga berkas fisik tertinggal di storage.
+     *
+     * Urutan: hapus materi (file materi) → hapus tugas (cascade ke submission files)
+     * → bersihkan direktori materials/courses/{id}.
+     */
+    protected static function booted(): void
+    {
+        static::deleting(function (Course $course) {
+            // 1. Hapus semua materi satu-satu agar event deleting di Material terpicu
+            foreach ($course->materials as $material) {
+                $material->delete();
+            }
+
+            // Bersihkan direktori materi mata kuliah
+            Storage::disk('local')->deleteDirectory("materials/courses/{$course->id}");
+
+            // 2. Hapus semua tugas satu-satu agar cascade ke submission terpicu
+            foreach ($course->assignments as $assignment) {
+                $assignment->delete();
+            }
+        });
+    }
 
     /**
      * The attributes that are mass assignable.
@@ -61,7 +90,7 @@ class Course extends Model
     public function students(): BelongsToMany
     {
         return $this->belongsToMany(User::class)
-                    ->withPivot('enrolled_at')
+                    ->withPivot('id', 'enrolled_at')
                     ->withTimestamps();
     }
 

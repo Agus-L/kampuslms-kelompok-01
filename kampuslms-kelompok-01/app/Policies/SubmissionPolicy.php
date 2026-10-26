@@ -59,6 +59,15 @@ class SubmissionPolicy
         }
 
         if ($assignment) {
+            if ($assignment->status !== 'published') {
+                return false;
+            }
+
+            // Tolak jika sudah lewat deadline DAN allow_late = false
+            if (!$assignment->allow_late && now()->gt($assignment->due_at)) {
+                return false;
+            }
+
             $isEnrolled = $assignment->course
                 && $assignment->course->students()->where('user_id', $user->id)->exists();
 
@@ -125,6 +134,32 @@ class SubmissionPolicy
         return $submission->assignment
             && $submission->assignment->course
             && $submission->assignment->course->lecturer_id === $user->id;
+    }
+
+    /**
+     * Tentukan apakah pengguna dapat mengunduh berkas submission.
+     *
+     * Admin: Diizinkan untuk keperluan audit sistem.
+     * Dosen: Diizinkan HANYA jika submission berasal dari mata kuliah yang diampunya.
+     * Mahasiswa: Diizinkan HANYA jika submission adalah miliknya sendiri.
+     */
+    public function download(User $user, Submission $submission): bool
+    {
+        if ($user->role === 'admin') {
+            return true;
+        }
+
+        if ($user->role === 'dosen') {
+            return $submission->assignment
+                && $submission->assignment->course
+                && $submission->assignment->course->lecturer_id === $user->id;
+        }
+
+        if ($user->role === 'mahasiswa') {
+            return $submission->user_id === $user->id;
+        }
+
+        return false;
     }
 
     /**
