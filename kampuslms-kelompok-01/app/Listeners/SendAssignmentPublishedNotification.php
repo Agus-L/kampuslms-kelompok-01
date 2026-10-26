@@ -5,7 +5,9 @@ namespace App\Listeners;
 use App\Events\AssignmentPublished;
 use App\Notifications\AssignmentPublishedNotification;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Notification;
+use Throwable;
 
 /**
  * Listener yang mengirim notifikasi tugas baru ke seluruh mahasiswa
@@ -20,6 +22,18 @@ use Illuminate\Support\Facades\Notification;
  */
 class SendAssignmentPublishedNotification implements ShouldQueue
 {
+    /**
+     * Jumlah maksimal percobaan eksekusi job sebelum dinyatakan gagal permanen.
+     * Setelah 3 kali gagal, job dipindahkan ke tabel `failed_jobs`.
+     */
+    public int $tries = 3;
+
+    /**
+     * Jeda waktu (detik) sebelum job dicoba ulang setelah gagal.
+     * Memberi waktu agar kondisi sementara (misal SMTP down) bisa pulih.
+     */
+    public int $backoff = 10;
+
     /**
      * Handle the event.
      *
@@ -37,5 +51,21 @@ class SendAssignmentPublishedNotification implements ShouldQueue
         $assignment->course->students()->chunk(100, function ($students) use ($assignment) {
             Notification::send($students, new AssignmentPublishedNotification($assignment));
         });
+    }
+
+    /**
+     * Tangani kegagalan permanen setelah semua percobaan retry habis.
+     *
+     * Dicatat ke laravel.log agar admin/dosen bisa mendiagnosis
+     * mengapa notifikasi publikasi tugas tidak sampai ke mahasiswa.
+     */
+    public function failed(AssignmentPublished $event, Throwable $exception): void
+    {
+        Log::error('SendAssignmentPublishedNotification gagal setelah semua retry.', [
+            'assignment_id'    => $event->assignment->id,
+            'assignment_title' => $event->assignment->title,
+            'course_id'        => $event->assignment->course_id,
+            'error'            => $exception->getMessage(),
+        ]);
     }
 }

@@ -7,6 +7,8 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
+use Illuminate\Support\Facades\Log;
+use Throwable;
 
 /**
  * Notifikasi submission telah dinilai oleh dosen.
@@ -23,6 +25,16 @@ use Illuminate\Notifications\Notification;
 class SubmissionGradedNotification extends Notification implements ShouldQueue
 {
     use Queueable;
+
+    /**
+     * Jumlah maksimal percobaan pengiriman notifikasi.
+     */
+    public int $tries = 3;
+
+    /**
+     * Jeda waktu (detik) sebelum notifikasi dicoba ulang.
+     */
+    public int $backoff = 10;
 
     /**
      * Create a new notification instance.
@@ -89,5 +101,16 @@ class SubmissionGradedNotification extends Notification implements ShouldQueue
         return $mail
             ->action('Lihat Detail Nilai', route('mahasiswa.submissions.grades.index', $submission->id))
             ->line('Terima kasih telah mengerjakan tugas.');
+    }
+
+    /**
+     * Tangani kegagalan pengiriman notifikasi setelah semua retry habis.
+     */
+    public function failed(Throwable $exception): void
+    {
+        Log::error('SubmissionGradedNotification gagal terkirim.', [
+            'grade_id' => $this->grade->id,
+            'error'    => $exception->getMessage(),
+        ]);
     }
 }

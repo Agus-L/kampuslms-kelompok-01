@@ -5,6 +5,8 @@ namespace App\Listeners;
 use App\Events\SubmissionGraded;
 use App\Notifications\SubmissionGradedNotification;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Support\Facades\Log;
+use Throwable;
 
 /**
  * Listener yang mengirim notifikasi penilaian ke mahasiswa pemilik submission.
@@ -17,6 +19,16 @@ use Illuminate\Contracts\Queue\ShouldQueue;
  */
 class SendSubmissionGradedNotification implements ShouldQueue
 {
+    /**
+     * Jumlah maksimal percobaan eksekusi job sebelum dinyatakan gagal permanen.
+     */
+    public int $tries = 3;
+
+    /**
+     * Jeda waktu (detik) sebelum job dicoba ulang setelah gagal.
+     */
+    public int $backoff = 10;
+
     /**
      * Handle the event.
      *
@@ -33,5 +45,21 @@ class SendSubmissionGradedNotification implements ShouldQueue
         $student = $grade->submission->student;
 
         $student->notify(new SubmissionGradedNotification($grade));
+    }
+
+    /**
+     * Tangani kegagalan permanen setelah semua percobaan retry habis.
+     *
+     * Dicatat ke laravel.log agar admin bisa mendiagnosis
+     * mengapa notifikasi penilaian tidak sampai ke mahasiswa.
+     */
+    public function failed(SubmissionGraded $event, Throwable $exception): void
+    {
+        Log::error('SendSubmissionGradedNotification gagal setelah semua retry.', [
+            'grade_id'      => $event->grade->id,
+            'submission_id' => $event->grade->submission_id,
+            'student_id'    => $event->grade->submission?->user_id,
+            'error'         => $exception->getMessage(),
+        ]);
     }
 }

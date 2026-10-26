@@ -7,6 +7,8 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
+use Illuminate\Support\Facades\Log;
+use Throwable;
 
 /**
  * Notifikasi tugas baru dipublikasikan.
@@ -23,6 +25,16 @@ use Illuminate\Notifications\Notification;
 class AssignmentPublishedNotification extends Notification implements ShouldQueue
 {
     use Queueable;
+
+    /**
+     * Jumlah maksimal percobaan pengiriman notifikasi per mahasiswa.
+     */
+    public int $tries = 3;
+
+    /**
+     * Jeda waktu (detik) sebelum notifikasi dicoba ulang.
+     */
+    public int $backoff = 10;
 
     /**
      * Create a new notification instance.
@@ -80,5 +92,16 @@ class AssignmentPublishedNotification extends Notification implements ShouldQueu
             ->line("**Tenggat:** {$dueLabel}")
             ->action('Lihat Tugas', route('mahasiswa.courses.assignments.index', $course->id))
             ->line('Segera kerjakan sebelum batas waktu berakhir.');
+    }
+
+    /**
+     * Tangani kegagalan pengiriman notifikasi setelah semua retry habis.
+     */
+    public function failed(Throwable $exception): void
+    {
+        Log::error('AssignmentPublishedNotification gagal terkirim.', [
+            'assignment_id' => $this->assignment->id,
+            'error'         => $exception->getMessage(),
+        ]);
     }
 }
