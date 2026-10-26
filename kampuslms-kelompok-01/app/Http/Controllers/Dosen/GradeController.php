@@ -4,9 +4,9 @@ namespace App\Http\Controllers\Dosen;
 
 use App\Events\SubmissionGraded;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\GradeRequest;
 use App\Models\Grade;
 use App\Models\Submission;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 
 /**
@@ -21,7 +21,11 @@ use Illuminate\Support\Facades\Gate;
  * Route hanya mendaftarkan: store, update
  * (lihat ->only(['store', 'update']) di routes/web.php)
  *
- * Otorisasi menggunakan GradePolicy via Gate::authorize.
+ * Prinsip Controller Tipis:
+ * - Validasi input didelegasikan ke Form Request (GradeRequest).
+ * - Otorisasi menggunakan GradePolicy via Gate::authorize.
+ * - Dispatching event SubmissionGraded mendelegasikan pengiriman notifikasi
+ *   ke antrean asynchronous di background.
  */
 class GradeController extends Controller
 {
@@ -31,16 +35,11 @@ class GradeController extends Controller
      * Route: POST /dosen/submissions/{submission}/grades → dosen.submissions.grades.store
      * Route model binding: {submission} → Submission $submission
      */
-    public function store(Request $request, Submission $submission)
+    public function store(GradeRequest $request, Submission $submission)
     {
         Gate::authorize('create', [Grade::class, $submission]);
 
-        $maxScore = $submission->assignment->max_score ?? 100;
-
-        $validated = $request->validate([
-            'score'    => ['required', 'numeric', 'min:0', "max:{$maxScore}"],
-            'feedback' => ['nullable', 'string', 'max:2000'],
-        ]);
+        $validated = $request->validated();
 
         $grade = Grade::firstOrNew(['submission_id' => $submission->id]);
         $grade->graded_by = auth()->id();
@@ -49,7 +48,7 @@ class GradeController extends Controller
         $grade->graded_at = now();
         $grade->save();
 
-        // Dispatch event → notifikasi ke mahasiswa pemilik submission
+        // Dispatch event → notifikasi ke mahasiswa pemilik submission via Queue
         event(new SubmissionGraded($grade));
 
         return back()->with('success', 'Nilai dan umpan balik berhasil disimpan.');
@@ -61,16 +60,11 @@ class GradeController extends Controller
      * Route: PUT /dosen/grades/{grade} → dosen.grades.update
      * Route model binding: {grade} → Grade $grade
      */
-    public function update(Request $request, Grade $grade)
+    public function update(GradeRequest $request, Grade $grade)
     {
         Gate::authorize('update', $grade);
 
-        $maxScore = $grade->submission->assignment->max_score ?? 100;
-
-        $validated = $request->validate([
-            'score'    => ['required', 'numeric', 'min:0', "max:{$maxScore}"],
-            'feedback' => ['nullable', 'string', 'max:2000'],
-        ]);
+        $validated = $request->validated();
 
         $grade->graded_by = auth()->id();
         $grade->score     = $validated['score'];
@@ -78,7 +72,7 @@ class GradeController extends Controller
         $grade->graded_at = now();
         $grade->save();
 
-        // Dispatch event → notifikasi ke mahasiswa pemilik submission
+        // Dispatch event → notifikasi ke mahasiswa pemilik submission via Queue
         event(new SubmissionGraded($grade));
 
         return back()->with('success', 'Nilai berhasil diperbarui.');

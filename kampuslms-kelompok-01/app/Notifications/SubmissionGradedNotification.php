@@ -74,8 +74,8 @@ class SubmissionGradedNotification extends Notification implements ShouldQueue
             'submission_id'    => $submission->id,
             'assignment_title' => $assignment->title,
             'course_name'      => $course->name,
-            'message'          => "Tugas '{$assignment->title}' pada mata kuliah {$course->name} telah dinilai oleh dosen.",
-            'action_url'       => route('mahasiswa.submissions.grades.index', $submission->id),
+            'message'          => "Hasil pengumpulan '{$assignment->title}' pada mata kuliah {$course->name} telah diperiksa oleh dosen.",
+            'action_url'       => route('mahasiswa.submissions.show', $submission->id),
         ];
     }
 

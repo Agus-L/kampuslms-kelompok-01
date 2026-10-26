@@ -28,16 +28,18 @@ class GradeController extends Controller
      * Route: GET /mahasiswa/submissions/{submission}/grades → mahasiswa.submissions.grades.index
      * Route model binding: {submission} → Submission $submission
      */
-    public function index(Submission $submission)
+    public function index(Request $request, Submission $submission)
     {
         Gate::authorize('view', $submission);
 
-        $grade = $submission->grade;
+        if ($request->wantsJson()) {
+            return response()->json([
+                'submission_id' => $submission->id,
+                'assignment'    => $submission->assignment->title ?? null,
+                'grade'         => $submission->grade,
+            ]);
+        }
 
-        return response()->json([
-            'submission_id' => $submission->id,
-            'assignment'    => $submission->assignment->title ?? null,
-            'grade'         => $grade,
-        ]);
+        return redirect()->route('mahasiswa.submissions.show', $submission);
     }
 }
