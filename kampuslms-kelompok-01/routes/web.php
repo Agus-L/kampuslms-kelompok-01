@@ -196,6 +196,11 @@ Route::middleware(['auth:sanctum,web'])->group(function () {
                 ->shallow()
                 ->only(['store', 'update']);
 
+            // Rekap nilai per mata kuliah — Poin 7 Milestone M3
+            // Dosen melihat buku nilai (gradebook) seluruh mahasiswa di MK yang diampunya
+            Route::get('courses/{course}/grades', [DosenGradeController::class, 'rekap'])
+                ->name('courses.grades.rekap');
+
             // Enrollment — dosen mendaftarkan dan mengelola mahasiswa di kelasnya
             Route::resource('courses.enrollments', DosenEnrollmentController::class)
                 ->shallow()
@@ -250,5 +255,10 @@ Route::middleware(['auth:sanctum,web'])->group(function () {
             Route::resource('submissions.grades', MahasiswaGradeController::class)
                 ->shallow()
                 ->only(['index']);
+
+            // Rekap nilai per mata kuliah — Poin 7 Milestone M3
+            // Mahasiswa melihat rapor nilainya pada satu MK yang diikutinya
+            Route::get('courses/{course}/grades', [MahasiswaGradeController::class, 'courseGrades'])
+                ->name('courses.grades.index');
         });
 });
