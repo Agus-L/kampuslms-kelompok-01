@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Dosen;
 
+use App\Events\AssignmentPublished;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreAssignmentRequest;
 use App\Http\Requests\UpdateAssignmentRequest;
@@ -79,6 +80,12 @@ class AssignmentController extends Controller
         }
 
         $assignment->save();
+
+        // Dispatch event notifikasi ke seluruh mahasiswa mata kuliah
+        // hanya jika tugas langsung berstatus published (bukan draft).
+        if ($assignment->status === 'published') {
+            event(new AssignmentPublished($assignment));
+        }
 
         return redirect()->route('dosen.courses.assignments.index', $course)
             ->with('success', 'Tugas berhasil dibuat.');

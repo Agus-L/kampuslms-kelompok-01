@@ -61,6 +61,92 @@ In order to ensure that the Laravel community is welcoming to all, please review
 
 If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
 
+## Sistem Notifikasi & Queue Worker
+
+Proyek ini menggunakan **Event-Driven Notification** untuk memberi tahu mahasiswa ketika:
+1. **Tugas baru dipublikasikan** oleh dosen → seluruh mahasiswa di mata kuliah tersebut.
+2. **Submission dinilai** oleh dosen → mahasiswa pemilik submission.
+
+### Prasyarat Tabel Database
+
+Proyek ini sudah menyertakan migration untuk tabel-tabel yang dibutuhkan queue dan notifikasi. Jalankan migrasi untuk membuat seluruh tabel yang diperlukan:
+
+```bash
+php artisan migrate
+```
+
+Tabel yang dibuat oleh migration di atas terkait sistem ini:
+
+| Tabel | Migration | Fungsi |
+|-------|-----------|--------|
+| `jobs` | `0001_01_01_000002_create_jobs_table.php` | Menyimpan antrean job yang menunggu dieksekusi worker |
+| `failed_jobs` | `0001_01_01_000002_create_jobs_table.php` | Mencatat job yang gagal setelah dieksekusi |
+| `job_batches` | `0001_01_01_000002_create_jobs_table.php` | Mendukung batch processing job |
+| `notifications` | `2025_01_02_000007_create_notifications_table.php` | Menyimpan notifikasi in-app (lonceng) untuk setiap user |
+
+### Konfigurasi Queue
+
+Pastikan file `.env` sudah mengatur koneksi queue ke database:
+
+```env
+QUEUE_CONNECTION=database
+```
+
+Nilai ini sudah diatur secara default di `.env.example`.
+
+### Menjalankan Queue Worker
+
+Setelah `php artisan migrate` selesai, jalankan queue worker di terminal **terpisah** agar job notifikasi dapat diproses:
+
+```bash
+# Mode development — worker berjalan dan memproses job secara real-time
+php artisan queue:work
+
+# Dengan opsi retry (mencoba ulang job yang gagal setelah 90 detik)
+php artisan queue:work --tries=3 --backoff=90
+```
+
+> **⚠️ PENTING:** Queue worker **harus tetap berjalan** selama aplikasi digunakan.
+> Jika worker mati, notifikasi **tidak akan terkirim** (baik database maupun email),
+> tetapi **tidak ada error** yang muncul di layar dosen — ini disebut *silent failure*.
+> Job hanya menumpuk di tabel `jobs` hingga worker dihidupkan kembali.
+
+### Perintah Berguna
+
+```bash
+# Melihat antrean job yang tertunda
+php artisan queue:monitor database:default
+
+# Menjalankan 1 job saja (berguna untuk debugging)
+php artisan queue:work --once
+
+# Melihat job yang gagal
+php artisan queue:failed
+
+# Menjalankan ulang semua job yang gagal
+php artisan queue:retry all
+
+# Membersihkan semua job yang gagal
+php artisan queue:flush
+```
+
+### Arsitektur Event → Listener → Notification
+
+```
+Dosen membuat tugas (AssignmentController@store)
+  └─► event(new AssignmentPublished($assignment))
+        └─► SendAssignmentPublishedNotification (ShouldQueue)
+              └─► AssignmentPublishedNotification → [database, mail]
+                    └─► Penerima: $assignment->course->students
+
+Dosen memberi nilai (GradeController@store / update)
+  └─► event(new SubmissionGraded($grade))
+        └─► SendSubmissionGradedNotification (ShouldQueue)
+              └─► SubmissionGradedNotification → [database, mail]
+                    └─► Penerima: $grade->submission->student
+```
+
 ## License
 
 The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+

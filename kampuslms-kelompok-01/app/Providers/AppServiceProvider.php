@@ -2,10 +2,15 @@
 
 namespace App\Providers;
 
+use App\Events\AssignmentPublished;
+use App\Events\SubmissionGraded;
+use App\Listeners\SendAssignmentPublishedNotification;
+use App\Listeners\SendSubmissionGradedNotification;
 use Illuminate\Support\ServiceProvider;
 
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\RateLimiter;
 
 class AppServiceProvider extends ServiceProvider
@@ -23,6 +28,12 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        /* ------------------------------------------------------------------ *
+         |  Event → Listener mapping (Notifikasi LMS — Minggu 10)
+         * ------------------------------------------------------------------ */
+        Event::listen(AssignmentPublished::class, SendAssignmentPublishedNotification::class);
+        Event::listen(SubmissionGraded::class, SendSubmissionGradedNotification::class);
+
         // Rate limiting umum: 60/menit per user/IP
         RateLimiter::for('api', function (Request $request) {
             return Limit::perMinute(60)->by($request->user()?->id ?: $request->ip());
