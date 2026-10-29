@@ -76,20 +76,24 @@
                         </div>
                     </div>
                     <div>
-                        <div style="color: var(--text-muted, #94a3b8); margin-bottom: 0.25rem;">Berkas Tugas:</div>
-                        <div style="display: flex; align-items: center; gap: 0.5rem;">
-                            <span style="font-size: 1.2rem;">📎</span>
-                            <div>
-                                <a href="{{ auth()->user()->role === 'dosen'
-                                    ? route('dosen.submissions.download', $submission)
-                                    : route('mahasiswa.submissions.download', $submission) }}" style="color: #38bdf8; font-weight: 700; text-decoration: underline;">
-                                    {{ $submission->original_name }}
-                                </a>
-                                <span style="font-size: 0.75rem; color: var(--text-muted); display: block;">
-                                    ({{ $submission->humanReadableSize() }})
-                                </span>
-                            </div>
-                        </div>
+                        <div style="color: var(--text-muted, #94a3b8); margin-bottom: 0.35rem;">Berkas Tugas:</div>
+                        @php
+                            $downloadUrl = auth()->user()->role === 'dosen'
+                                ? route('dosen.submissions.download', $submission)
+                                : route('mahasiswa.submissions.download', $submission);
+                        @endphp
+                        <a href="{{ $downloadUrl }}"
+                           title="{{ $submission->original_name }}"
+                           style="display: inline-flex; align-items: center; gap: 0.5rem; background: var(--badge-bg, rgba(99, 102, 241, 0.08)); border: 1px solid var(--badge-border, rgba(99, 102, 241, 0.25)); color: var(--primary, #4f46e5); padding: 0.4rem 0.75rem; border-radius: 0.5rem; text-decoration: none; font-weight: 600; font-size: 0.85rem; max-width: 100%; transition: all 0.2s ease;">
+                            <span style="font-size: 1.05rem;">📄</span>
+                            <span style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                                {{ $submission->original_name }}
+                            </span>
+                            <span style="font-size: 0.75rem; color: var(--text-muted, #64748b); font-weight: normal;">
+                                ({{ $submission->humanReadableSize() }})
+                            </span>
+                            <span style="font-size: 0.85rem; opacity: 0.75;">⬇️</span>
+                        </a>
                     </div>
                 </div>
 
@@ -134,9 +138,11 @@
                                     id="score"
                                     min="0"
                                     max="{{ $submission->assignment->max_score }}"
-                                    step="0.01"
-                                    value="{{ old('score', $submission->grade->score ?? '') }}"
+                                    step="1"
+                                    value="{{ old('score', isset($submission->grade) ? (int)$submission->grade->score : '') }}"
                                     required
+                                    oninvalid="this.setCustomValidity(this.validity.stepMismatch ? 'Nilai harus berupa bilangan bulat (tidak boleh desimal atau berkoma).' : (this.validity.valueMissing ? 'Nilai wajib diisi.' : 'Harap masukkan nilai yang valid.'))"
+                                    oninput="this.setCustomValidity('')"
                                     class="search-input"
                                     style="width: 100%; font-size: 1.1rem; font-weight: 700;"
                                     placeholder="Contoh: 85"
@@ -180,7 +186,7 @@
                     @if($submission->grade)
                         <div style="display: flex; align-items: baseline; gap: 0.75rem; margin-bottom: 0.75rem;">
                             <span style="font-size: 2.2rem; font-weight: 800; color: #10b981;">
-                                {{ $submission->grade->score }}
+                                {{ (int) $submission->grade->score == $submission->grade->score ? (int) $submission->grade->score : $submission->grade->score }}
                             </span>
                             <span style="font-size: 1.1rem; color: var(--text-muted);">
                                 / {{ $submission->assignment->max_score }}

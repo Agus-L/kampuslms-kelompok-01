@@ -116,7 +116,7 @@ class NewFeaturesAndFixesTest extends TestCase
         $gradeRes = $this->actingAs($this->dosen1)->post(
             route('dosen.submissions.grades.store', $submission),
             [
-                'score'    => 95.5,
+                'score'    => 95,
                 'feedback' => 'Analisis sangat baik dan komprehensif.',
             ]
         );
@@ -125,7 +125,7 @@ class NewFeaturesAndFixesTest extends TestCase
         $this->assertDatabaseHas('grades', [
             'submission_id' => $submission->id,
             'graded_by'     => $this->dosen1->id,
-            'score'         => 95.5,
+            'score'         => 95,
         ]);
 
         // 3. Dosen memperbarui nilai
@@ -133,14 +133,14 @@ class NewFeaturesAndFixesTest extends TestCase
         $updateGradeRes = $this->actingAs($this->dosen1)->put(
             route('dosen.grades.update', $grade),
             [
-                'score'    => 98.0,
+                'score'    => 98,
                 'feedback' => 'Revisi tambahan sempurna.',
             ]
         );
         $updateGradeRes->assertSessionHas('success');
         $this->assertDatabaseHas('grades', [
             'id'    => $grade->id,
-            'score' => 98.0,
+            'score' => 98,
         ]);
     }
 

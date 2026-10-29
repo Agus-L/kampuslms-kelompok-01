@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Dosen;
 
+use App\Events\AssignmentPublished;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreAssignmentRequest;
 use App\Http\Requests\UpdateAssignmentRequest;
@@ -79,6 +80,15 @@ class AssignmentController extends Controller
         }
 
         $assignment->save();
+
+        // =========================================================================
+        // Saat event ini di-dispatch, sistem HANYA menyisipkan data ke antrean (INSERT INTO jobs).
+        // Karena proses insert berhasil, web langsung redirect dengan pesan 'Tugas berhasil dibuat'.
+        // Jika Queue Worker mati, error TIDAK akan muncul di sini.
+        // =========================================================================
+        if ($assignment->status === 'published') {
+            event(new AssignmentPublished($assignment));
+        }
 
         return redirect()->route('dosen.courses.assignments.index', $course)
             ->with('success', 'Tugas berhasil dibuat.');

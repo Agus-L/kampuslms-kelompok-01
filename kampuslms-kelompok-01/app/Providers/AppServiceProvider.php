@@ -2,10 +2,15 @@
 
 namespace App\Providers;
 
+use App\Events\AssignmentPublished;
+use App\Events\SubmissionGraded;
+use App\Listeners\SendAssignmentPublishedNotification;
+use App\Listeners\SendSubmissionGradedNotification;
 use Illuminate\Support\ServiceProvider;
 
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\RateLimiter;
 
 class AppServiceProvider extends ServiceProvider

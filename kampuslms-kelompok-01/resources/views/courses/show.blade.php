@@ -101,6 +101,39 @@
         </p>
     </div>
 
+    {{-- ── Tombol Rekap Nilai — Poin 7 Milestone M3 ── --}}
+    @if($role === 'dosen' || $role === 'mahasiswa')
+    <div style="background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(139, 92, 246, 0.08)); border: 1px solid rgba(99, 102, 241, 0.25); border-radius: 1rem; padding: 1.25rem 1.5rem; margin-top: 1.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+        <div>
+            <h2 style="font-size: 1.15rem; font-weight: 700; color: var(--text-main, #f8fafc); margin: 0 0 0.25rem 0;">
+                📊 Rekapitulasi Nilai
+            </h2>
+            <p style="font-size: 0.85rem; color: var(--text-muted, #94a3b8); margin: 0;">
+                @if($role === 'dosen')
+                    Lihat buku nilai lengkap (gradebook) seluruh mahasiswa di mata kuliah ini.
+                @else
+                    Lihat rapor capaian belajar Anda di mata kuliah ini.
+                @endif
+            </p>
+        </div>
+        <div>
+            @if($role === 'dosen')
+                <a href="{{ route('dosen.courses.grades.rekap', $course) }}" class="btn" style="padding: 0.6rem 1.25rem; font-size: 0.88rem; font-weight: 700; background: #1d4ed8; color: #ffffff; border: 1px solid #1e40af; border-radius: 0.5rem; text-decoration: none; box-shadow: 0 2px 4px rgba(29, 78, 216, 0.25); display: inline-flex; align-items: center; gap: 0.35rem; transition: all 0.2s ease;"
+                   onmouseover="this.style.background='#1e40af'; this.style.borderColor='#1e3a8a'; this.style.transform='translateY(-1px)'; this.style.boxShadow='0 4px 10px rgba(29, 78, 216, 0.35)';"
+                   onmouseout="this.style.background='#1d4ed8'; this.style.borderColor='#1e40af'; this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 4px rgba(29, 78, 216, 0.25)';">
+                    📊 Rekap Nilai Kelas →
+                </a>
+            @else
+                <a href="{{ route('mahasiswa.courses.grades.index', $course) }}" class="btn" style="padding: 0.6rem 1.25rem; font-size: 0.88rem; font-weight: 700; background: #1d4ed8; color: #ffffff; border: 1px solid #1e40af; border-radius: 0.5rem; text-decoration: none; box-shadow: 0 2px 4px rgba(29, 78, 216, 0.25); display: inline-flex; align-items: center; gap: 0.35rem; transition: all 0.2s ease;"
+                   onmouseover="this.style.background='#1e40af'; this.style.borderColor='#1e3a8a'; this.style.transform='translateY(-1px)'; this.style.boxShadow='0 4px 10px rgba(29, 78, 216, 0.35)';"
+                   onmouseout="this.style.background='#1d4ed8'; this.style.borderColor='#1e40af'; this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 4px rgba(29, 78, 216, 0.25)';">
+                    📊 Nilai Saya →
+                </a>
+            @endif
+        </div>
+    </div>
+    @endif
+
     {{-- ── Modul Materi Perkuliahan ── --}}
     <div style="background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 1rem; padding: 1.5rem; margin-top: 1.5rem;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">

@@ -12,9 +12,14 @@ class NotificationController extends Controller
      */
     public function index(Request $request)
     {
-        $notifications = $request->user()->notifications()->paginate(20);
+        $notifications = $request->user()
+            ->notifications()
+            ->latest()
+            ->paginate(15);
 
-        return view('notifications.index', compact('notifications'));
+        $unreadCount = $request->user()->unreadNotifications()->count();
+
+        return view('notifications.index', compact('notifications', 'unreadCount'));
     }
 
     /**
@@ -30,6 +35,18 @@ class NotificationController extends Controller
 
         $notification->markAsRead();
 
-        return back()->with('success', 'Notifikasi ditandai sudah dibaca.');
+        return back()->with('success', 'Notifikasi berhasil ditandai sudah dibaca.');
+    }
+
+    /**
+     * Tandai semua notifikasi yang belum dibaca milik pengguna sebagai sudah dibaca.
+     *
+     * Route: POST /notifications/mark-all-read → notifications.mark-all-read
+     */
+    public function markAllAsRead(Request $request)
+    {
+        $request->user()->unreadNotifications->markAsRead();
+
+        return back()->with('success', 'Semua notifikasi berhasil ditandai sudah dibaca.');
     }
 }
