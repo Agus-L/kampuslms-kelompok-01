@@ -20,6 +20,14 @@ use Throwable;
  *
  * @see \App\Events\AssignmentPublished
  */
+
+// 1. "implements ShouldQueue" membuat listener ini dikirim ke antrean (tabel 'jobs'),
+//    BUKAN langsung dieksekusi saat dosen menekan tombol di web.
+// 2. KETIKA QUEUE WORKER MATI:
+//    - Web dosen tetap menampilkan "Tugas berhasil dibuat" (tanpa error).
+//    - Tetapi lonceng notifikasi di web mahasiswa TIDAK AKAN MUNCUL (tertahan di tabel 'jobs').
+// 3. KETIKA QUEUE WORKER DINYALAKAN (php artisan queue:work):
+//    - Job di tabel 'jobs' diproses, barulah notifikasi masuk ke lonceng mahasiswa di web.
 class SendAssignmentPublishedNotification implements ShouldQueue
 {
     /**

@@ -81,8 +81,11 @@ class AssignmentController extends Controller
 
         $assignment->save();
 
-        // Dispatch event notifikasi ke seluruh mahasiswa mata kuliah
-        // hanya jika tugas langsung berstatus published (bukan draft).
+        // =========================================================================
+        // Saat event ini di-dispatch, sistem HANYA menyisipkan data ke antrean (INSERT INTO jobs).
+        // Karena proses insert berhasil, web langsung redirect dengan pesan 'Tugas berhasil dibuat'.
+        // Jika Queue Worker mati, error TIDAK akan muncul di sini.
+        // =========================================================================
         if ($assignment->status === 'published') {
             event(new AssignmentPublished($assignment));
         }
