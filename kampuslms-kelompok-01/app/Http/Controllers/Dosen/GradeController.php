@@ -96,36 +96,43 @@ class GradeController extends Controller
     {
         Gate::authorize('view', $course);
 
-        // Ambil semua tugas di MK ini, urut berdasarkan waktu pembuatan
+        // Optimisasi Minggu 11 (Penyebab #2): Ambil HANYA kolom yang dibutuhkan (hindari SELECT *)
+        // Menghemat alokasi memori Eloquent, bandwidth DB, dan tidak memuat kolom sensitif/teks panjang
         $assignments = $course->assignments()
+            ->select(['assignments.id', 'assignments.course_id', 'assignments.title', 'assignments.max_score'])
             ->orderBy('created_at', 'asc')
             ->get();
 
-        // Ambil semua mahasiswa yang terdaftar beserta submission & nilai
-        // untuk tugas-tugas di MK ini
+        // Ambil mahasiswa dan relasi bersarang dengan kolom spesifik
         $students = $course->students()
+            ->select(['users.id', 'users.name', 'users.nim_nip', 'users.email'])
             ->with(['submissions' => function ($query) use ($assignments) {
-                $query->whereIn('assignment_id', $assignments->pluck('id'))
-                      ->with('grade');
+                $query->select(['submissions.id', 'submissions.assignment_id', 'submissions.user_id'])
+                      ->whereIn('assignment_id', $assignments->pluck('id'))
+                      ->with(['grade' => function ($gQuery) {
+                          $gQuery->select(['grades.id', 'grades.submission_id', 'grades.score']);
+                      }]);
             }])
             ->orderBy('name', 'asc')
             ->get();
 
-        // Hitung statistik kelas
-        $allScores = collect();
-        foreach ($students as $student) {
-            foreach ($student->submissions as $sub) {
-                if ($sub->grade && $sub->grade->score !== null) {
-                    $allScores->push($sub->grade->score);
-                }
-            }
-        }
+        // Optimisasi Minggu 11 (Penyebab #1): Raw Aggregate di Database
+        // Menggantikan nested loop PHP in-memory dengan query agregasi database engine
+        $assignmentIds = $assignments->pluck('id');
+        $studentIds    = $students->pluck('id');
+
+        $aggregate = Grade::whereHas('submission', function ($query) use ($assignmentIds, $studentIds) {
+            $query->whereIn('assignment_id', $assignmentIds)
+                  ->whereIn('user_id', $studentIds);
+        })
+        ->selectRaw('AVG(score) as avg_score, MAX(score) as max_score, MIN(score) as min_score, COUNT(score) as graded_count')
+        ->first();
 
         $stats = (object) [
-            'avg'          => $allScores->isNotEmpty() ? round($allScores->avg(), 2) : null,
-            'max'          => $allScores->isNotEmpty() ? $allScores->max() : null,
-            'min'          => $allScores->isNotEmpty() ? $allScores->min() : null,
-            'graded_count' => $allScores->count(),
+            'avg'            => ($aggregate && $aggregate->avg_score !== null) ? round((float) $aggregate->avg_score, 2) : null,
+            'max'            => ($aggregate && $aggregate->max_score !== null) ? (float) $aggregate->max_score : null,
+            'min'            => ($aggregate && $aggregate->min_score !== null) ? (float) $aggregate->min_score : null,
+            'graded_count'   => (int) ($aggregate->graded_count ?? 0),
             'total_students' => $students->count(),
         ];
 
