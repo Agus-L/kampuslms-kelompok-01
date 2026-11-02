@@ -39,7 +39,7 @@ class SubmissionController extends Controller
         $submissions = $assignment->submissions()
             ->where('user_id', auth()->id())
             ->with('grade')
-            ->get();
+            ->paginate(15);
 
         return view('submissions.index', compact('assignment', 'submissions'));
     }

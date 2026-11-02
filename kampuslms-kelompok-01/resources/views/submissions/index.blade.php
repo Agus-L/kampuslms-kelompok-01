@@ -212,6 +212,13 @@
                         </div>
                     @endforeach
                 </div>
+
+                {{-- Pagination Links — Tampilan Dosen (Build #5 Minggu 11) --}}
+                @if (method_exists($studentList, 'hasPages') && $studentList->hasPages())
+                    <div style="margin-top: 1.5rem;">
+                        {{ $studentList->links() }}
+                    </div>
+                @endif
             @endif
 
         {{-- ══════════════════════════════════════════════════════════════
