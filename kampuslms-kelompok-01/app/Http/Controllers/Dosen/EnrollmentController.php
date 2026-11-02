@@ -21,6 +21,8 @@ class EnrollmentController extends Controller
     {
         Gate::authorize('manageEnrollment', $course);
 
+        $course->loadMissing('lecturer');
+
         $students = $course->students()
             ->latest('course_user.created_at')
             ->paginate(15);

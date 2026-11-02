@@ -42,6 +42,8 @@ class SubmissionController extends Controller
     {
         Gate::authorize('view', $assignment);
 
+        $assignment->loadMissing('course');
+
         // 1. Ambil seluruh mahasiswa yang terdaftar di mata kuliah ini
         $enrolledStudents = $assignment->course->students()->orderBy('name')->get();
 
