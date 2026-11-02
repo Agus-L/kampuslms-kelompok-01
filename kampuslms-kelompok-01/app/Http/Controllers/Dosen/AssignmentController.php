@@ -37,7 +37,12 @@ class AssignmentController extends Controller
     {
         Gate::authorize('view', $course);
 
-        $assignments = $course->assignments()->latest()->paginate(15);
+        $course->loadMissing('lecturer');
+
+        $assignments = $course->assignments()
+            ->with('course')
+            ->latest()
+            ->paginate(15);
 
         return view('assignments.index', compact('course', 'assignments'));
     }

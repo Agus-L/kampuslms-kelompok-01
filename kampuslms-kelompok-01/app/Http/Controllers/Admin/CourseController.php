@@ -22,7 +22,10 @@ class CourseController extends Controller
      */
     public function index()
     {
-        $courses = Course::with('lecturer')->latest()->paginate(15);
+        $courses = Course::with('lecturer')
+            ->withCount(['students', 'materials', 'assignments'])
+            ->latest()
+            ->paginate(15);
 
         return view('courses.index', compact('courses'));
     }
