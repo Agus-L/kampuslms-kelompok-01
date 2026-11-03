@@ -22,9 +22,9 @@ class DemoAccountSeeder extends Seeder
     public function run(): void
     {
         // Password default: 'password'
-        // Di produksi, ganti password via environment variable
-        // atau ubah langsung di sini sebelum deploy.
-        $password = env('DEMO_PASSWORD', 'password');
+        // Di produksi, ganti password via environment variable (DEMO_PASSWORD)
+        // yang diakses melalui config('auth.demo_password').
+        $password = config('auth.demo_password', 'password');
 
         User::updateOrCreate(
             ['email' => 'admin@kampuslms.test'],

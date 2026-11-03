@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 
 class Material extends Model
@@ -14,12 +15,16 @@ class Material extends Model
     /**
      * Boot model events.
      *
+     * Invalidation cache statistik dashboard admin saat materi ditambah, diubah, atau dihapus (Build #6).
      * Event `deleting` menghapus berkas fisik dari disk privat saat record dihapus.
      * Diperlukan untuk kasus cascade: ketika Course dihapus, event ini memastikan
      * berkas materi tidak tertinggal sebagai orphaned file di storage.
      */
     protected static function booted(): void
     {
+        static::saved(fn () => Cache::forget('admin.dashboard.stats'));
+        static::deleted(fn () => Cache::forget('admin.dashboard.stats'));
+
         static::deleting(function (Material $material) {
             if ($material->file_path && Storage::disk('local')->exists($material->file_path)) {
                 Storage::disk('local')->delete($material->file_path);
