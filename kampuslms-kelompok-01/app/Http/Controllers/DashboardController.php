@@ -9,6 +9,7 @@ use App\Models\Material;
 use App\Models\Submission;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class DashboardController extends Controller
 {
@@ -29,20 +30,23 @@ class DashboardController extends Controller
 
     /**
      * Dashboard untuk Peran Admin: Statistik menyeluruh sistem & tata kelola pengguna/MK.
+     * Menggunakan cache dengan durasi 30 menit dan invalidasi otomatis saat data berubah (Build #6).
      */
     protected function adminDashboard(User $user)
     {
-        $stats = [
-            'total_users'       => User::count(),
-            'total_admin'       => User::where('role', 'admin')->count(),
-            'total_dosen'       => User::where('role', 'dosen')->count(),
-            'total_mahasiswa'   => User::where('role', 'mahasiswa')->count(),
-            'total_courses'     => Course::count(),
-            'active_courses'    => Course::where('status', 'active')->count(),
-            'total_materials'   => Material::count(),
-            'total_assignments' => Assignment::count(),
-            'total_submissions' => Submission::count(),
-        ];
+        $stats = Cache::remember('admin.dashboard.stats', now()->addMinutes(30), function () {
+            return [
+                'total_users'       => User::count(),
+                'total_admin'       => User::where('role', 'admin')->count(),
+                'total_dosen'       => User::where('role', 'dosen')->count(),
+                'total_mahasiswa'   => User::where('role', 'mahasiswa')->count(),
+                'total_courses'     => Course::count(),
+                'active_courses'    => Course::where('status', 'active')->count(),
+                'total_materials'   => Material::count(),
+                'total_assignments' => Assignment::count(),
+                'total_submissions' => Submission::count(),
+            ];
+        });
 
         $latestUsers = User::latest()->take(5)->get();
         $latestCourses = Course::with('lecturer')->latest()->take(5)->get();

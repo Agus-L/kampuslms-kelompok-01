@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 
 class Course extends Model
@@ -16,6 +17,7 @@ class Course extends Model
     /**
      * Boot model events.
      *
+     * Invalidation cache statistik dashboard admin saat mata kuliah ditambah, diubah, atau dihapus (Build #6).
      * Event `deleting` menghapus seluruh berkas fisik anak saat mata kuliah dihapus.
      * cascadeOnDelete di database menghapus baris tabel anak, tetapi TIDAK
      * memicu event Eloquent — sehingga berkas fisik tertinggal di storage.
@@ -25,6 +27,9 @@ class Course extends Model
      */
     protected static function booted(): void
     {
+        static::saved(fn () => Cache::forget('admin.dashboard.stats'));
+        static::deleted(fn () => Cache::forget('admin.dashboard.stats'));
+
         static::deleting(function (Course $course) {
             // 1. Hapus semua materi satu-satu agar event deleting di Material terpicu
             foreach ($course->materials as $material) {

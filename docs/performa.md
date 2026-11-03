@@ -12,7 +12,7 @@
 | **Rekap Nilai Dosen** | `/dosen/courses/1/grades` | 9 queries | 954 ms | 4 MB | **10 queries** | **91.19 ms** | **3 MB** | ✅ **Selesai (Build #1, #2, #8)** |
 | **Dashboard Dosen** | `/dashboard` (Dosen) | 11 queries | 225 ms | 4 MB | *(oleh tim)* | *(oleh tim)* | *(oleh tim)* | ⏳ Dalam pengerjaan tim |
 | **Dashboard Mahasiswa** | `/dashboard` (Mahasiswa) | 26 queries | 163 ms | 4 MB | *(oleh tim)* | *(oleh tim)* | *(oleh tim)* | ⏳ Dalam pengerjaan tim |
-| **Dashboard Admin** | `/dashboard` (Admin) | 16 queries | 666 ms | 4 MB | *(oleh tim)* | *(oleh tim)* | *(oleh tim)* | ⏳ Dalam pengerjaan tim |
+| **Dashboard Admin** | `/dashboard` (Admin) | 16 queries | 666 ms | 4 MB | **7 queries** | **~52 ms** | **3 MB** | ✅ **Selesai (Build #6)** |
 | **Daftar Mata Kuliah** | `/dosen/courses` | 7 queries | 1.02 s | 4 MB | *(oleh tim)* | *(oleh tim)* | *(oleh tim)* | ⏳ Dalam pengerjaan tim |
 | **Detail Mata Kuliah** | `/dosen/courses/1` | 11 queries | 1.81 s | 5 MB | *(oleh tim)* | *(oleh tim)* | *(oleh tim)* | ⏳ Dalam pengerjaan tim |
 | **Daftar Pengumpulan Tugas**| `/dosen/assignments/1/submissions` | 10 queries | 1.49 s | 4 MB | **11 queries** | **160 ms** | **3 MB** | ✅ **Selesai (Build #5)** |
@@ -102,5 +102,87 @@ Sebelum optimisasi ini diterapkan, sebagian besar halaman daftar utama (Daftar M
 - **Waktu Eksekusi:** Terpangkas dari 1.49 s menjadi **~160 ms**.
 - **Integritas Sistem:** Seluruh 55 pengujian otomatis (*automated feature tests*) berhasil lolos (**PASS**) tanpa ada regresi fitur.
 - **Skalabilitas:** Tidak ada lagi endpoint halaman daftar yang memuat seluruh tabel ke memori server.
+
+---
+
+## 6. Strategi Caching Dashboard & Pembersihan Otomatis (Build #6)
+
+Sesuai ketentuan Poin 6 modul Minggu 11: **"Cache pada minimal satu bagian dashboard, lengkap dengan pembersihan otomatis saat data berubah — dan penjelasan di `docs/performa.md` tentang bagian mana yang sengaja tidak di-cache dan mengapa."**
+
+### A. Implementasi Caching pada Dashboard Admin
+Pada `app/Http/Controllers/DashboardController.php`, method `adminDashboard()` sebelumnya mengeksekusi 9 query agregat `COUNT()` terpisah setiap kali halaman dimuat:
+- `User::count()`, `User::where('role', 'admin')->count()`, `User::where('role', 'dosen')->count()`, `User::where('role', 'mahasiswa')->count()`
+- `Course::count()`, `Course::where('status', 'active')->count()`
+- `Material::count()`, `Assignment::count()`, `Submission::count()`
+
+Sembilan query ini dibungkus menggunakan facade cache dengan durasi kedaluwarsa 30 menit:
+```php
+$stats = Cache::remember('admin.dashboard.stats', now()->addMinutes(30), function () {
+    return [
+        'total_users'       => User::count(),
+        'total_admin'       => User::where('role', 'admin')->count(),
+        'total_dosen'       => User::where('role', 'dosen')->count(),
+        'total_mahasiswa'   => User::where('role', 'mahasiswa')->count(),
+        'total_courses'     => Course::count(),
+        'active_courses'    => Course::where('status', 'active')->count(),
+        'total_materials'   => Material::count(),
+        'total_assignments' => Assignment::count(),
+        'total_submissions' => Submission::count(),
+    ];
+});
+```
+
+### B. Mekanisme Pembersihan Otomatis (Cache Invalidation)
+Agar statistik admin tidak basi secara permanen saat terjadi perubahan data pada sistem, diterapkan hook event Eloquent di dalam method `booted()` pada masing-masing model sumber:
+- **`App\Models\User`:** Memicu `Cache::forget('admin.dashboard.stats')` saat event `saved`, `deleted`, dan `restored`.
+- **`App\Models\Course`:** Memicu `Cache::forget('admin.dashboard.stats')` saat event `saved` dan `deleted`.
+- **`App\Models\Material`:** Memicu `Cache::forget('admin.dashboard.stats')` saat event `saved` dan `deleted`.
+- **`App\Models\Assignment`:** Memicu `Cache::forget('admin.dashboard.stats')` saat event `saved` dan `deleted`.
+- **`App\Models\Submission`:** Memicu `Cache::forget('admin.dashboard.stats')` saat event `saved` dan `deleted`.
+
+Dengan strategi ini, cache hanya bertahan selama data stabil, dan akan seketika di-*flush* saat ada penambahan, pembaruan status, atau penghapusan data.
+
+### C. Bagian yang Sengaja TIDAK Di-cache dan Alasannya (Ketentuan Modul 11 & Checkpoint 11.4)
+Sesuai prinsip modul: *"Yang harus Anda pikirkan sebelum memakai cache: kapan data ini menjadi basi, dan apa akibatnya?"* dan evaluasi Break #7, bagian-bagian berikut sengaja **TIDAK** di-cache:
+1. **Nilai Mahasiswa (`Grade`) & Riwayat Nilai (`recentGrades` di Dashboard Mahasiswa):**
+   - *Alasan:* Nilai adalah data akademik yang sensitif dan memiliki konsekuensi langsung bagi mahasiswa. Meng-cache nilai bahkan untuk 10 menit saja dapat merugikan mahasiswa yang baru saja diperbaiki nilainya oleh dosen namun masih melihat nilai lama (sesuai skenario BREAK #7).
+2. **Status Pengumpulan Tugas Mahasiswa (`mySubmissions` di Dashboard Mahasiswa):**
+   - *Alasan:* Setelah mahasiswa mengunggah tugas, mereka membutuhkan konfirmasi visual seketika bahwa status tugas telah berubah menjadi "Sudah Dikumpulkan". Jika data ini di-cache, mahasiswa akan panik mengira pengumpulan tugasnya gagal.
+3. **Daftar Tugas yang Memerlukan Penilaian (`pendingSubmissions` di Dashboard Dosen):**
+   - *Alasan:* Merupakan daftar tugas tindakan (*action items*) bagi dosen. Begitu mahasiswa mengumpulkan tugas, antrean ini harus langsung memuat berkas baru tanpa menunggu waktu kedaluwarsa cache.
+
+### D. Hasil Pengukuran Sebelum vs Sesudah:
+- **Jumlah Query:** Turun dari **16 queries** menjadi **7 queries** (pemangkasan ~56% beban query database).
+- **Waktu Eksekusi:** Terpangkas dari 666 ms menjadi **~52 ms**.
+- **Penggunaan Memori:** Stabil di **3 MB**.
+
+---
+
+## 7. Eliminasi Pemanggilan `env()` di Luar `config/` (Build #7)
+
+Sesuai ketentuan Poin 7 modul Minggu 11: **"Seluruh pemanggilan `env()` di luar `config/` dihapus, diganti `config()`."**
+
+### A. Bahaya Pemanggilan `env()` di Luar `config/`
+Saat perintah optimasi produksi `php artisan config:cache` dijalankan:
+1. Seluruh konfigurasi di folder `config/*.php` digabungkan menjadi satu file statis di `bootstrap/cache/config.php`.
+2. Laravel **berhenti memuat dan mengurai file `.env`**.
+3. Pemanggilan fungsi `env('KEY')` di luar folder `config/` akan **selalu mengembalikan `null`**, yang menyebabkan kegagalan autentikasi, hilangnya koneksi, atau error deployment fatal yang sulit dilacak (persiapan penting sebelum deployment VPS Minggu 12).
+
+### B. Audit dan Perbaikan Codebase
+- **Audit:** Dilakukan pemindaian terhadap seluruh direktori proyek (`app/`, `database/`, `resources/`, `routes/`, `bootstrap/`).
+- **Temuan:** Ditemukan pemanggilan `env('DEMO_PASSWORD', 'password')` pada `database/seeders/DemoAccountSeeder.php:27`.
+- **Perbaikan:**
+  1. Menambahkan kunci konfigurasi terpusat pada `config/auth.php`:
+     ```php
+     'demo_password' => env('DEMO_PASSWORD', 'password'),
+     ```
+  2. Mengganti pemanggilan di `DemoAccountSeeder.php` menjadi:
+     ```php
+     $password = config('auth.demo_password', 'password');
+     ```
+- **Verifikasi:**
+  - Pemindaian regex `/\benv\s*\(/` di seluruh file PHP di luar folder `config/` menghasilkan **0 temuan** (*clean*).
+  - Eksekusi `php artisan config:cache` berhasil dijalankan tanpa ada konfigurasi yang *broken*.
+  - Dibuat automated test `DashboardCacheAndEnvOptimizationTest::test_no_env_calls_outside_config_directory` untuk mencegah regresi ke depannya.
 
 

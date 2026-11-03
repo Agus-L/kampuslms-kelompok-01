@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 
 class Assignment extends Model
@@ -16,6 +17,7 @@ class Assignment extends Model
     /**
      * Boot model events.
      *
+     * Invalidation cache statistik dashboard admin saat tugas ditambah, diubah, atau dihapus (Build #6).
      * Event `deleting` menghapus berkas fisik seluruh submission saat tugas dihapus.
      * cascadeOnDelete di database TIDAK memicu event Eloquent pada child,
      * sehingga kita harus menghapus setiap submission secara eksplisit
@@ -24,6 +26,9 @@ class Assignment extends Model
      */
     protected static function booted(): void
     {
+        static::saved(fn () => Cache::forget('admin.dashboard.stats'));
+        static::deleted(fn () => Cache::forget('admin.dashboard.stats'));
+
         static::deleting(function (Assignment $assignment) {
             // Hapus tiap submission satu-satu agar event deleting di Submission terpicu
             foreach ($assignment->submissions as $submission) {
