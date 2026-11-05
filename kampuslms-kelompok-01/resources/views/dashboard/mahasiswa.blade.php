@@ -116,18 +116,18 @@
                                        style="font-size: 0.8rem; color: var(--primary-light); text-decoration: none; font-weight: 600;">
                                         Lihat Lembar Tugas →
                                     </a>
-                                @else
-                                    @can('create', [\App\Models\Submission::class, $assign])
-                                    <a href="{{ route('mahasiswa.assignments.submissions.create', $assign) }}"
-                                       style="padding: 0.35rem 0.85rem; background: var(--primary); color: #ffffff; text-decoration: none; border-radius: 0.375rem; font-size: 0.8rem; font-weight: 600;">
-                                        Kumpulkan Sekarang
-                                    </a>
-                                    @else
+                                @elseif (!$assign->allow_late && $assign->due_at && now()->gt($assign->due_at))
+                                    {{-- Lewat batas tenggat & tidak izinkan terlambat: arahkan ke detail tanpa query policy berulang --}}
                                     <a href="{{ route('mahasiswa.assignments.show', $assign) }}"
                                        style="padding: 0.35rem 0.85rem; background: rgba(255, 255, 255, 0.08); color: var(--text-muted); text-decoration: none; border-radius: 0.375rem; font-size: 0.8rem; font-weight: 600;">
                                         Lihat Detail Tugas →
                                     </a>
-                                    @endcan
+                                @else
+                                    {{-- Belum mengumpulkan dan masih dalam tenggat: tombol kumpulkan instan (0 query) --}}
+                                    <a href="{{ route('mahasiswa.assignments.submissions.create', $assign) }}"
+                                       style="padding: 0.35rem 0.85rem; background: var(--primary); color: #ffffff; text-decoration: none; border-radius: 0.375rem; font-size: 0.8rem; font-weight: 600;">
+                                        Kumpulkan Sekarang
+                                    </a>
                                 @endif
                             </div>
                         </div>
@@ -211,12 +211,10 @@
                                 <span>📝 {{ $course->assignments_count }} Tugas</span>
                             </div>
 
-                            @can('view', $course)
                             <a href="{{ route('mahasiswa.courses.show', $course) }}"
                                style="display: block; text-align: center; padding: 0.6rem; background: rgba(79, 70, 229, 0.12); border: 1px solid rgba(99, 102, 241, 0.3); color: var(--primary-light); text-decoration: none; border-radius: 0.5rem; font-weight: 600; font-size: 0.88rem;">
                                 Masuk Kelas →
                             </a>
-                            @endcan
                         </div>
                     </div>
                 @empty
