@@ -35,7 +35,12 @@ class MaterialController extends Controller
     {
         Gate::authorize('view', $course);
 
-        $materials = $course->materials()->latest()->paginate(15);
+        $course->loadMissing('lecturer');
+
+        $materials = $course->materials()
+            ->with('course')
+            ->latest()
+            ->paginate(15);
 
         return view('materials.index', compact('course', 'materials'));
     }

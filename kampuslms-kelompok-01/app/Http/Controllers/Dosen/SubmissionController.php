@@ -27,11 +27,17 @@ use Illuminate\Support\Facades\Storage;
 class SubmissionController extends Controller
 {
     /**
-     * Daftar pengumpulan untuk satu tugas — Poin 5 BUILD Minggu 9.
+     * Daftar pengumpulan untuk satu tugas — Poin 5 BUILD Minggu 9 & Poin 5 BUILD Minggu 11.
      *
-     * Menampilkan SELURUH mahasiswa yang terdaftar di mata kuliah,
+     * Menampilkan daftar mahasiswa yang terdaftar di mata kuliah,
      * baik yang sudah maupun belum mengumpulkan tugas, lengkap dengan
      * penanda terlambat (is_late) dan ringkasan statistik.
+     *
+     * Optimisasi Minggu 11 (Build #5):
+     * - Mengganti pemuatan seluruh tabel in-memory (get()) dengan pagination (paginate(15)).
+     * - Menghitung ringkasan statistik (total, submitted, unsubmitted, late) langsung di level database.
+     * - Filter status diterapkan langsung pada query database (whereHas / whereDoesntHave).
+     * - Eager loading relasi submission dan grade dibatasi hanya untuk tugas yang sedang aktif.
      *
      * Route: GET /dosen/assignments/{assignment}/submissions → dosen.assignments.submissions.index
      * Route model binding: {assignment} → Assignment $assignment
@@ -42,18 +48,47 @@ class SubmissionController extends Controller
     {
         Gate::authorize('view', $assignment);
 
-        // 1. Ambil seluruh mahasiswa yang terdaftar di mata kuliah ini
-        $enrolledStudents = $assignment->course->students()->orderBy('name')->get();
+        $assignment->loadMissing('course');
 
-        // 2. Ambil semua submission untuk tugas ini, di-index berdasarkan user_id
-        $submissions = $assignment->submissions()
-            ->with(['student', 'grade'])
-            ->get()
-            ->keyBy('user_id');
+        // 1. Hitung ringkasan statistik di database (cepat dan hemat memori)
+        $totalStudents    = $assignment->course->students()->count();
+        $submittedCount   = $assignment->submissions()->count();
+        $lateCount        = $assignment->submissions()->where('is_late', true)->count();
+        $unsubmittedCount = max(0, $totalStudents - $submittedCount);
 
-        // 3. Gabungkan: setiap mahasiswa dipetakan ke submission-nya (atau null)
-        $studentList = $enrolledStudents->map(function ($student) use ($submissions) {
-            $submission = $submissions->get($student->id);
+        $stats = (object) [
+            'total'       => $totalStudents,
+            'submitted'   => $submittedCount,
+            'unsubmitted' => $unsubmittedCount,
+            'late'        => $lateCount,
+        ];
+
+        // 2. Query mahasiswa terdaftar dengan filter status di database
+        $filterStatus = $request->query('status', 'all');
+
+        $query = $assignment->course->students()
+            ->select(['users.id', 'users.name', 'users.email', 'users.nim_nip'])
+            ->orderBy('users.name');
+
+        if ($filterStatus === 'submitted') {
+            $query->whereHas('submissions', fn ($q) => $q->where('assignment_id', $assignment->id));
+        } elseif ($filterStatus === 'unsubmitted') {
+            $query->whereDoesntHave('submissions', fn ($q) => $q->where('assignment_id', $assignment->id));
+        } elseif ($filterStatus === 'late') {
+            $query->whereHas('submissions', fn ($q) => $q->where('assignment_id', $assignment->id)->where('is_late', true));
+        }
+
+        // 3. Eager loading hanya submission untuk tugas ini beserta nilainya (mencegah N+1)
+        $query->with(['submissions' => function ($q) use ($assignment) {
+            $q->where('assignment_id', $assignment->id)->with('grade');
+        }]);
+
+        // 4. Pagination 15 per halaman dengan mempertahankan query string filter
+        $paginator = $query->paginate(15)->withQueryString();
+
+        // 5. Transformasi data per item paginator untuk view blade
+        $studentList = $paginator->through(function ($student) {
+            $submission = $student->submissions->first();
 
             return (object) [
                 'student'    => $student,
@@ -64,26 +99,9 @@ class SubmissionController extends Controller
             ];
         });
 
-        // 4. Hitung ringkasan statistik
-        $stats = (object) [
-            'total'       => $studentList->count(),
-            'submitted'   => $studentList->where('status', '!=', 'unsubmitted')->count(),
-            'unsubmitted' => $studentList->where('status', 'unsubmitted')->count(),
-            'late'        => $studentList->where('status', 'late')->count(),
-        ];
-
-        // 5. Filter berdasarkan query string ?status=
-        $filterStatus = $request->query('status', 'all');
-        $filtered = match ($filterStatus) {
-            'submitted'   => $studentList->whereIn('status', ['submitted', 'late']),
-            'unsubmitted' => $studentList->where('status', 'unsubmitted'),
-            'late'        => $studentList->where('status', 'late'),
-            default       => $studentList,
-        };
-
         return view('submissions.index', [
             'assignment'   => $assignment,
-            'studentList'  => $filtered->values(),
+            'studentList'  => $studentList,
             'stats'        => $stats,
             'filterStatus' => $filterStatus,
         ]);

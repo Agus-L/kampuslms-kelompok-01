@@ -112,4 +112,16 @@ return [
 
     'password_timeout' => env('AUTH_PASSWORD_TIMEOUT', 10800),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Demo Account Default Password
+    |--------------------------------------------------------------------------
+    |
+    | Password yang digunakan saat menjalankan seeder akun demo (DemoAccountSeeder).
+    | Di lingkungan produksi, dapat diatur melalui variabel DEMO_PASSWORD di .env.
+    |
+    */
+
+    'demo_password' => env('DEMO_PASSWORD', 'password'),
+
 ];

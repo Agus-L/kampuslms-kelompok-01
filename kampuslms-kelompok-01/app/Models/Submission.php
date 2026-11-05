@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 
 class Submission extends Model
@@ -15,6 +16,7 @@ class Submission extends Model
     /**
      * Boot model events.
      *
+     * Invalidation cache statistik dashboard admin saat submission ditambah, diubah, atau dihapus (Build #6).
      * Event `deleting` menghapus berkas fisik dari disk privat saat record dihapus.
      * Catatan: cascadeOnDelete dari database level TIDAK memicu event ini —
      * jika assignment dihapus, berkas submission tetap tertinggal dan harus
@@ -22,6 +24,9 @@ class Submission extends Model
      */
     protected static function booted(): void
     {
+        static::saved(fn () => Cache::forget('admin.dashboard.stats'));
+        static::deleted(fn () => Cache::forget('admin.dashboard.stats'));
+
         static::deleting(function (Submission $submission) {
             Storage::disk('local')->delete($submission->file_path);
         });

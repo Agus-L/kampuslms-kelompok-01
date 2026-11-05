@@ -6,6 +6,7 @@ use App\Events\AssignmentPublished;
 use App\Events\SubmissionGraded;
 use App\Listeners\SendAssignmentPublishedNotification;
 use App\Listeners\SendSubmissionGradedNotification;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\ServiceProvider;
 
 use Illuminate\Cache\RateLimiting\Limit;
@@ -28,6 +29,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Mencegah N+1 Query secara otomatis di lingkungan non-produksi (Minggu 11)
+        // Di lokal/testing akan melempar exception jika ada relasi yang diakses tanpa eager loading
+        Model::preventLazyLoading(! app()->isProduction());
+
         // Rate limiting umum: 60/menit per user/IP
         RateLimiter::for('api', function (Request $request) {
             return Limit::perMinute(60)->by($request->user()?->id ?: $request->ip());

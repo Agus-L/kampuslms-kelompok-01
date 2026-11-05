@@ -35,7 +35,10 @@ class AssignmentController extends Controller
     {
         Gate::authorize('view', $course);
 
+        $course->loadMissing('lecturer');
+
         $assignments = $course->assignments()
+            ->with('course')
             ->where('status', 'published')
             ->latest()
             ->paginate(15);

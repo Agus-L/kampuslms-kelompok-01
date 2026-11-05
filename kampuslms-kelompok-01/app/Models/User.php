@@ -9,12 +9,24 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Cache;
 use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasApiTokens, HasFactory, Notifiable, SoftDeletes;
+
+    /**
+     * Boot model events.
+     * Membersihkan cache statistik dashboard admin saat user baru dibuat, diubah, atau dihapus (Build #6).
+     */
+    protected static function booted(): void
+    {
+        static::saved(fn () => Cache::forget('admin.dashboard.stats'));
+        static::deleted(fn () => Cache::forget('admin.dashboard.stats'));
+        static::restored(fn () => Cache::forget('admin.dashboard.stats'));
+    }
 
     /**
      * The attributes that are mass assignable.
