@@ -6,14 +6,7 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     *
-     * Minggu 11 — BUILD Poin 4:
-     * Migrasi tambahan berisi index performa yang dirancang secara terukur,
-     * lengkap dengan komentar spesifik mengenai query yang diuntungkan,
-     * analisis biaya tulis (write cost), serta contoh query EXPLAIN.
-     */
+
     public function up(): void
     {
         // ──────────────────────────────────────────────────────────────────────────

@@ -2,23 +2,16 @@
     <div style="max-width: 1200px; margin: 0 auto; padding: 1.5rem 1rem;">
         
         {{-- ── Banner Sambutan ── --}}
-        <div style="background: linear-gradient(135deg, rgba(6, 182, 212, 0.2) 0%, rgba(79, 70, 229, 0.15) 100%); border: 1px solid var(--card-border); border-radius: 1rem; padding: 1.75rem 2rem; margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
-            <div>
-                <div style="display: inline-flex; align-items: center; gap: 0.5rem; background: rgba(6, 182, 212, 0.3); border: 1px solid #38bdf8; color: var(--text-main); font-size: 0.8rem; font-weight: 700; padding: 0.25rem 0.75rem; border-radius: 9999px; margin-bottom: 0.5rem;">
-                    🎓 PERAN: MAHASISWA
-                </div>
-                <h1 style="font-size: 1.75rem; font-weight: 800; color: var(--text-main); margin-bottom: 0.25rem;">
-                    Selamat Datang, {{ $user->name }}
-                </h1>
-                <p style="color: var(--text-muted); font-size: 0.95rem;">
-                    NIM: {{ $user->nim_nip ?? '-' }} · Pantau materi, penugasan, dan capaian nilai akademik Anda.
-                </p>
+        <div style="background: linear-gradient(135deg, rgba(6, 182, 212, 0.2) 0%, rgba(79, 70, 229, 0.15) 100%); border: 1px solid var(--card-border); border-radius: 1rem; padding: 1.75rem 2rem; margin-bottom: 2rem;">
+            <div style="display: inline-flex; align-items: center; gap: 0.5rem; background: rgba(6, 182, 212, 0.3); border: 1px solid #38bdf8; color: var(--text-main); font-size: 0.8rem; font-weight: 700; padding: 0.25rem 0.75rem; border-radius: 9999px; margin-bottom: 0.5rem;">
+                🎓 PERAN: MAHASISWA
             </div>
-            <div>
-                <a href="{{ route('mahasiswa.courses.index') }}" style="display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.65rem 1.25rem; background: var(--primary); color: #ffffff; text-decoration: none; border-radius: var(--radius); font-weight: 600; font-size: 0.9rem; box-shadow: 0 4px 12px var(--primary-glow);">
-                    📖 Lihat Mata Kuliah Saya
-                </a>
-            </div>
+            <h1 style="font-size: 1.75rem; font-weight: 800; color: var(--text-main); margin-bottom: 0.25rem;">
+                Selamat Datang, {{ $user->name }}
+            </h1>
+            <p style="color: var(--text-muted); font-size: 0.95rem; margin: 0;">
+                NIM: {{ $user->nim_nip ?? '-' }} · Pantau materi, penugasan, dan capaian nilai akademik Anda.
+            </p>
         </div>
 
         {{-- ── Statistik Utama Mahasiswa ── --}}
