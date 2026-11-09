@@ -97,14 +97,14 @@ Berkas migrasi tambahan: `database/migrations/2026_11_02_000001_add_performance_
 
 Indeks dirancang berdasarkan pola query yang paling sering dijalankan pada aplikasi:
 
-| Tabel | Nama Index | Kolom Index | Query yang Diuntungkan | Analisis Biaya Tulis (Write Cost) |
-| :--- | :--- | :--- | :--- | :--- |
-| `courses` | `idx_courses_lecturer_status` | `['lecturer_id', 'status']` | `Course::where('lecturer_id', ...)->where('status', 'active')` (Dashboard Dosen & Filter MK) | Tambahan minor pada operasi INSERT/UPDATE mata kuliah. |
-| `courses` | `idx_courses_status` | `'status'` | `Course::where('status', 'active')->count()` (Dashboard Admin) & filter katalog kursus | Overhead kecil saat pembaruan status draft ke active. |
-| `assignments` | `idx_assignments_course_status` | `['course_id', 'status']` | `Assignment::whereIn('course_id', ...)->where('status', 'published')` (Dashboard Mahasiswa & counter tugas terbit) | Overhead saat dosen mempublikasikan tugas. |
-| `submissions` | `idx_submissions_user_id` | `'user_id'` | `Submission::where('user_id', ...)` (Dashboard Mahasiswa `total_submitted`, `mySubmissions`, & riwayat mahasiswa) | Menghilangkan Full Table Scan (type: ALL) saat mencari submission mahasiswa tertentu. |
-| `submissions` | `idx_submissions_assignment_is_late` | `['assignment_id', 'is_late']` | Filter keterlambatan pengumpulan di halaman dosen (`where('assignment_id', ...)->where('is_late', true)`) | Overhead minor saat insert pengumpulan tugas. |
-| `grades` | `idx_grades_graded_at` | `'graded_at'` | `Grade::latest('graded_at')->take(5)` (Dashboard Mahasiswa - nilai terbaru) | Menghilangkan filesort di memori saat pengurutan riwayat nilai. |
+| Tabel         | Nama Index                            | Kolom Index                    | Query yang Diuntungkan                                                                                              | Analisis Biaya Tulis (Write Cost)                                                     |
+| :------------ | :------------------------------------ | :----------------------------- | :------------------------------------------------------------------------------------------------------------------ | :------------------------------------------------------------------------------------ |
+| `courses`     | `idx_courses_lecturer_status`         | `['lecturer_id', 'status']`    | `Course::where('lecturer_id', ...)->where('status', 'active')` (Dashboard Dosen & Filter MK)                        | Tambahan minor pada operasi INSERT/UPDATE mata kuliah.                                |
+| `courses`     | `idx_courses_status`                  | `'status'`                     | `Course::where('status', 'active')->count()` (Dashboard Admin) & filter katalog kursus                               | Overhead kecil saat pembaruan status draft ke active.                                 |
+| `assignments` | `idx_assignments_course_status`       | `['course_id', 'status']`      | `Assignment::whereIn('course_id', ...)->where('status', 'published')` (Dashboard Mahasiswa & counter tugas terbit) | Overhead saat dosen mempublikasikan tugas.                                            |
+| `submissions` | `idx_submissions_user_id`             | `'user_id'`                    | `Submission::where('user_id', ...)` (Dashboard Mahasiswa `total_submitted`, `mySubmissions`, & riwayat mahasiswa)   | Menghilangkan Full Table Scan (type: ALL) saat mencari submission mahasiswa tertentu. |
+| `submissions` | `idx_submissions_assignment_is_late` | `['assignment_id', 'is_late']` | Filter keterlambatan pengumpulan di halaman dosen (`where('assignment_id', ...)->where('is_late', true)`)          | Overhead minor saat insert pengumpulan tugas.                                         |
+| `grades`      | `idx_grades_graded_at`                | `'graded_at'`                  | `Grade::latest('graded_at')->take(5)` (Dashboard Mahasiswa - nilai terbaru)                                         | Menghilangkan filesort di memori saat pengurutan riwayat nilai.                         |
 
 ### Index yang Sengaja Tidak Ditambahkan (Evaluasi Modul 11.2 Pack C):
 1. Kolom teks pencarian nama (`users.name`, `courses.name`): Menggunakan query wildcard `LIKE '%keyword%'` yang secara arsitektural tidak dapat memanfaatkan index B-Tree.
@@ -202,13 +202,13 @@ Ketika perintah produksi `php artisan config:cache` dieksekusi, berkas `.env` ti
 
 ## 9. Rangkuman Pemenuhan Seluruh Checklist Modul Minggu 11
 
-| Poin Build | Ketentuan Modul | Status Implementasi |
-| :---: | :--- | :--- |
-| **Build 1** | Berkas `docs/performa.md` memuat tabel pengukuran sebelum dan sesudah seluruh halaman utama | Terpenuhi pada Bagian 1 dokumen ini |
-| **Build 2** | `Model::preventLazyLoading()` aktif di non-produksi dan aplikasi berjalan tanpa melanggarnya | Terpenuhi pada `app/Providers/AppServiceProvider.php` |
-| **Build 3** | Seluruh N+1 diperbaiki dengan `with()`, `withCount()`, dan `loadMissing()` | Terpenuhi pada seluruh Controller utama |
-| **Build 4** | Migrasi tambahan berisi rancangan index dengan komentar query yang diuntungkan | Terpenuhi pada migrasi `2026_11_02_000001` |
-| **Build 5** | Paginasi pada seluruh halaman daftar tanpa memuat seluruh tabel | Terpenuhi pada seluruh halaman daftar pengumpulan dan entitas |
-| **Build 6** | Caching pada dashboard dengan auto-invalidation dan penjelasan data yang tidak di-cache | Terpenuhi pada Dashboard Admin via `Cache::remember` |
-| **Build 7** | Seluruh pemanggilan `env()` di luar folder `config/` diganti dengan `config()` | Terpenuhi 100% bebas dari pemanggilan `env()` langsung |
-| **Build 8** | Halaman rekap nilai dosen turun menjadi di bawah 15 query | Terpenuhi (stabil pada 10 queries, waktu 91.19 ms) |
+| Poin Build  | Ketentuan Modul                                                                              | Status Implementasi                                          |
+| :---------: | :------------------------------------------------------------------------------------------- | :----------------------------------------------------------- |
+| **Build 1** | Berkas `docs/performa.md` memuat tabel pengukuran sebelum dan sesudah seluruh halaman utama  | Terpenuhi pada Bagian 1 dokumen ini                          |
+| **Build 2** | `Model::preventLazyLoading()` aktif di non-produksi dan aplikasi berjalan tanpa melanggarnya | Terpenuhi pada `app/Providers/AppServiceProvider.php`        |
+| **Build 3** | Seluruh N+1 diperbaiki dengan `with()`, `withCount()`, dan `loadMissing()`                   | Terpenuhi pada seluruh Controller utama                      |
+| **Build 4** | Migrasi tambahan berisi rancangan index dengan komentar query yang diuntungkan               | Terpenuhi pada migrasi `2026_11_02_000001`                   |
+| **Build 5** | Paginasi pada seluruh halaman daftar tanpa memuat seluruh tabel                              | Terpenuhi pada seluruh halaman daftar pengumpulan dan entitas |
+| **Build 6** | Caching pada dashboard dengan auto-invalidation dan penjelasan data yang tidak di-cache      | Terpenuhi pada Dashboard Admin via `Cache::remember`          |
+| **Build 7** | Seluruh pemanggilan `env()` di luar folder `config/` diganti dengan `config()`               | Terpenuhi 100% bebas dari pemanggilan `env()` langsung       |
+| **Build 8** | Halaman rekap nilai dosen turun menjadi di bawah 15 query                                    | Terpenuhi (stabil pada 10 queries, waktu 91.19 ms)           |

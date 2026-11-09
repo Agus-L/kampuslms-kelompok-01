@@ -6,12 +6,14 @@ use App\Events\AssignmentPublished;
 use App\Events\SubmissionGraded;
 use App\Listeners\SendAssignmentPublishedNotification;
 use App\Listeners\SendSubmissionGradedNotification;
+use App\Policies\TranscriptPolicy;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\ServiceProvider;
 
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\RateLimiter;
 
 class AppServiceProvider extends ServiceProvider
@@ -31,7 +33,7 @@ class AppServiceProvider extends ServiceProvider
     {
         // Mencegah N+1 Query secara otomatis di lingkungan non-produksi (Minggu 11)
         // Di lokal/testing akan melempar exception jika ada relasi yang diakses tanpa eager loading
-        Model::preventLazyLoading(! app()->isProduction());
+        Model::preventLazyLoading(! app()->isProduction()); // 
 
         // Rate limiting umum: 60/menit per user/IP
         RateLimiter::for('api', function (Request $request) {
@@ -42,5 +44,11 @@ class AppServiceProvider extends ServiceProvider
         RateLimiter::for('login', function (Request $request) {
             return Limit::perMinute(5)->by($request->ip());
         });
+
+        // Otorisasi Transkrip & Kehadiran Tugas (Tahap 2)
+        Gate::define('viewStudentCourseTranscript', [TranscriptPolicy::class, 'viewStudentCourseTranscript']);
+        Gate::define('exportStudentCourseTranscript', [TranscriptPolicy::class, 'exportStudentCourseTranscript']);
+        Gate::define('viewCumulativeTranscript', [TranscriptPolicy::class, 'viewCumulativeTranscript']);
+        Gate::define('exportCumulativeTranscript', [TranscriptPolicy::class, 'exportCumulativeTranscript']);
     }
 }
