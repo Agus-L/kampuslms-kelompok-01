@@ -5,15 +5,15 @@
 
 Berikut adalah rekapitulasi audit performa pada tujuh halaman utama KampusLMS sebelum dan sesudah seluruh rangkaian optimisasi  diterapkan:
 
-| Halaman                      | URL / Peran                         | Query (Sebelum) | Waktu (Sebelum) | Memori (Sebelum) | Query (Sesudah) | Waktu (Sesudah) | Memori (Sesudah) |
-| :--------------------------- | :---------------------------------- | :-------------: | :-------------: | :--------------: | :-------------: | :-------------: | :--------------: |
-| **Rekap Nilai Dosen**        | `/dosen/courses/1/grades`           |    9 queries    |    954.00 ms    |       4 MB       | **10 queries**  |  **91.19 ms**   |     **3 MB**     |
-| **Dashboard Dosen**          | `/dashboard` (Dosen)                |   11 queries    |    225.00 ms    |       4 MB       |  **8 queries**  |  **74.20 ms**   |     **3 MB**     |
-| **Dashboard Mahasiswa**      | `/dashboard` (Mahasiswa)            |   26 queries    |    163.00 ms    |       4 MB       | **12 queries**  |  **68.40 ms**   |     **3 MB**     |
-| **Dashboard Admin**          | `/dashboard` (Admin)                |   16 queries    |    666.00 ms    |       4 MB       |  **7 queries**  |  **52.10 ms**   |     **3 MB**     |
-| **Daftar Mata Kuliah**       | `/dosen/courses`                    |    7 queries    |   1020.00 ms    |       4 MB       |  **4 queries**  |  **85.30 ms**   |     **3 MB**     |
-| **Detail Mata Kuliah**       | `/dosen/courses/1`                  |   11 queries    |   1810.00 ms    |       5 MB       |  **6 queries**  |  **110.50 ms**  |     **4 MB**     |
-| **Daftar Pengumpulan Tugas** | `/dosen/assignments/1/submissions` |   10 queries    |   1490.00 ms    |       4 MB       | **11 queries**  |  **160.00 ms**  |     **3 MB**     |
+| Halaman                      | URL / Peran                          | Query (Sebelum) | Waktu (Sebelum) | Memori (Sebelum) | Query (Sesudah) | Waktu (Sesudah) | Memori (Sesudah) |
+| :--------------------------- | :----------------------------------- | :-------------: | :-------------: | :--------------: | :-------------: | :-------------: | :--------------: |
+| **Rekap Nilai Dosen**        | `/dosen/courses/1/grades`            |    9 queries    |    954.00 ms    |       4 MB       | **10 queries**  |  **91.19 ms**   |     **3 MB**     |
+| **Dashboard Dosen**          | `/dashboard` (Dosen)                 |   11 queries    |    225.00 ms    |       4 MB       |  **8 queries**  |  **74.20 ms**   |     **3 MB**     |
+| **Dashboard Mahasiswa**      | `/dashboard` (Mahasiswa)             |   26 queries    |    163.00 ms    |       4 MB       | **12 queries**  |  **68.40 ms**   |     **3 MB**     |
+| **Dashboard Admin**          | `/dashboard` (Admin)                 |   16 queries    |    666.00 ms    |       4 MB       |  **7 queries**  |  **52.10 ms**   |     **3 MB**     |
+| **Daftar Mata Kuliah**       | `/dosen/courses`                     |    7 queries    |   1020.00 ms    |       4 MB       |  **4 queries**  |  **85.30 ms**   |     **3 MB**     |
+| **Detail Mata Kuliah**       | `/dosen/courses/1`                   |   11 queries    |   1810.00 ms    |       5 MB       |  **6 queries**  |  **110.50 ms**  |     **4 MB**     |
+| **Daftar Pengumpulan Tugas** | `/dosen/assignments/1/submissions`   |   10 queries    |   1490.00 ms    |       4 MB       | **11 queries**  |  **160.00 ms**  |     **3 MB**     |
 
 ---
 

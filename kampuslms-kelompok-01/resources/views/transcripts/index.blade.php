@@ -1,5 +1,18 @@
 <x-layout :title="'Transkrip Prestasi Akademik & Rekap Presensi Tugas — Kampus LMS'">
     <div class="page-container">
+        {{-- Breadcrumb Navigasi --}}
+        <nav class="breadcrumb" style="margin-bottom: 1rem;">
+            @if(auth()->user()->role === 'admin')
+                <a href="{{ route('admin.users.index') }}" class="breadcrumb-link">Pengguna</a>
+                <span class="breadcrumb-separator">›</span>
+                <span class="breadcrumb-current">Transkrip {{ $student->name }}</span>
+            @else
+                <a href="{{ route('mahasiswa.courses.index') }}" class="breadcrumb-link">Mata Kuliah</a>
+                <span class="breadcrumb-separator">›</span>
+                <span class="breadcrumb-current">Transkrip Akademik</span>
+            @endif
+        </nav>
+
         {{-- Header & Navigasi --}}
         <div style="background: var(--card-bg, #1e293b); border: 1px solid var(--card-border, #334155); border-radius: 1rem; padding: 1.75rem; margin-bottom: 1.5rem;">
             <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem;">
@@ -14,14 +27,26 @@
                         {{ $student->name }} ({{ $student->nim_nip }}) — {{ $student->email }}
                     </p>
                 </div>
-                <div>
-                    @if(auth()->user()->role === 'mahasiswa')
-                        <a href="{{ route('mahasiswa.transcript.export.pdf') }}" class="btn btn-primary" target="_blank">
-                            📥 Ekspor Dokumen PDF
+                <div style="display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap;">
+                    @if(auth()->user()->role === 'admin')
+                        <a href="{{ route('admin.users.index') }}" class="btn" style="background: var(--card-bg); border: 1px solid var(--card-border); color: var(--text-main); padding: 0.6rem 1rem; font-weight: 600; text-decoration: none;">
+                            ← Kembali ke Pengguna
                         </a>
-                    @elseif(auth()->user()->role === 'admin')
-                        <a href="{{ route('admin.users.transcript.export.pdf', $student) }}" class="btn btn-primary" target="_blank">
-                            📥 Ekspor Dokumen PDF
+                        <a href="{{ route('admin.users.transcript.export.pdf', [$student, 'preview' => 1]) }}" class="btn" target="_blank" style="background: var(--card-bg); border: 1px solid var(--card-border); color: var(--text-main); padding: 0.6rem 1.1rem; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 0.35rem;" title="Buka pratinjau PDF di peramban">
+                            👁️ Pratinjau PDF
+                        </a>
+                        <a href="{{ route('admin.users.transcript.export.pdf', $student) }}" class="btn btn-primary" style="padding: 0.6rem 1.25rem; font-weight: 700; font-size: 0.9rem; display: inline-flex; align-items: center; gap: 0.35rem;" title="Unduh berkas PDF ke penyimpanan komputer lokal">
+                            📥 Unduh PDF
+                        </a>
+                    @elseif(auth()->user()->role === 'mahasiswa')
+                        <a href="{{ route('mahasiswa.courses.index') }}" class="btn" style="background: var(--card-bg); border: 1px solid var(--card-border); color: var(--text-main); padding: 0.6rem 1rem; font-weight: 600; text-decoration: none;">
+                            ← Kembali ke Mata Kuliah
+                        </a>
+                        <a href="{{ route('mahasiswa.transcript.export.pdf', ['preview' => 1]) }}" class="btn" target="_blank" style="background: var(--card-bg); border: 1px solid var(--card-border); color: var(--text-main); padding: 0.6rem 1.1rem; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 0.35rem;" title="Buka pratinjau PDF di peramban">
+                            👁️ Pratinjau PDF
+                        </a>
+                        <a href="{{ route('mahasiswa.transcript.export.pdf') }}" class="btn btn-primary" style="padding: 0.6rem 1.25rem; font-weight: 700; font-size: 0.9rem; display: inline-flex; align-items: center; gap: 0.35rem;" title="Unduh berkas PDF ke penyimpanan komputer lokal">
+                            📥 Unduh PDF
                         </a>
                     @endif
                 </div>

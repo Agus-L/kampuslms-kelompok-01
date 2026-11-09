@@ -180,6 +180,9 @@
 
                             {{-- Aksi Dosen --}}
                             <div style="display: flex; align-items: center; gap: 0.75rem;">
+                                <a href="{{ route('dosen.courses.students.transcript.show', [$assignment->course, $student]) }}" class="btn" style="padding: 0.45rem 0.8rem; font-size: 0.82rem; font-weight: 600; background: var(--card-bg); border: 1px solid var(--card-border); color: var(--text-main); text-decoration: none; border-radius: var(--radius); display: inline-flex; align-items: center; gap: 0.25rem;" title="Transkrip & Presensi Mahasiswa">
+                                    📄 Transkrip
+                                </a>
                                 @if($submission)
                                     <div style="text-align: right;">
                                         @if($submission->grade)

@@ -134,6 +134,9 @@
                                 <th style="padding: 0.85rem 1rem; text-align: center; font-size: 0.78rem; font-weight: 700; color: #818cf8; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 2px solid var(--card-border, #334155); white-space: nowrap; background: rgba(99, 102, 241, 0.05);">
                                     Rata-rata
                                 </th>
+                                <th style="padding: 0.85rem 1rem; text-align: center; font-size: 0.78rem; font-weight: 700; color: var(--text-muted, #94a3b8); text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 2px solid var(--card-border, #334155); white-space: nowrap;">
+                                    Transkrip
+                                </th>
                             </tr>
                         </thead>
                         <tbody>
@@ -200,6 +203,13 @@
                                         @else
                                             <span style="font-size: 0.85rem; color: var(--text-muted, #64748b);">—</span>
                                         @endif
+                                    </td>
+
+                                    {{-- Kolom Transkrip (Minggu 12) --}}
+                                    <td style="padding: 0.85rem 1rem; text-align: center; white-space: nowrap;">
+                                        <a href="{{ route('dosen.courses.students.transcript.show', [$course, $student]) }}" class="btn" style="padding: 0.35rem 0.75rem; font-size: 0.8rem; font-weight: 600; background: var(--card-bg); border: 1px solid var(--card-border); color: var(--text-main); text-decoration: none; border-radius: 0.375rem; display: inline-flex; align-items: center; gap: 0.3rem;" title="Lihat Transkrip Nilai & Rekap Presensi Tugas Mahasiswa">
+                                            📄 Transkrip
+                                        </a>
                                     </td>
                                 </tr>
                             @endforeach
