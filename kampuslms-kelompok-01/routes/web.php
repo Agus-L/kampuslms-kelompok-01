@@ -21,6 +21,7 @@ use App\Livewire\Courses\CourseList;
 use App\Http\Controllers\UserController              as AdminUserController;
 use App\Http\Controllers\CourseController             as AdminCourseController;
 use App\Http\Controllers\Admin\EnrollmentController  as AdminEnrollmentController;
+use App\Http\Controllers\Admin\TranscriptController  as AdminTranscriptController;
 
 // ──────────────────────────────────────────────────────
 // Import Controller — Dosen
@@ -31,6 +32,7 @@ use App\Http\Controllers\Dosen\AssignmentController  as DosenAssignmentControlle
 use App\Http\Controllers\Dosen\SubmissionController  as DosenSubmissionController;
 use App\Http\Controllers\Dosen\GradeController       as DosenGradeController;
 use App\Http\Controllers\Dosen\EnrollmentController  as DosenEnrollmentController;
+use App\Http\Controllers\Dosen\TranscriptController  as DosenTranscriptController;
 
 // ──────────────────────────────────────────────────────
 // Import Controller — Mahasiswa
@@ -40,6 +42,7 @@ use App\Http\Controllers\Mahasiswa\MaterialController   as MahasiswaMaterialCont
 use App\Http\Controllers\Mahasiswa\AssignmentController as MahasiswaAssignmentController;
 use App\Http\Controllers\Mahasiswa\SubmissionController as MahasiswaSubmissionController;
 use App\Http\Controllers\Mahasiswa\GradeController      as MahasiswaGradeController;
+use App\Http\Controllers\Mahasiswa\TranscriptController as MahasiswaTranscriptController;
 
 
 /*
@@ -144,6 +147,12 @@ Route::middleware(['auth:sanctum,web'])->group(function () {
             Route::resource('courses.enrollments', AdminEnrollmentController::class)
                 ->shallow()
                 ->only(['index', 'create', 'store', 'destroy']);
+
+            // Transkrip Nilai & Rekap Presensi Tugas (Tahap 3 - Minggu 12)
+            Route::get('/users/{user}/transcript', [AdminTranscriptController::class, 'show'])
+                ->name('users.transcript.show');
+            Route::get('/users/{user}/transcript/export/pdf', [AdminTranscriptController::class, 'exportPdf'])
+                ->name('users.transcript.export.pdf');
         });
 
 
@@ -205,6 +214,12 @@ Route::middleware(['auth:sanctum,web'])->group(function () {
             Route::resource('courses.enrollments', DosenEnrollmentController::class)
                 ->shallow()
                 ->only(['index', 'create', 'store', 'destroy']);
+
+            // Transkrip Nilai & Rekap Presensi Tugas (Tahap 3 - Minggu 12)
+            Route::get('courses/{course}/students/{student}/transcript', [DosenTranscriptController::class, 'show'])
+                ->name('courses.students.transcript.show');
+            Route::get('courses/{course}/students/{student}/transcript/export/pdf', [DosenTranscriptController::class, 'exportPdf'])
+                ->name('courses.students.transcript.export.pdf');
         });
 
 
@@ -260,5 +275,11 @@ Route::middleware(['auth:sanctum,web'])->group(function () {
             // Mahasiswa melihat rapor nilainya pada satu MK yang diikutinya
             Route::get('courses/{course}/grades', [MahasiswaGradeController::class, 'courseGrades'])
                 ->name('courses.grades.index');
+
+            // Transkrip Nilai & Rekap Presensi Tugas (Tahap 3 - Minggu 12)
+            Route::get('/transcript', [MahasiswaTranscriptController::class, 'index'])
+                ->name('transcript.index');
+            Route::get('/transcript/export/pdf', [MahasiswaTranscriptController::class, 'exportPdf'])
+                ->name('transcript.export.pdf');
         });
 });
