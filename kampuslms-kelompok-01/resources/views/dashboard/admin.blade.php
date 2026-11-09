@@ -114,12 +114,19 @@
                                     {{ $u->email }} · {{ $u->nim_nip ?? 'N/A' }}
                                 </div>
                             </div>
-                            <span style="padding: 0.25rem 0.65rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; text-transform: capitalize;
-                                background: {{ $u->role === 'admin' ? 'rgba(79, 70, 229, 0.15)' : ($u->role === 'dosen' ? 'rgba(16, 185, 129, 0.15)' : 'rgba(6, 182, 212, 0.15)') }};
-                                color: {{ $u->role === 'admin' ? '#a5b4fc' : ($u->role === 'dosen' ? '#6ee7b7' : '#67e8f9') }};
-                                border: 1px solid {{ $u->role === 'admin' ? 'rgba(99, 102, 241, 0.3)' : ($u->role === 'dosen' ? 'rgba(16, 185, 129, 0.3)' : 'rgba(6, 182, 212, 0.3)') }};">
-                                {{ $u->role }}
-                            </span>
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                @if($u->role === 'mahasiswa')
+                                    <a href="{{ route('admin.users.transcript.show', $u) }}" style="font-size: 0.75rem; padding: 0.25rem 0.55rem; border-radius: 0.35rem; background: var(--card-bg); border: 1px solid var(--card-border); color: var(--text-main); text-decoration: none; font-weight: 600;" title="Transkrip Nilai Mahasiswa">
+                                        📄 Transkrip
+                                    </a>
+                                @endif
+                                <span style="padding: 0.25rem 0.65rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; text-transform: capitalize;
+                                    background: {{ $u->role === 'admin' ? 'rgba(79, 70, 229, 0.15)' : ($u->role === 'dosen' ? 'rgba(16, 185, 129, 0.15)' : 'rgba(6, 182, 212, 0.15)') }};
+                                    color: {{ $u->role === 'admin' ? '#a5b4fc' : ($u->role === 'dosen' ? '#6ee7b7' : '#67e8f9') }};
+                                    border: 1px solid {{ $u->role === 'admin' ? 'rgba(99, 102, 241, 0.3)' : ($u->role === 'dosen' ? 'rgba(16, 185, 129, 0.3)' : 'rgba(6, 182, 212, 0.3)') }};">
+                                    {{ $u->role }}
+                                </span>
+                            </div>
                         </div>
                     @empty
                         <p style="color: var(--text-muted); font-size: 0.88rem;">Belum ada pengguna terdaftar.</p>

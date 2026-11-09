@@ -172,6 +172,11 @@
                                 </td>
                                 <td>
                                     <div class="table-actions">
+                                        @if($user->role === 'mahasiswa')
+                                            <a href="{{ route('admin.users.transcript.show', $user) }}" class="btn" style="background: var(--card-bg); border: 1px solid var(--card-border); color: var(--text-main); padding: 0.35rem 0.75rem; font-size: 0.8rem; font-weight: 600; text-decoration: none; border-radius: var(--radius); display: inline-flex; align-items: center; gap: 0.25rem;" title="Transkrip Nilai Akademik Kumulatif Mahasiswa">
+                                                📄 Transkrip
+                                            </a>
+                                        @endif
                                         <a href="{{ route('admin.users.edit', $user) }}" class="btn btn-edit" title="Edit">
                                             ✏️ Edit
                                         </a>
