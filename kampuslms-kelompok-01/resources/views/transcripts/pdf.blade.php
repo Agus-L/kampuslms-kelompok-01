@@ -2,261 +2,137 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>Transkrip Prestasi Akademik & Presensi Tugas — {{ $student['name'] ?? 'Mahasiswa' }}</title>
+    <title>Daftar Kemajuan Studi/Transkrip Mata Kuliah — {{ $student['name'] ?? 'Mahasiswa' }}</title>
     <style>
         @page {
-            size: A4 portrait;
-            margin: 12mm 15mm 15mm 15mm;
+            size: A4 landscape;
+            margin: 7mm 12mm 8mm 12mm;
+        }
+        * {
+            box-sizing: border-box;
         }
         body {
             font-family: 'Helvetica', 'Arial', sans-serif;
-            font-size: 9.5pt;
-            line-height: 1.35;
-            color: #0f172a;
+            font-size: 8pt;
+            line-height: 1.25;
+            color: #000000;
             margin: 0;
             padding: 0;
         }
 
-        /* ─────────────────────────────────────────────────────────────
-           KOP RESMI DOKUMEN AKADEMIK
-        ───────────────────────────────────────────────────────────── */
+        /* Kop Dokumen Resmi */
         .kop-table {
             width: 100%;
             border-collapse: collapse;
-            border-bottom: 2.5px solid #0f172a;
-            padding-bottom: 6px;
-            margin-bottom: 10px;
+            margin-bottom: 2px;
         }
         .kop-table td {
             vertical-align: middle;
         }
         .kop-logo {
-            width: 65px;
+            width: 60px;
             text-align: center;
-        }
-        .kop-logo-box {
-            display: inline-block;
-            background-color: #1e3a8a;
-            color: #ffffff;
-            font-weight: bold;
-            font-size: 13pt;
-            padding: 10px 8px;
-            border-radius: 4px;
-            letter-spacing: 1px;
         }
         .kop-text {
             text-align: center;
-            padding-left: 10px;
-            padding-right: 20px;
+            padding-right: 60px;
         }
-        .kop-universitas {
-            font-size: 13pt;
-            font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: 0.8px;
-            color: #0f172a;
+        .kop-kemen {
+            font-size: 10pt;
+            font-weight: bold;
+            letter-spacing: 0.5px;
         }
-        .kop-fakultas {
-            font-size: 10.5pt;
-            font-weight: 700;
-            color: #1e293b;
-            margin-top: 1px;
-            text-transform: uppercase;
+        .kop-inst {
+            font-size: 12pt;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+            margin: 1px 0;
         }
-        .kop-alamat {
-            font-size: 7.8pt;
-            color: #475569;
-            margin-top: 2px;
+        .kop-kampus {
+            font-size: 8pt;
+        }
+        .kop-kontak {
+            font-size: 7.5pt;
+        }
+        .kop-line {
+            border-bottom: 2px solid #000000;
+            margin-bottom: 5px;
         }
 
         /* Judul Dokumen */
         .doc-title {
             text-align: center;
-            font-size: 11.5pt;
-            font-weight: 800;
+            font-size: 11pt;
+            font-weight: bold;
             text-transform: uppercase;
-            color: #0f172a;
-            margin-top: 8px;
-            margin-bottom: 2px;
             letter-spacing: 0.5px;
-        }
-        .doc-subtitle {
-            text-align: center;
-            font-size: 8pt;
-            color: #64748b;
-            margin-bottom: 12px;
+            margin-bottom: 5px;
         }
 
-        /* ─────────────────────────────────────────────────────────────
-           IDENTITAS MAHASISWA & MATA KULIAH
-        ───────────────────────────────────────────────────────────── */
-        .identity-box {
-            width: 100%;
-            margin-bottom: 10px;
-            font-size: 8.5pt;
-            background-color: #f8fafc;
-            border: 1px solid #cbd5e1;
-            border-radius: 3px;
-            padding: 6px 8px;
-        }
-        .identity-table {
+        /* Kotak Identitas */
+        .id-table {
             width: 100%;
             border-collapse: collapse;
+            margin-bottom: 5px;
+            font-size: 7.8pt;
         }
-        .identity-table td {
-            padding: 2px 4px;
+        .id-table td {
+            padding: 1px 2px;
             vertical-align: top;
         }
-        .id-label {
-            width: 18%;
-            color: #475569;
-            font-weight: 700;
-        }
-        .id-sep {
-            width: 2%;
-            text-align: center;
-            color: #64748b;
-        }
-        .id-val {
-            width: 30%;
-            color: #0f172a;
-            font-weight: 600;
-        }
 
-        /* ─────────────────────────────────────────────────────────────
-           SECTION HEADER
-        ───────────────────────────────────────────────────────────── */
-        .section-header {
-            font-size: 9pt;
-            font-weight: 800;
-            color: #0f172a;
+        /* Judul Bagian */
+        .section-title {
+            font-size: 8pt;
+            font-weight: bold;
             text-transform: uppercase;
-            letter-spacing: 0.4px;
-            border-bottom: 1.5px solid #94a3b8;
-            padding-bottom: 2px;
-            margin-top: 10px;
-            margin-bottom: 6px;
+            margin-top: 4px;
+            margin-bottom: 3px;
+            color: #000000;
         }
 
-        /* ─────────────────────────────────────────────────────────────
-           TABEL DATA (NILAI & PRESENSI)
-        ───────────────────────────────────────────────────────────── */
+        /* Tabel Data Transkrip */
         .data-table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 8pt;
-            margin-bottom: 10px;
+            font-size: 7.5pt;
+            margin-bottom: 5px;
         }
         .data-table th, .data-table td {
-            border: 1px solid #94a3b8;
-            padding: 4px 5px;
+            border: 1px solid #000000;
+            padding: 2.5px 4px;
             vertical-align: middle;
         }
         .data-table th {
             background-color: #f1f5f9;
-            color: #0f172a;
-            font-weight: 800;
+            font-weight: bold;
             text-align: center;
-        }
-        .data-table tr:nth-child(even) td {
-            background-color: #f8fafc;
         }
         .text-center { text-align: center; }
         .text-left   { text-align: left; }
         .text-right  { text-align: right; }
-        .font-bold   { font-weight: 700; }
+        .font-bold   { font-weight: bold; }
 
-        /* ─────────────────────────────────────────────────────────────
-           BADGE STATUS PRESENSI & EVALUASI
-        ───────────────────────────────────────────────────────────── */
-        .badge {
-            display: inline-block;
-            padding: 2px 5px;
-            font-size: 7pt;
-            font-weight: 700;
-            border-radius: 3px;
-            text-align: center;
-        }
-        .badge-success { background-color: #dcfce7; color: #166534; }
-        .badge-warning { background-color: #fef3c7; color: #92400e; }
-        .badge-danger  { background-color: #fee2e2; color: #991b1b; }
-        .badge-info    { background-color: #e0e7ff; color: #3730a3; }
-
-        /* ─────────────────────────────────────────────────────────────
-           KOTAK RINGKASAN PRESTASI (IPK & PRESENSI)
-        ───────────────────────────────────────────────────────────── */
-        .summary-table {
+        /* Footer & Tanda Tangan */
+        .footer-table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 12px;
-            font-size: 8pt;
+            margin-top: 4px;
+            font-size: 7.8pt;
         }
-        .summary-card {
-            border: 1px solid #cbd5e1;
-            background-color: #f8fafc;
-            border-radius: 4px;
-            padding: 6px 8px;
-            text-align: center;
-        }
-        .summary-card-title {
-            font-size: 7pt;
-            color: #64748b;
-            text-transform: uppercase;
-            font-weight: 700;
-        }
-        .summary-card-value {
-            font-size: 11pt;
-            font-weight: 800;
-            color: #0f172a;
-            margin-top: 2px;
-        }
-
-        /* ─────────────────────────────────────────────────────────────
-           BLOK PENGESAHAN & TANDA TANGAN (SIGNATURE BLOCK)
-        ───────────────────────────────────────────────────────────── */
-        .sign-container {
-            width: 100%;
-            margin-top: 14px;
-            page-break-inside: avoid;
-        }
-        .sign-table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        .sign-table td {
+        .footer-table td {
             vertical-align: top;
-            font-size: 8pt;
         }
-        .qr-box {
-            display: inline-block;
-            border: 1px dashed #64748b;
-            background-color: #f8fafc;
-            width: 72px;
-            height: 72px;
+        .sign-box {
             text-align: center;
-            vertical-align: middle;
-            font-size: 6.5pt;
-            color: #475569;
-            padding: 4px;
-            border-radius: 4px;
-        }
-
-        /* Catatan Kaki */
-        .footer-note {
-            font-size: 7pt;
-            color: #64748b;
-            border-top: 1px solid #cbd5e1;
-            padding-top: 3px;
-            margin-top: 10px;
-            text-align: center;
-            font-style: italic;
+            width: 250px;
+            float: right;
         }
     </style>
 </head>
 <body>
 
     @php
-        // Konfigurasi Bulan Bahasa Indonesia
         $indoMonths = [
             1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
             5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
@@ -264,396 +140,275 @@
         ];
         $currentDate = now()->format('j') . ' ' . $indoMonths[(int)now()->format('n')] . ' ' . now()->format('Y');
 
-        // Deteksi Tipe Transkrip: Kumulatif (Mahasiswa/Admin) vs Spesifik Mata Kuliah (Dosen)
         $isCumulative = isset($courses) && is_array($courses);
+
+        if ($isCumulative) {
+            $courseList = $courses;
+            $totalSksPassed = $summary['total_credits_passed'] ?? 0;
+            $ipsVal = number_format($summary['gpa'] ?? 0, 2);
+            $ipkVal = number_format($summary['gpa'] ?? 0, 2);
+            $overallRate = (float)($summary['overall_attendance_rate'] ?? 100);
+            $overallStatus = $summary['attendance_status'] ?? 'Memenuhi Syarat';
+        } else {
+            // Skenario Dosen: 1 mata kuliah yang diampu
+            $courseList = [
+                [
+                    'code' => $course['code'] ?? '-',
+                    'name' => $course['name'] ?? '-',
+                    'sks' => $course['sks'] ?? 0,
+                    'semester' => '2025/Gn',
+                    'final_score' => $grade['final_score'] ?? null,
+                    'letter_grade' => $grade['letter'] ?? '—',
+                    'attendance' => $attendance ?? [],
+                ]
+            ];
+            $totalSksPassed = ($grade['is_passed'] ?? false) ? ($course['sks'] ?? 0) : 0;
+            $ipsVal = $grade['final_score'] !== null ? number_format($grade['grade_point'], 2) : '—';
+            $ipkVal = $grade['final_score'] !== null ? number_format($grade['grade_point'], 2) : '—';
+            $overallRate = (float)($attendance['attendance_rate'] ?? 100);
+            $overallStatus = $attendance['status_label'] ?? 'Memenuhi Syarat';
+        }
     @endphp
 
     {{-- ═════════════════════════════════════════════════════════════════
-         BAGIAN I: KOP RESMI & IDENTITAS DOKUMEN
+         KOP RESMI DOKUMEN (PERSIS SEPERTI GAMBAR ITK)
     ═════════════════════════════════════════════════════════════════ --}}
     <table class="kop-table">
         <tr>
             <td class="kop-logo">
-                <div class="kop-logo-box">LMS</div>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 110" width="50" height="56">
+                    <!-- Blue outer wings -->
+                    <path d="M 50,25 C 42,10 25,8 15,22 C 5,36 12,58 24,70 C 32,78 42,82 50,85 C 58,82 68,78 76,70 C 88,58 95,36 85,22 C 75,8 58,10 50,25 Z" fill="none" stroke="#0072bc" stroke-width="5" />
+                    <path d="M 50,35 C 44,22 32,20 25,30 C 18,40 22,55 30,65 C 38,72 45,75 50,78 C 55,75 62,72 70,65 C 78,55 82,40 75,30 C 68,20 56,22 50,35 Z" fill="none" stroke="#0072bc" stroke-width="4" />
+                    <!-- Yellow flame center -->
+                    <path d="M 50,15 C 46,25 43,35 45,45 C 47,52 50,56 50,60 C 50,56 53,52 55,45 C 57,35 54,25 50,15 Z" fill="#fdb813" />
+                    <path d="M 50,25 C 48,32 46,38 48,44 C 49,48 50,51 50,54 C 50,51 51,48 52,44 C 54,38 52,32 50,25 Z" fill="#f39200" />
+                    <!-- Blue base pedestal -->
+                    <path d="M 20,86 C 30,96 70,96 80,86" fill="none" stroke="#0072bc" stroke-width="4" stroke-linecap="round" />
+                    <path d="M 28,94 C 36,102 64,102 72,94" fill="none" stroke="#0072bc" stroke-width="4" stroke-linecap="round" />
+                    <path d="M 36,101 C 42,107 58,107 64,101" fill="none" stroke="#0072bc" stroke-width="3.5" stroke-linecap="round" />
+                </svg>
             </td>
             <td class="kop-text">
-                <div class="kop-universitas">KAMPUS INSTITUT TEKNOLOGI & ILMU KOMPUTER</div>
-                <div class="kop-fakultas">FAKULTAS TEKNOLOGI INFORMASI DAN INDUSTRI</div>
-                <div class="kop-alamat">
-                    Sistem Pembelajaran Digital Terintegrasi (KampusLMS) &bull; Kampus Utama Jl. Soekarno-Hatta Km. 15<br>
-                    Laman Resmi: https://lms.kampus.ac.id &bull; Surel: akademik@kampus.ac.id
+                <div class="kop-kemen">KEMENTERIAN PENDIDIKAN TINGGI, SAINS, DAN TEKNOLOGI</div>
+                <div class="kop-inst">INSTITUT TEKNOLOGI KALIMANTAN</div>
+                <div class="kop-kampus">Kampus ITK Karang Joang, Balikpapan 76127</div>
+                <div class="kop-kontak">Telepon (0542) 8530801 Faksimile (0542) 8530800 Surat elektronik : humas@itk.ac.id laman : www.itk.ac.id</div>
+            </td>
+        </tr>
+    </table>
+    <div class="kop-line"></div>
+
+    {{-- JUDUL RESMI --}}
+    <div class="doc-title">
+        DAFTAR KEMAJUAN STUDI/TRANSKRIP MATA KULIAH
+    </div>
+
+    {{-- IDENTITAS MAHASISWA (2 KOLOM SEJAJAR) --}}
+    <table class="id-table">
+        <tr>
+            <td style="width: 10%;">Nama</td>
+            <td style="width: 1.5%;">:</td>
+            <td style="width: 38.5%;">{{ $student['name'] ?? '-' }}</td>
+
+            <td style="width: 22%;">SKS Diambil / SKS Lulus</td>
+            <td style="width: 1.5%;">:</td>
+            <td style="width: 26.5%;">
+                @if($isCumulative)
+                    {{ $summary['total_credits_taken'] ?? 0 }} SKS / {{ $summary['total_credits_passed'] ?? 0 }} SKS
+                @else
+                    {{ $course['sks'] ?? 0 }} SKS / {{ ($grade['is_passed'] ?? false) ? ($course['sks'] ?? 0) : 0 }} SKS
+                @endif
+            </td>
+        </tr>
+        <tr>
+            <td>NIM</td>
+            <td>:</td>
+            <td>{{ $student['nim_nip'] ?? '-' }}</td>
+
+            <td>SKS Tempuh Sekarang</td>
+            <td>:</td>
+            <td>
+                @if($isCumulative)
+                    {{ $summary['total_credits_taken'] ?? 0 }} SKS
+                @else
+                    {{ $course['sks'] ?? 0 }} SKS
+                @endif
+            </td>
+        </tr>
+        <tr>
+            <td>Program Studi</td>
+            <td>:</td>
+            <td>{{ $student['prodi'] ?? 'Sistem Informasi' }}</td>
+
+            <td>Status Perkuliahan</td>
+            <td>:</td>
+            <td>Aktif</td>
+        </tr>
+        @if(!$isCumulative && isset($course))
+        <tr>
+            <td>Mata Kuliah</td>
+            <td>:</td>
+            <td><strong>{{ $course['code'] }} — {{ $course['name'] }}</strong></td>
+
+            <td>Dosen Pengampu</td>
+            <td>:</td>
+            <td>{{ $course['lecturer_name'] ?? '-' }}</td>
+        </tr>
+        @else
+        <tr>
+            <td colspan="3"></td>
+            <td>Semester</td>
+            <td>:</td>
+            <td>4</td>
+        </tr>
+        @endif
+    </table>
+
+    {{-- ═════════════════════════════════════════════════════════════════
+         BAGIAN I: TABEL PRESTASI NILAI AKADEMIK
+         (Tanpa Bobot Indeks & Angka Mutu; Di bawahnya ada Total SKS, IPS, IPK)
+    ═════════════════════════════════════════════════════════════════ --}}
+    <div class="section-title">I. Prestasi Nilai Akademik</div>
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th style="width: 4%;">No</th>
+                <th style="width: 12%;">Kode MK</th>
+                <th style="width: 46%;">Nama Mata Kuliah</th>
+                <th style="width: 8%;">SKS</th>
+                <th style="width: 12%;">Semester</th>
+                <th style="width: 10%;">Nilai Angka</th>
+                <th style="width: 8%;">Nilai</th>
+            </tr>
+        </thead>
+        <tbody>
+            @forelse($courseList as $idx => $c)
+                <tr>
+                    <td class="text-center">{{ $idx + 1 }}</td>
+                    <td class="text-center font-bold">{{ $c['code'] }}</td>
+                    <td>{{ $c['name'] }}</td>
+                    <td class="text-center">{{ $c['sks'] }}</td>
+                    <td class="text-center">{{ $c['semester'] ?? '2024/Gs' }}</td>
+                    <td class="text-center">
+                        {{ $c['final_score'] !== null ? number_format($c['final_score'], 2) : '—' }}
+                    </td>
+                    <td class="text-center font-bold">{{ $c['letter_grade'] ?? '—' }}</td>
+                </tr>
+            @empty
+                <tr>
+                    <td colspan="7" class="text-center" style="padding: 6px;">Belum ada mata kuliah yang dinilai.</td>
+                </tr>
+            @endforelse
+        </tbody>
+        <tfoot>
+            {{-- Bagian Total SKS, IPS, IPK di bawah tabel persis seperti contoh gambar ITK --}}
+            <tr>
+                <td colspan="5" class="text-right font-bold" style="background-color: #f8fafc; padding-right: 8px;">Total SKS Lulus :</td>
+                <td colspan="2" class="text-center font-bold" style="background-color: #f8fafc;">{{ $totalSksPassed }} SKS</td>
+            </tr>
+            <tr>
+                <td colspan="5" class="text-right font-bold" style="background-color: #f8fafc; padding-right: 8px;">IPS Genap 2025/2026 :</td>
+                <td colspan="2" class="text-center font-bold" style="background-color: #f8fafc;">{{ $ipsVal }}</td>
+            </tr>
+            <tr>
+                <td colspan="5" class="text-right font-bold" style="background-color: #f8fafc; padding-right: 8px;">IPK Genap 2025/2026 :</td>
+                <td colspan="2" class="text-center font-bold" style="background-color: #f8fafc;">{{ $ipkVal }}</td>
+            </tr>
+        </tfoot>
+    </table>
+
+    {{-- ═════════════════════════════════════════════════════════════════
+         BAGIAN II: TABEL REKAPITULASI PRESENSI TUGAS
+         (Tetap ada di isi PDF sesuai permintaan)
+    ═════════════════════════════════════════════════════════════════ --}}
+    <div class="section-title">II. Rekapitulasi Presensi & Kepatuhan Pengumpulan Tugas</div>
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th style="width: 4%;">No</th>
+                <th style="width: 12%;">Kode MK</th>
+                <th style="width: 40%;">Nama Mata Kuliah</th>
+                <th style="width: 8%;">Wajib</th>
+                <th style="width: 8%;">Tepat Waktu</th>
+                <th style="width: 8%;">Terlambat</th>
+                <th style="width: 8%;">Alpa/Belum</th>
+                <th style="width: 12%;">% Kehadiran</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if($isCumulative)
+                @forelse($courses as $idx => $c)
+                    @php
+                        $att = $c['attendance'] ?? [];
+                        $rate = (float)($att['attendance_rate'] ?? 100);
+                    @endphp
+                    <tr>
+                        <td class="text-center">{{ $idx + 1 }}</td>
+                        <td class="text-center font-bold">{{ $c['code'] }}</td>
+                        <td>{{ $c['name'] }}</td>
+                        <td class="text-center">{{ $att['total_mandatory'] ?? 0 }}</td>
+                        <td class="text-center">{{ $att['on_time_count'] ?? 0 }}</td>
+                        <td class="text-center">{{ $att['late_count'] ?? 0 }}</td>
+                        <td class="text-center">{{ $att['missing_count'] ?? 0 }}</td>
+                        <td class="text-center font-bold">{{ $rate }}%</td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="8" class="text-center" style="padding: 6px;">Belum ada data presensi tugas.</td>
+                    </tr>
+                @endforelse
+            @else
+                @php
+                    $rate = (float)($attendance['attendance_rate'] ?? 100);
+                @endphp
+                <tr>
+                    <td class="text-center">1</td>
+                    <td class="text-center font-bold">{{ $course['code'] }}</td>
+                    <td>{{ $course['name'] }}</td>
+                    <td class="text-center">{{ $attendance['total_mandatory'] ?? 0 }}</td>
+                    <td class="text-center">{{ $attendance['on_time_count'] ?? 0 }}</td>
+                    <td class="text-center">{{ $attendance['late_count'] ?? 0 }}</td>
+                    <td class="text-center">{{ $attendance['missing_count'] ?? 0 }}</td>
+                    <td class="text-center font-bold">{{ $rate }}%</td>
+                </tr>
+            @endif
+        </tbody>
+        <tfoot>
+            <tr style="background-color: #f8fafc; font-weight: bold;">
+                <td colspan="3" class="text-right" style="padding-right: 8px;">RATA-RATA PRESENSI TUGAS :</td>
+                <td colspan="4" class="text-center">{{ $overallStatus }}</td>
+                <td class="text-center font-bold">{{ $overallRate }}%</td>
+            </tr>
+        </tfoot>
+    </table>
+
+    {{-- ═════════════════════════════════════════════════════════════════
+         BAGIAN FOOTER & PENGESAHAN (PERSIS GAMBAR ITK)
+    ═════════════════════════════════════════════════════════════════ --}}
+    <table class="footer-table">
+        <tr>
+            <td style="width: 55%; padding-top: 10px; font-style: italic; color: #333333;">
+                Daftar Kemajuan Studi/Transkrip Mata Kuliah ini dibuat untuk dipergunakan sebagaimana mestinya
+            </td>
+            <td style="width: 45%;">
+                <div class="sign-box">
+                    <div>Balikpapan, {{ $currentDate }}</div>
+                    @if(!$isCumulative && isset($course))
+                        <div>Dosen Pengampu Mata Kuliah,</div>
+                        <div style="height: 38px;"></div>
+                        <div style="font-weight: bold; text-decoration: underline;">{{ $course['lecturer_name'] ?? 'Dosen Pengampu' }}</div>
+                        <div style="font-size: 7.5pt;">NIP/NIDN. {{ $course['lecturer_nip'] ?? '19800101 200501 1 002' }}</div>
+                    @else
+                        <div>Wakil Dekan Bidang Akademik dan Kemahasiswaan</div>
+                        <div style="height: 38px;"></div>
+                        <div style="font-weight: bold; text-decoration: underline;">Prof. Dr. Ir. Akademisi Utama, M.Sc.</div>
+                        <div style="font-size: 7.5pt;">NIP. 19780512 200312 1 001</div>
+                    @endif
                 </div>
             </td>
         </tr>
     </table>
 
-    <div class="doc-title">
-        @if($isCumulative)
-            TRANSKRIP PRESTASI AKADEMIK & REKAPITULASI PRESENSI TUGAS
-        @else
-            LAPORAN PRESTASI AKADEMIK & REKAP PRESENSI TUGAS MATA KULIAH
-        @endif
-    </div>
-    <div class="doc-subtitle">
-        Dokumen Evaluasi Akademik Resmi Terpadu &bull; Diterbitkan melalui Sistem Pembelajaran Digital KampusLMS
-    </div>
-
-    {{-- Biodata Mahasiswa --}}
-    <div class="identity-box">
-        <table class="identity-table">
-            <tr>
-                <td class="id-label">Nama Lengkap</td>
-                <td class="id-sep">:</td>
-                <td class="id-val">{{ $student['name'] ?? '-' }}</td>
-
-                <td class="id-label">Tanggal Cetak</td>
-                <td class="id-sep">:</td>
-                <td class="id-val">{{ $currentDate }}</td>
-            </tr>
-            <tr>
-                <td class="id-label">Nomor Induk (NIM)</td>
-                <td class="id-sep">:</td>
-                <td class="id-val">{{ $student['nim_nip'] ?? '-' }}</td>
-
-                <td class="id-label">Program Studi</td>
-                <td class="id-sep">:</td>
-                <td class="id-val">Teknik Informatika</td>
-            </tr>
-            <tr>
-                <td class="id-label">Surel Mahasiswa</td>
-                <td class="id-sep">:</td>
-                <td class="id-val">{{ $student['email'] ?? '-' }}</td>
-
-                <td class="id-label">Tahun Akademik</td>
-                <td class="id-sep">:</td>
-                <td class="id-val">{{ now()->format('Y') }}/{{ (int)now()->format('Y') + 1 }} Ganjil</td>
-            </tr>
-            @if(!$isCumulative && isset($course))
-            <tr>
-                <td class="id-label">Mata Kuliah</td>
-                <td class="id-sep">:</td>
-                <td class="id-val"><strong>{{ $course['code'] }} — {{ $course['name'] }}</strong> ({{ $course['sks'] }} SKS)</td>
-
-                <td class="id-label">Dosen Pengampu</td>
-                <td class="id-sep">:</td>
-                <td class="id-val">{{ $course['lecturer_name'] ?? '-' }}</td>
-            </tr>
-            @endif
-        </table>
-    </div>
-
-    @if($isCumulative)
-        {{-- ═════════════════════════════════════════════════════════════════
-             SKENARIO A: TRANSKRIP KUMULATIF SELURUH MATA KULIAH (MAHASISWA & ADMIN)
-        ═════════════════════════════════════════════════════════════════ --}}
-
-        {{-- BAGIAN II: TABEL PRESTASI NILAI AKADEMIK --}}
-        <div class="section-header">I. Prestasi Nilai Akademik Kumulatif</div>
-        <table class="data-table">
-            <thead>
-                <tr>
-                    <th style="width: 5%;">No</th>
-                    <th style="width: 12%;">Kode MK</th>
-                    <th style="width: 33%;">Nama Mata Kuliah</th>
-                    <th style="width: 7%;">SKS</th>
-                    <th style="width: 12%;">Nilai Akhir</th>
-                    <th style="width: 10%;">Huruf Mutu</th>
-                    <th style="width: 10%;">Bobot Indeks</th>
-                    <th style="width: 11%;">Angka Mutu</th>
-                </tr>
-            </thead>
-            <tbody>
-                @forelse($courses as $idx => $c)
-                    <tr>
-                        <td class="text-center">{{ $idx + 1 }}</td>
-                        <td class="text-center font-bold">{{ $c['code'] }}</td>
-                        <td>{{ $c['name'] }}</td>
-                        <td class="text-center">{{ $c['sks'] }}</td>
-                        <td class="text-center">
-                            {{ $c['final_score'] !== null ? number_format($c['final_score'], 2) : '—' }}
-                        </td>
-                        <td class="text-center font-bold">
-                            {{ $c['letter_grade'] }}
-                        </td>
-                        <td class="text-center">{{ number_format($c['grade_point'], 2) }}</td>
-                        <td class="text-center font-bold">{{ number_format($c['quality_points'], 2) }}</td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="8" class="text-center" style="padding: 10px; color: #64748b;">
-                            Belum ada mata kuliah yang terdaftar atau dinilai.
-                        </td>
-                    </tr>
-                @endforelse
-            </tbody>
-            @if(count($courses) > 0)
-            <tfoot>
-                <tr style="background-color: #f1f5f9; font-weight: 800;">
-                    <td colspan="3" class="text-right" style="padding-right: 8px;">TOTAL KUMULATIF:</td>
-                    <td class="text-center">{{ $summary['total_credits_taken'] ?? 0 }}</td>
-                    <td colspan="3" class="text-right" style="padding-right: 8px;">TOTAL ANGKA MUTU:</td>
-                    <td class="text-center">{{ number_format($summary['total_quality_points'] ?? 0, 2) }}</td>
-                </tr>
-            </tfoot>
-            @endif
-        </table>
-
-        {{-- BAGIAN III: RINGKASAN PRESTASI AKADEMIK --}}
-        <table class="summary-table">
-            <tr>
-                <td style="width: 20%;">
-                    <div class="summary-card">
-                        <div class="summary-card-title">SKS Diambil</div>
-                        <div class="summary-card-value" style="color: #0284c7;">{{ $summary['total_credits_taken'] ?? 0 }} SKS</div>
-                    </div>
-                </td>
-                <td style="width: 20%;">
-                    <div class="summary-card">
-                        <div class="summary-card-title">SKS Lulus</div>
-                        <div class="summary-card-value" style="color: #16a34a;">{{ $summary['total_credits_passed'] ?? 0 }} SKS</div>
-                    </div>
-                </td>
-                <td style="width: 20%;">
-                    <div class="summary-card">
-                        <div class="summary-card-title">Total Mutu</div>
-                        <div class="summary-card-value" style="color: #7c3aed;">{{ number_format($summary['total_quality_points'] ?? 0, 2) }}</div>
-                    </div>
-                </td>
-                <td style="width: 20%;">
-                    <div class="summary-card">
-                        <div class="summary-card-title">IPK Kumulatif</div>
-                        <div class="summary-card-value" style="color: #ea580c;">{{ number_format($summary['gpa'] ?? 0, 2) }}</div>
-                    </div>
-                </td>
-                <td style="width: 20%;">
-                    <div class="summary-card">
-                        <div class="summary-card-title">Predikat</div>
-                        <div class="summary-card-value" style="font-size: 8.5pt; color: #0f172a; margin-top: 4px;">{{ $summary['predicate'] ?? '—' }}</div>
-                    </div>
-                </td>
-            </tr>
-        </table>
-
-        {{-- BAGIAN IV: TABEL REKAPITULASI PRESENSI TUGAS --}}
-        <div class="section-header">II. Rekapitulasi Presensi & Kepatuhan Pengumpulan Tugas</div>
-        <table class="data-table">
-            <thead>
-                <tr>
-                    <th style="width: 12%;">Kode MK</th>
-                    <th style="width: 32%;">Mata Kuliah</th>
-                    <th style="width: 11%;">Tugas Wajib</th>
-                    <th style="width: 11%;">Tepat Waktu</th>
-                    <th style="width: 10%;">Terlambat</th>
-                    <th style="width: 10%;">Alpa/Belum</th>
-                    <th style="width: 14%;">% Kehadiran</th>
-                </tr>
-            </thead>
-            <tbody>
-                @forelse($courses as $c)
-                    @php
-                        $att = $c['attendance'];
-                        $rate = (float) $att['attendance_rate'];
-                        $badgeClass = $rate >= 85 ? 'badge-success' : ($rate >= 75 ? 'badge-warning' : 'badge-danger');
-                    @endphp
-                    <tr>
-                        <td class="text-center font-bold">{{ $c['code'] }}</td>
-                        <td>{{ $c['name'] }}</td>
-                        <td class="text-center font-bold">{{ $att['total_mandatory'] }}</td>
-                        <td class="text-center" style="color: #166534;">{{ $att['on_time_count'] }}</td>
-                        <td class="text-center" style="color: #92400e;">{{ $att['late_count'] }}</td>
-                        <td class="text-center" style="color: #991b1b;">{{ $att['missing_count'] }}</td>
-                        <td class="text-center">
-                            <span class="badge {{ $badgeClass }}">
-                                {{ $rate }}%
-                            </span>
-                        </td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="7" class="text-center" style="padding: 8px; color: #64748b;">
-                            Tidak ada data presensi tugas.
-                        </td>
-                    </tr>
-                @endforelse
-            </tbody>
-            @if(count($courses) > 0)
-            <tfoot>
-                @php
-                    $overallRate = (float)($summary['overall_attendance_rate'] ?? 100);
-                    $overallBadge = $overallRate >= 85 ? 'badge-success' : ($overallRate >= 75 ? 'badge-warning' : 'badge-danger');
-                @endphp
-                <tr style="background-color: #f1f5f9; font-weight: 800;">
-                    <td colspan="2" class="text-right" style="padding-right: 8px;">RATA-RATA PRESENSI TUGAS KAMPUS:</td>
-                    <td class="text-center">{{ $summary['total_assignments'] ?? 0 }}</td>
-                    <td class="text-center" style="color: #166534;">{{ $summary['on_time_count'] ?? 0 }}</td>
-                    <td class="text-center" style="color: #92400e;">{{ $summary['late_count'] ?? 0 }}</td>
-                    <td class="text-center" style="color: #991b1b;">{{ $summary['missing_count'] ?? 0 }}</td>
-                    <td class="text-center">
-                        <span class="badge {{ $overallBadge }}">
-                            {{ $overallRate }}%
-                        </span>
-                    </td>
-                </tr>
-            </tfoot>
-            @endif
-        </table>
-
-        @if(($summary['overall_attendance_rate'] ?? 100) < 75)
-            <div style="background-color: #fef2f2; border-left: 3px solid #ef4444; padding: 5px 8px; font-size: 7.5pt; color: #991b1b; margin-bottom: 8px;">
-                <strong>PERINGATAN AKADEMIK:</strong> Persentase kehadiran pengumpulan tugas kumulatif berada di bawah ambang batas kelayakan minimum (&lt; 75%).
-            </div>
-        @endif
-
-    @else
-        {{-- ═════════════════════════════════════════════════════════════════
-             SKENARIO B: TRANSKRIP KHUSUS SATU MATA KULIAH (DOSEN PENGAMPU)
-        ═════════════════════════════════════════════════════════════════ --}}
-
-        {{-- RINGKASAN NILAI MATA KULIAH --}}
-        <div class="section-header">I. Capaian Nilai & Status Kelulusan Mata Kuliah</div>
-        <table class="summary-table">
-            <tr>
-                <td style="width: 25%;">
-                    <div class="summary-card">
-                        <div class="summary-card-title">Nilai Akhir (0-100)</div>
-                        <div class="summary-card-value" style="color: #0284c7;">
-                            {{ $grade['final_score'] !== null ? number_format($grade['final_score'], 2) : '—' }}
-                        </div>
-                    </div>
-                </td>
-                <td style="width: 25%;">
-                    <div class="summary-card">
-                        <div class="summary-card-title">Huruf Mutu / Bobot</div>
-                        <div class="summary-card-value" style="color: #7c3aed;">
-                            {{ $grade['letter'] ?? '—' }} ({{ number_format($grade['grade_point'] ?? 0, 2) }})
-                        </div>
-                    </div>
-                </td>
-                <td style="width: 25%;">
-                    <div class="summary-card">
-                        <div class="summary-card-title">Kehadiran Tugas</div>
-                        @php
-                            $rate = (float)($attendance['attendance_rate'] ?? 100);
-                            $badgeClass = $rate >= 85 ? 'badge-success' : ($rate >= 75 ? 'badge-warning' : 'badge-danger');
-                        @endphp
-                        <div class="summary-card-value">
-                            <span class="badge {{ $badgeClass }}" style="font-size: 9pt;">
-                                {{ $rate }}%
-                            </span>
-                        </div>
-                    </div>
-                </td>
-                <td style="width: 25%;">
-                    <div class="summary-card">
-                        <div class="summary-card-title">Status Akademik</div>
-                        <div class="summary-card-value" style="font-size: 9pt; color: {{ ($grade['is_passed'] ?? false) ? '#166534' : '#991b1b' }}; margin-top: 3px;">
-                            {{ ($grade['is_passed'] ?? false) ? 'LULUS (MEMENUHI SYARAT)' : 'BELUM MEMENUHI' }}
-                        </div>
-                    </div>
-                </td>
-            </tr>
-        </table>
-
-        {{-- RINCIAN PENILAIAN & PRESENSI SELURUH TUGAS --}}
-        <div class="section-header">II. Rincian Pengumpulan & Penilaian Tugas Perkuliahan</div>
-        <table class="data-table">
-            <thead>
-                <tr>
-                    <th style="width: 5%;">No</th>
-                    <th style="width: 33%;">Judul Penugasan</th>
-                    <th style="width: 17%;">Tenggat Waktu</th>
-                    <th style="width: 15%;">Waktu Kumpul</th>
-                    <th style="width: 15%;">Status Presensi</th>
-                    <th style="width: 15%;">Nilai (Maks)</th>
-                </tr>
-            </thead>
-            <tbody>
-                @forelse($assignments as $idx => $asg)
-                    @php
-                        $stClass = 'badge-danger';
-                        if ($asg['status_key'] === 'on_time') $stClass = 'badge-success';
-                        elseif ($asg['status_key'] === 'late') $stClass = 'badge-warning';
-                        elseif ($asg['status_key'] === 'pending') $stClass = 'badge-info';
-                    @endphp
-                    <tr>
-                        <td class="text-center">{{ $idx + 1 }}</td>
-                        <td>
-                            <strong>{{ $asg['title'] }}</strong>
-                            @if(!empty($asg['feedback']))
-                                <div style="font-size: 7pt; color: #64748b; font-style: italic; margin-top: 2px;">
-                                    Catatan Dosen: "{{ $asg['feedback'] }}"
-                                </div>
-                            @endif
-                        </td>
-                        <td class="text-center">
-                            {{ $asg['due_at'] ? \Carbon\Carbon::parse($asg['due_at'])->format('d/m/Y H:i') : '—' }}
-                        </td>
-                        <td class="text-center">
-                            {{ $asg['submitted_at'] ? \Carbon\Carbon::parse($asg['submitted_at'])->format('d/m/Y H:i') : '—' }}
-                        </td>
-                        <td class="text-center">
-                            <span class="badge {{ $stClass }}">
-                                {{ $asg['status_label'] }}
-                            </span>
-                        </td>
-                        <td class="text-center font-bold">
-                            {{ $asg['score'] !== null ? number_format($asg['score'], 1) : '—' }}
-                            <span style="font-size: 7pt; font-weight: normal; color: #64748b;">/ {{ $asg['max_score'] }}</span>
-                        </td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="6" class="text-center" style="padding: 10px; color: #64748b;">
-                            Belum ada penugasan yang dipublikasikan pada mata kuliah ini.
-                        </td>
-                    </tr>
-                @endforelse
-            </tbody>
-        </table>
-    @endif
-
-    {{-- ═════════════════════════════════════════════════════════════════
-         BAGIAN V: KOLOM VALIDASI, KEABSAHAN & TANDA TANGAN
-    ═════════════════════════════════════════════════════════════════ --}}
-    <div class="sign-container">
-        <table class="sign-table">
-            <tr>
-                <td style="width: 25%; text-align: center; vertical-align: middle;">
-                    <div class="qr-box">
-                        <div style="font-weight: bold; margin-top: 4px;">VERIFIKASI LMS</div>
-                        <div style="font-size: 16pt; margin: 4px 0;">&#x2611;</div>
-                        <div style="font-size: 6pt;">ID Mahasiswa: #{{ $student['id'] ?? '0' }}</div>
-                        <div style="font-size: 5.5pt; color: #15803d; font-weight: bold;">DOKUMEN VALID</div>
-                    </div>
-                </td>
-                <td style="width: 35%;">
-                    <div style="font-size: 7.5pt; color: #475569; padding-right: 15px;">
-                        <strong>Catatan Keabsahan:</strong><br>
-                        Dokumen transkrip dan rekap presensi tugas ini diterbitkan secara elektronik oleh Sistem KampusLMS. Data yang tertera di atas sah dan bersumber langsung dari pangkalan data akademik universitas.
-                    </div>
-                </td>
-                <td style="width: 40%; text-align: center;">
-                    <div>Balikpapan, {{ $currentDate }}</div>
-                    @if(!$isCumulative && isset($course))
-                        <div style="font-weight: 700; margin-top: 2px;">Dosen Pengampu Mata Kuliah,</div>
-                        <div style="height: 48px;"></div>
-                        <div style="font-weight: 800; text-decoration: underline;">{{ $course['lecturer_name'] ?? 'Dosen Pengampu' }}</div>
-                        <div style="font-size: 7.5pt; color: #475569;">NIP/NIDN. Dosen Terdaftar</div>
-                    @else
-                        <div style="font-weight: 700; margin-top: 2px;">Ketua Program Studi Informatika,</div>
-                        <div style="height: 48px;"></div>
-                        <div style="font-weight: 800; text-decoration: underline;">Dr. Eng. Ir. Akademisi Utama, S.T., M.T.</div>
-                        <div style="font-size: 7.5pt; color: #475569;">NIP. 19850101 201012 1 001</div>
-                    @endif
-                </td>
-            </tr>
-        </table>
-
-        <div class="footer-note">
-            Halaman 1 dari 1 &bull; Transkrip Akademik Resmi & Rekapitulasi Presensi Tugas Mahasiswa &bull; KampusLMS v2.4 (Build Minggu 12)
-        </div>
-    </div>
-
 </body>
 </html>
-
