@@ -31,7 +31,7 @@ class AppServiceProvider extends ServiceProvider
     {
         // Mencegah N+1 Query secara otomatis di lingkungan non-produksi (Minggu 11)
         // Di lokal/testing akan melempar exception jika ada relasi yang diakses tanpa eager loading
-        Model::preventLazyLoading(! app()->isProduction());
+        Model::preventLazyLoading(! app()->isProduction()); // 
 
         // Rate limiting umum: 60/menit per user/IP
         RateLimiter::for('api', function (Request $request) {
