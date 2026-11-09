@@ -94,4 +94,17 @@ class CoursePolicy
 
         return false;
     }
+
+    /**
+     * Tentukan apakah pengguna dapat mengakses transkrip nilai mahasiswa pada mata kuliah ini.
+     * Mendelegasikan pemeriksaan ke TranscriptPolicy (Tahap 2).
+     */
+    public function viewTranscript(User $user, Course $course, ?User $student = null): bool
+    {
+        if (! $student) {
+            return false;
+        }
+
+        return app(TranscriptPolicy::class)->viewStudentCourseTranscript($user, $course, $student);
+    }
 }
