@@ -38,6 +38,12 @@
                 + Tambah Mata Kuliah
             </a>
             @endcan
+
+            @if(auth()->check() && auth()->user()->role === 'mahasiswa')
+            <a href="{{ route('mahasiswa.transcript.index') }}" class="btn" style="background: var(--card-bg); border: 1px solid var(--card-border); color: var(--text-main); font-weight: 700; text-decoration: none; padding: 0.6rem 1.25rem; border-radius: var(--radius); box-shadow: var(--card-shadow); display: inline-flex; align-items: center; gap: 0.4rem; transition: all 0.2s ease;">
+                📄 Transkrip Nilai (PDF)
+            </a>
+            @endif
         </div>
     </div>
 

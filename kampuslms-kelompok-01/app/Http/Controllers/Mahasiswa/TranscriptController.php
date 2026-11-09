@@ -75,6 +75,10 @@ class TranscriptController extends Controller
             $pdf = Pdf::loadView('transcripts.pdf', $data)
                 ->setPaper('a4', 'portrait');
 
+            if ($request->has('preview') || $request->query('preview')) {
+                return $pdf->stream($filename);
+            }
+
             return $pdf->download($filename);
         }
 
