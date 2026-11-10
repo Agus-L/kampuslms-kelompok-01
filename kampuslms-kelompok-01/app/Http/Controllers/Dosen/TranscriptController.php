@@ -75,7 +75,7 @@ class TranscriptController extends Controller
 
         if (class_exists(Pdf::class) && view()->exists('transcripts.pdf')) {
             $pdf = Pdf::loadView('transcripts.pdf', $data)
-                ->setPaper('a4', 'portrait');
+                ->setPaper('a4', 'landscape');
 
             if ($request->has('preview') || $request->query('preview')) {
                 return $pdf->stream($filename);

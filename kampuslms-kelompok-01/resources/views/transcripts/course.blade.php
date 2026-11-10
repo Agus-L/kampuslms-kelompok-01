@@ -1,4 +1,4 @@
-<x-layout :title="'Transkrip Mahasiswa — ' . $course->name . ' — Kampus LMS'">
+<x-layout :title="'Transkrip Prestasi Akademik — ' . $course->name . ' — Kampus LMS'">
     <div class="page-container">
         {{-- Breadcrumb Navigasi --}}
         <nav class="breadcrumb" style="margin-bottom: 1rem;">
@@ -19,7 +19,7 @@
                         Transkrip Mata Kuliah • {{ $course->code }}
                     </span>
                     <h1 style="font-size: 1.75rem; font-weight: 800; color: var(--text-main, #f8fafc); margin: 0.5rem 0 0.25rem 0;">
-                        📄 Transkrip Nilai & Rekapitulasi Presensi Tugas
+                        📄 Transkrip Prestasi Akademik
                     </h1>
                     <p style="font-size: 0.9rem; color: var(--text-muted, #94a3b8); margin: 0;">
                         {{ $student->name }} ({{ $student->nim_nip }}) — {{ $student->email }}
@@ -72,24 +72,22 @@
                 <table style="width: 100%; border-collapse: collapse; text-align: left;">
                     <thead>
                         <tr style="border-bottom: 1px solid var(--card-border, #334155); color: var(--text-muted, #94a3b8); font-size: 0.85rem;">
-                            <th style="padding: 0.75rem;">Kode MK</th>
+                            <th style="padding: 0.75rem; width: 5%; text-align: center;">No</th>
+                            <th style="padding: 0.75rem; width: 15%;">Kode MK</th>
                             <th style="padding: 0.75rem;">Nama Mata Kuliah</th>
-                            <th style="padding: 0.75rem; text-align: center;">SKS</th>
-                            <th style="padding: 0.75rem; text-align: center;">Nilai Angka</th>
-                            <th style="padding: 0.75rem; text-align: center;">Huruf</th>
-                            <th style="padding: 0.75rem; text-align: center;">Bobot Indeks</th>
-                            <th style="padding: 0.75rem; text-align: center;">Angka Mutu</th>
+                            <th style="padding: 0.75rem; text-align: center; width: 10%;">SKS</th>
+                            <th style="padding: 0.75rem; text-align: center; width: 15%;">Nilai Angka</th>
+                            <th style="padding: 0.75rem; text-align: center; width: 12%;">Huruf Mutu</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr style="border-bottom: 1px solid var(--card-border, #334155); font-size: 0.9rem;">
+                            <td style="padding: 0.75rem; text-align: center; color: var(--text-muted, #94a3b8);">1</td>
                             <td style="padding: 0.75rem; font-weight: 600; color: #818cf8;">{{ $course->code }}</td>
                             <td style="padding: 0.75rem; color: var(--text-main, #f8fafc);">{{ $course->name }}</td>
                             <td style="padding: 0.75rem; text-align: center;">{{ $course->sks }}</td>
                             <td style="padding: 0.75rem; text-align: center;">{{ $data['grade']['final_score'] !== null ? number_format($data['grade']['final_score'], 2) : '—' }}</td>
                             <td style="padding: 0.75rem; text-align: center; font-weight: 700;">{{ $data['grade']['letter'] }}</td>
-                            <td style="padding: 0.75rem; text-align: center;">{{ number_format($data['grade']['grade_point'], 2) }}</td>
-                            <td style="padding: 0.75rem; text-align: center; font-weight: 600;">{{ number_format($data['grade']['quality_points'] ?? ($course->sks * $data['grade']['grade_point']), 2) }}</td>
                         </tr>
                     </tbody>
                 </table>

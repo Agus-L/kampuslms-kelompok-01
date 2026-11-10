@@ -15,6 +15,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Facades\URL;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -31,6 +32,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Paksa HTTPS di lingkungan produksi untuk mencegah mixed content (CSS/JS)
+        if (app()->isProduction()) {
+            URL::forceScheme('https');
+        }
+
         // Mencegah N+1 Query secara otomatis di lingkungan non-produksi (Minggu 11)
         // Di lokal/testing akan melempar exception jika ada relasi yang diakses tanpa eager loading
         Model::preventLazyLoading(! app()->isProduction()); // 
