@@ -10,8 +10,15 @@ git pull origin main
 echo "Memperbarui dependensi Composer..."
 composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader
 
+echo "Mengompilasi aset frontend (Vite & Tailwind CSS)..."
+npm ci --no-audit
+npm run build
+
 echo "Menjalankan migrasi database..."
 php artisan migrate --force
+
+echo "Memastikan symbolic link storage terpasang..."
+php artisan storage:link || true
 
 echo "Mengoptimalkan konfigurasi dan route cache..."
 php artisan config:cache
