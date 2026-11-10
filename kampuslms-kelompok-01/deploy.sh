@@ -5,7 +5,11 @@ echo "Mengaktifkan maintenance mode..."
 php artisan down || true
 
 echo "Menarik kode terbaru dari Git..."
-git pull origin main
+if [ -d .git ]; then
+    git pull origin main
+else
+    echo "Direktori .git tidak terdeteksi (lingkungan container Docker). Melewati langkah git pull."
+fi
 
 echo "Memperbarui dependensi Composer..."
 composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader
