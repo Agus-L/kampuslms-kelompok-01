@@ -37,3 +37,4 @@ Aplikasi Portal Pembelajaran Terintegrasi (Learning Management System) berbasis 
 * **Audit Keamanan IDOR (Milestone 2):** [docs/keamanan.md](docs/keamanan.md)
 * **Laporan Optimasi Performa (Milestone 3 / Minggu 11):** [docs/performa.md](docs/performa.md)
 * **Spesifikasi Transkrip Akademik (Minggu 12):** [spek-minggu-12.md](spek-minggu-12.md)
+
