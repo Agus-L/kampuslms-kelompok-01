@@ -10,7 +10,49 @@ use App\Models\Submission;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
+
+// Fallback polyfill jika fakerphp/faker tidak terinstall di produksi (--no-dev)
+if (! function_exists('fake')) {
+    function fake()
+    {
+        return new class {
+            public function numberBetween($min = 0, $max = 2147483647): int
+            {
+                return mt_rand($min, $max);
+            }
+
+            public function randomElement(array $array = ['a', 'b', 'c']): mixed
+            {
+                return Arr::random($array);
+            }
+
+            public function uuid(): string
+            {
+                return (string) Str::uuid();
+            }
+
+            public function slug(): string
+            {
+                return 'konten-' . mt_rand(1000, 9999);
+            }
+
+            public function boolean($chanceOfTrue = 50): bool
+            {
+                return mt_rand(1, 100) <= $chanceOfTrue;
+            }
+
+            public function randomFloat($nbMaxDecimals = null, $min = 0, $max = null): float
+            {
+                $decimals = $nbMaxDecimals ?? 2;
+                $val = $min + (mt_rand() / mt_getrandmax()) * ($max - $min);
+                return round($val, $decimals);
+            }
+        };
+    }
+}
 
 /**
  * Seeder utama KampusLMS.
