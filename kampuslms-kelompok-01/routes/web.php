@@ -216,6 +216,10 @@ Route::middleware(['auth:sanctum,web'])->group(function () {
                 ->only(['index', 'create', 'store', 'destroy']);
 
             // Transkrip Nilai & Rekap Presensi Tugas (Tahap 3 - Minggu 12)
+            Route::get('transcript', [DosenTranscriptController::class, 'index'])
+                ->name('transcript.index');
+            Route::get('transcript/export/pdf', [DosenTranscriptController::class, 'exportAllPdf'])
+                ->name('transcript.export.pdf');
             Route::get('courses/{course}/students/{student}/transcript', [DosenTranscriptController::class, 'show'])
                 ->name('courses.students.transcript.show');
             Route::get('courses/{course}/students/{student}/transcript/export/pdf', [DosenTranscriptController::class, 'exportPdf'])

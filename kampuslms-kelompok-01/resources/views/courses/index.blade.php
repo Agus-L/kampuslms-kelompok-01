@@ -44,6 +44,12 @@
                 📄 Transkrip Nilai (PDF)
             </a>
             @endif
+
+            @if(auth()->check() && auth()->user()->role === 'dosen')
+            <a href="{{ route('dosen.transcript.index') }}" class="btn" style="background: var(--card-bg); border: 1px solid var(--card-border); color: var(--text-main); font-weight: 700; text-decoration: none; padding: 0.6rem 1.25rem; border-radius: var(--radius); box-shadow: var(--card-shadow); display: inline-flex; align-items: center; gap: 0.4rem; transition: all 0.2s ease;">
+                📋 Laporan Transkrip Pengampu (PDF)
+            </a>
+            @endif
         </div>
     </div>
 
