@@ -136,6 +136,114 @@ class TranscriptService
     }
 
     /**
+     * Mengambil data transkrip terpadu seluruh mata kuliah yang diampu dosen,
+     * beserta seluruh mahasiswa yang terdaftar dan nilai masing-masing.
+     *
+     * Digunakan untuk fitur "Laporan Transkrip Pengampu" — 1 PDF mencakup
+     * semua MK yang diampu dan semua mahasiswa di setiap MK tersebut.
+     *
+     * Dioptimalkan dengan Eager Loading bertingkat untuk mencegah N+1 Query.
+     */
+    public function getLecturerCoursesData(User $lecturer): array
+    {
+        // Ambil semua mata kuliah milik dosen ini, beserta mahasiswa dan tugas-tugasnya
+        $courses = $lecturer->taughtCourses()
+            ->with([
+                'students:id,name,nim_nip,email',
+                'assignments' => function ($q) {
+                    $q->select(['id', 'course_id', 'title', 'max_score', 'due_at', 'status'])
+                      ->where('status', 'published')
+                      ->orderBy('due_at', 'asc');
+                },
+                'assignments.submissions' => function ($q) {
+                    $q->select(['id', 'assignment_id', 'user_id', 'submitted_at', 'is_late'])
+                      ->with(['grade:id,submission_id,score,feedback,graded_at']);
+                },
+            ])
+            ->orderBy('code', 'asc')
+            ->get();
+
+        $courseResults = [];
+
+        foreach ($courses as $course) {
+            $assignments    = $course->assignments;
+            $allSubmissions = $assignments->flatMap(fn ($a) => $a->submissions);
+            $students       = $course->students->sortBy('nim_nip')->values();
+
+            $studentResults = [];
+            $totalFinalScore = 0.0;
+            $gradedStudentCount = 0;
+            $passedCount = 0;
+
+            foreach ($students as $student) {
+                // Filter submission hanya milik mahasiswa ini
+                $studentSubmissions = $allSubmissions->where('user_id', $student->id)->values();
+
+                $grade      = $this->calculateCourseGrade($assignments, $studentSubmissions);
+                $attendance = $this->calculateTaskAttendance($assignments, $studentSubmissions);
+
+                if ($grade['final_score'] !== null) {
+                    $totalFinalScore += $grade['final_score'];
+                    $gradedStudentCount++;
+                }
+
+                if ($grade['is_passed']) {
+                    $passedCount++;
+                }
+
+                $studentResults[] = [
+                    'id'              => $student->id,
+                    'name'            => $student->name,
+                    'nim_nip'         => $student->nim_nip,
+                    'email'           => $student->email,
+                    'final_score'     => $grade['final_score'],
+                    'letter_grade'    => $grade['letter'],
+                    'grade_point'     => $grade['grade_point'],
+                    'is_passed'       => $grade['is_passed'],
+                    'attendance_rate' => $attendance['attendance_rate'],
+                    'on_time_count'   => $attendance['on_time_count'],
+                    'late_count'      => $attendance['late_count'],
+                    'missing_count'   => $attendance['missing_count'],
+                    'total_mandatory' => $attendance['total_mandatory'],
+                ];
+            }
+
+            $avgScore = $gradedStudentCount > 0
+                ? round($totalFinalScore / $gradedStudentCount, 2)
+                : null;
+
+            $totalStudents = $students->count();
+            $passRate = $totalStudents > 0
+                ? round(($passedCount / $totalStudents) * 100, 1)
+                : 0.0;
+
+            $courseResults[] = [
+                'id'            => $course->id,
+                'code'          => $course->code,
+                'name'          => $course->name,
+                'sks'           => (int) $course->sks,
+                'total_students' => $totalStudents,
+                'avg_score'     => $avgScore,
+                'avg_grade'     => $avgScore !== null ? $this->scoreToGrade($avgScore)['letter'] : '—',
+                'pass_rate'     => $passRate,
+                'passed_count'  => $passedCount,
+                'students'      => $studentResults,
+            ];
+        }
+
+        return [
+            'lecturer' => [
+                'id'      => $lecturer->id,
+                'name'    => $lecturer->name,
+                'nim_nip' => $lecturer->nim_nip,
+                'email'   => $lecturer->email,
+            ],
+            'courses'       => $courseResults,
+            'total_courses' => count($courseResults),
+        ];
+    }
+
+    /**
      * Mengambil rincian nilai dan kehadiran tugas mahasiswa khusus pada SATU mata kuliah
      * yang diampu oleh Dosen Pengampu.
      */

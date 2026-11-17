@@ -26,6 +26,57 @@ class TranscriptController extends Controller
     ) {}
 
     /**
+     * Menampilkan laporan transkrip terpadu: semua MK yang diampu dosen beserta
+     * seluruh mahasiswa yang terdaftar dan nilai masing-masing.
+     *
+     * Route: GET /dosen/transcript → dosen.transcript.index
+     */
+    public function index(Request $request)
+    {
+        /** @var \App\Models\User $lecturer */
+        $lecturer = auth()->user();
+
+        $data = $this->transcriptService->getLecturerCoursesData($lecturer);
+
+        if ($request->wantsJson()) {
+            return response()->json($data);
+        }
+
+        return view('transcripts.dosen-index', $data);
+    }
+
+    /**
+     * Mengunduh PDF laporan transkrip terpadu semua MK yang diampu.
+     *
+     * Route: GET /dosen/transcript/export/pdf → dosen.transcript.export.pdf
+     */
+    public function exportAllPdf(Request $request)
+    {
+        /** @var \App\Models\User $lecturer */
+        $lecturer = auth()->user();
+
+        $data     = $this->transcriptService->getLecturerCoursesData($lecturer);
+        $filename = 'Laporan_Transkrip_Pengampu_' . str_replace(' ', '_', $lecturer->name) . '.pdf';
+
+        if (class_exists(Pdf::class)) {
+            $pdf = Pdf::loadView('transcripts.dosen-pdf', $data)
+                ->setPaper('a4', 'landscape');
+
+            if ($request->has('preview') || $request->query('preview')) {
+                return $pdf->stream($filename);
+            }
+
+            return $pdf->download($filename);
+        }
+
+        return response()->json([
+            'status'   => 'success',
+            'filename' => $filename,
+            'data'     => $data,
+        ]);
+    }
+
+    /**
      * Menampilkan rincian transkrip nilai dan rekapitulasi kehadiran tugas mahasiswa
      * pada mata kuliah yang diampu oleh dosen yang sedang login.
      *
