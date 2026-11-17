@@ -132,7 +132,7 @@ Pengujian akses nyata dilakukan menggunakan peramban mobile (smartphone) anggota
 
 ## BREAK 
 
-> ⛔ **Peringatan Keamanan Produksi:**  
+> **Peringatan Keamanan Produksi:**  
 > Percobaan 1 dan 2 membuka celah rahasia server ke internet. Pemindaian bot internet mencari halaman debug dan file `.env` berlangsung otomatis 24 jam nonstop. Oleh karena itu, pengujian dilakukan di lingkungan terkontrol dengan basis data percobaan, dan segera dinonaktifkan kembali (*reverted*) setelah pengamatan selesai.
 
 Hasil investigasi dan pengujian 8 skenario eksperimen dari subbab 12.3 modul:
