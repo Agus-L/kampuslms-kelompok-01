@@ -7,7 +7,7 @@ NIM: 10241009
 
 ---
 
-## READ — Analisis Riwayat Git Kelompok
+## READ 
 
 Prinsip utama materi Minggu 13 adalah: **"Version control bukan sekadar tempat mencadangkan file, melainkan alat komunikasi, bukti kontribusi individual, dan jaminan keamanan alur kerja pengembangan perangkat lunak secara kolaboratif"**.
 
@@ -131,7 +131,7 @@ Jika kelak ditemukan regresi visual atau bug JavaScript pada sistem tema gelap-t
 
 ---
 
-## BREAK — Enam Percobaan Eksperimen Git dan Keamanan Alur Kerja
+## BREAK 
 
 [PERINGATAN KEAMANAN]:  
 Percobaan nomor 1 wajib menggunakan berkas `.env` PALSU. Repositori kelompok bersifat publik di GitHub. Sekali kredensial sungguhan terdorong (*pushed*), berkas tersebut harus diasumsikan telah terbaca oleh bot pemindai publik internet dan tidak aman lagi.
