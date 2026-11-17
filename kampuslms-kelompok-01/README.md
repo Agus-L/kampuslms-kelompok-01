@@ -1,3 +1,15 @@
+# KampusLMS — Kelompok 01
+
+* **URL Publik Resmi (Live HTTPS):** [https://kampuslms-kelompok-01-production.up.railway.app](https://kampuslms-kelompok-01-production.up.railway.app)
+* **Dokumentasi Deployment (Milestone 4):** [docs/deployment.md](../docs/deployment.md)
+
+### Akun Demo:
+* Admin: `admin@kampuslms.test` / `password`
+* Dosen: `dosen@kampuslms.test` / `password`
+* Mahasiswa: `mahasiswa@kampuslms.test` / `password`
+
+---
+
 <p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
 
 <p align="center">

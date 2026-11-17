@@ -89,6 +89,10 @@
                        class="nav-link {{ request()->routeIs('dosen.courses.*') ? 'active' : '' }}">
                         Kelas Saya
                     </a>
+                    <a href="{{ route('dosen.transcript.index') }}"
+                       class="nav-link {{ request()->routeIs('dosen.transcript.*') ? 'active' : '' }}">
+                        Transkrip Pengampu
+                    </a>
                 @elseif(auth()->user()->role === 'mahasiswa')
                     <a href="{{ route('mahasiswa.courses.index') }}"
                        class="nav-link {{ request()->routeIs('mahasiswa.courses.*') ? 'active' : '' }}">
