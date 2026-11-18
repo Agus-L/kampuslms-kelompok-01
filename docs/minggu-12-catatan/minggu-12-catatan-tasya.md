@@ -7,7 +7,7 @@ NIM: 10241009
 
 ---
 
-## READ — Bedah Server (40 Menit)
+## READ 
 
 Prinsip utama materi Minggu 12 adalah: **"Mengubah aplikasi yang berjalan di laptop lokal menjadi aplikasi yang hidup di internet publik dan tangguh saat digunakan bersamaan tanpa membocorkan rahasia data"**. 
 
@@ -130,9 +130,9 @@ Pengujian akses nyata dilakukan menggunakan peramban mobile (smartphone) anggota
 
 ---
 
-## BREAK — Delapan Percobaan Keamanan & Produksi (50 Menit)
+## BREAK 
 
-> ⛔ **Peringatan Keamanan Produksi:**  
+> **Peringatan Keamanan Produksi:**  
 > Percobaan 1 dan 2 membuka celah rahasia server ke internet. Pemindaian bot internet mencari halaman debug dan file `.env` berlangsung otomatis 24 jam nonstop. Oleh karena itu, pengujian dilakukan di lingkungan terkontrol dengan basis data percobaan, dan segera dinonaktifkan kembali (*reverted*) setelah pengamatan selesai.
 
 Hasil investigasi dan pengujian 8 skenario eksperimen dari subbab 12.3 modul:
