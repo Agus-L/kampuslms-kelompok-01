@@ -149,7 +149,7 @@ class TranscriptService
         // Ambil semua mata kuliah milik dosen ini, beserta mahasiswa dan tugas-tugasnya
         $courses = $lecturer->taughtCourses()
             ->with([
-                'students:id,name,nim_nip,email',
+                'students:id,name,nim_nip',
                 'assignments' => function ($q) {
                     $q->select(['id', 'course_id', 'title', 'max_score', 'due_at', 'status'])
                       ->where('status', 'published')
@@ -195,7 +195,6 @@ class TranscriptService
                     'id'              => $student->id,
                     'name'            => $student->name,
                     'nim_nip'         => $student->nim_nip,
-                    'email'           => $student->email,
                     'final_score'     => $grade['final_score'],
                     'letter_grade'    => $grade['letter'],
                     'grade_point'     => $grade['grade_point'],
