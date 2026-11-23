@@ -30,6 +30,9 @@ class TranscriptController extends Controller
      */
     public function show(Request $request, User $user)
     {
+        // Pastikan hanya transkrip mahasiswa yang dapat diakses (Anti-kebocoran dokumen dosen/admin)
+        abort_unless($user->role === 'mahasiswa', 404);
+
         // Otorisasi audit akademik admin via TranscriptPolicy
         Gate::authorize('viewCumulativeTranscript', $user);
 
@@ -38,20 +41,6 @@ class TranscriptController extends Controller
 
         if ($request->wantsJson()) {
             return response()->json($data);
-        }
-
-        if (view()->exists('transcripts.admin')) {
-            return view('transcripts.admin', [
-                'data'    => $data,
-                'student' => $user,
-            ]);
-        }
-
-        if (view()->exists('admin.transcripts.show')) {
-            return view('admin.transcripts.show', [
-                'data'    => $data,
-                'student' => $user,
-            ]);
         }
 
         return view('transcripts.index', [
@@ -68,6 +57,9 @@ class TranscriptController extends Controller
      */
     public function exportPdf(Request $request, User $user)
     {
+        // Pastikan hanya transkrip mahasiswa yang dapat diekspor
+        abort_unless($user->role === 'mahasiswa', 404);
+
         // Otorisasi ekspor admin via TranscriptPolicy
         Gate::authorize('exportCumulativeTranscript', $user);
 

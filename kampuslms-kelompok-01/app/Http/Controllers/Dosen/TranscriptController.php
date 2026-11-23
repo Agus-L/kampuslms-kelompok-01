@@ -94,14 +94,6 @@ class TranscriptController extends Controller
             return response()->json($data);
         }
 
-        if (view()->exists('transcripts.dosen')) {
-            return view('transcripts.dosen', compact('data', 'course', 'student'));
-        }
-
-        if (view()->exists('dosen.transcripts.show')) {
-            return view('dosen.transcripts.show', compact('data', 'course', 'student'));
-        }
-
         return view('transcripts.course', [
             'data'    => $data,
             'course'  => $course,
