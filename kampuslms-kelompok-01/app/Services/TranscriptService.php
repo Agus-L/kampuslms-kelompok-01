@@ -161,7 +161,7 @@ class TranscriptService
                 },
             ])
             ->orderBy('code', 'asc')
-            ->get();
+            ->get(); 
 
         $courseResults = [];
 
@@ -232,7 +232,8 @@ class TranscriptService
                 'students'      => $studentResults,
             ];
         }
-
+        $totalAllStudents = collect($courseResults)->sum('total_students');
+        
         return [
             'lecturer' => [
                 'id'      => $lecturer->id,
@@ -240,9 +241,10 @@ class TranscriptService
                 'nim_nip' => $lecturer->nim_nip,
                 'email'   => $lecturer->email,
             ],
-            'courses'       => $courseResults,
-            'total_courses' => count($courseResults),
-            'academic_period' => config('academic.current_period', '2025/2026 Genap'),
+            'courses'              => $courseResults,
+            'total_courses'        => count($courseResults),
+            'total_students_count' => $totalAllStudents,
+            'academic_period'      => config('academic.current_period', '2025/2026 Genap'),
         ];
     }
 
