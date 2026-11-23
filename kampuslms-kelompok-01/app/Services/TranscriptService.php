@@ -149,7 +149,7 @@ class TranscriptService
         // Ambil semua mata kuliah milik dosen ini, beserta mahasiswa dan tugas-tugasnya
         $courses = $lecturer->taughtCourses()
             ->with([
-                'students:id,name,nim_nip,email',
+                'students:id,name,nim_nip', //bug IDOR dari kel 9 (1)
                 'assignments' => function ($q) {
                     $q->select(['id', 'course_id', 'title', 'max_score', 'due_at', 'status'])
                       ->where('status', 'published')
@@ -161,7 +161,7 @@ class TranscriptService
                 },
             ])
             ->orderBy('code', 'asc')
-            ->get();
+            ->get(); 
 
         $courseResults = [];
 
@@ -194,8 +194,7 @@ class TranscriptService
                 $studentResults[] = [
                     'id'              => $student->id,
                     'name'            => $student->name,
-                    'nim_nip'         => $student->nim_nip,
-                    'email'           => $student->email,
+                    'nim_nip'         => $student->nim_nip, // Bug IDOR dari kelompok 9 (1)
                     'final_score'     => $grade['final_score'],
                     'letter_grade'    => $grade['letter'],
                     'grade_point'     => $grade['grade_point'],
@@ -230,7 +229,8 @@ class TranscriptService
                 'students'      => $studentResults,
             ];
         }
-
+        $totalAllStudents = collect($courseResults)->sum('total_students');
+        
         return [
             'lecturer' => [
                 'id'      => $lecturer->id,
@@ -238,8 +238,9 @@ class TranscriptService
                 'nim_nip' => $lecturer->nim_nip,
                 'email'   => $lecturer->email,
             ],
-            'courses'       => $courseResults,
-            'total_courses' => count($courseResults),
+            'courses'              => $courseResults,
+            'total_courses'        => count($courseResults),
+            'total_students_count' => $totalAllStudents,
         ];
     }
 

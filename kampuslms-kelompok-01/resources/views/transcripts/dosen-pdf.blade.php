@@ -156,7 +156,8 @@
         <td>{{ $total_courses }} Mata Kuliah</td>
         <td>Total Mahasiswa</td>
         <td>:</td>
-        <td>{{ collect($courses)->sum('total_students') }} Mahasiswa</td>
+        <td>{{ $total_students_count }} Mahasiswa</td> 
+        <!-- bug duplikasi dari kel 9 (3) -->
     </tr>
     <tr>
         <td>Tahun Akademik</td>
