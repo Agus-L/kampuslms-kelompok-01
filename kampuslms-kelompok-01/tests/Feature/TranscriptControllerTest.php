@@ -193,5 +193,25 @@ class TranscriptControllerTest extends TestCase
 
         $response->assertStatus(403);
     }
+
+    public function test_admin_cannot_view_transcript_of_non_student(): void
+    {
+        // Admin mencoba membuka transkrip pengguna berstatus dosen -> Ditolak 404
+        $response = $this->actingAs($this->admin)->get(
+            route('admin.users.transcript.show', ['user' => $this->dosen1])
+        );
+
+        $response->assertStatus(404);
+    }
+
+    public function test_admin_cannot_export_transcript_of_non_student(): void
+    {
+        // Admin mencoba mengekspor transkrip pengguna berstatus dosen -> Ditolak 404
+        $response = $this->actingAs($this->admin)->get(
+            route('admin.users.transcript.export.pdf', ['user' => $this->dosen1])
+        );
+
+        $response->assertStatus(404);
+    }
 }
 
