@@ -96,6 +96,15 @@ class CoursePolicy
     }
 
     /**
+     * Tentukan apakah pengguna dapat melihat buku nilai (gradebook) seluruh kelas.
+     * HANYA dosen pengampu mata kuliah ini yang diizinkan (review A09 Temuan 1).
+     */
+    public function viewGradebook(User $user, Course $course): bool
+    {
+        return $user->role === 'dosen' && $course->lecturer_id === $user->id;
+    }
+
+    /**
      * Tentukan apakah pengguna dapat mengakses transkrip nilai mahasiswa pada mata kuliah ini.
      * Mendelegasikan pemeriksaan ke TranscriptPolicy (Tahap 2).
      */

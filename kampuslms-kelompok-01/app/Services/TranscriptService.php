@@ -149,7 +149,7 @@ class TranscriptService
         // Ambil semua mata kuliah milik dosen ini, beserta mahasiswa dan tugas-tugasnya
         $courses = $lecturer->taughtCourses()
             ->with([
-                'students:id,name,nim_nip', //bug IDOR dari kel 9 (1)
+                'students:id,name,nim_nip',
                 'assignments' => function ($q) {
                     $q->select(['id', 'course_id', 'title', 'max_score', 'due_at', 'status'])
                       ->where('status', 'published')
@@ -170,14 +170,17 @@ class TranscriptService
             $allSubmissions = $assignments->flatMap(fn ($a) => $a->submissions);
             $students       = $course->students->sortBy('nim_nip')->values();
 
+            // Kelompokkan submission satu kali berdasarkan user_id (O(M)) untuk efisiensi memori & CPU
+            $submissionsByStudent = $allSubmissions->groupBy('user_id');
+
             $studentResults = [];
             $totalFinalScore = 0.0;
             $gradedStudentCount = 0;
             $passedCount = 0;
 
             foreach ($students as $student) {
-                // Filter submission hanya milik mahasiswa ini
-                $studentSubmissions = $allSubmissions->where('user_id', $student->id)->values();
+                // Ambil langsung submission mahasiswa berdasarkan user_id (O(1) lookup)
+                $studentSubmissions = $submissionsByStudent->get($student->id, collect());
 
                 $grade      = $this->calculateCourseGrade($assignments, $studentSubmissions);
                 $attendance = $this->calculateTaskAttendance($assignments, $studentSubmissions);
@@ -194,7 +197,7 @@ class TranscriptService
                 $studentResults[] = [
                     'id'              => $student->id,
                     'name'            => $student->name,
-                    'nim_nip'         => $student->nim_nip, // Bug IDOR dari kelompok 9 (1)
+                    'nim_nip'         => $student->nim_nip,
                     'final_score'     => $grade['final_score'],
                     'letter_grade'    => $grade['letter'],
                     'grade_point'     => $grade['grade_point'],
@@ -241,6 +244,7 @@ class TranscriptService
             'courses'              => $courseResults,
             'total_courses'        => count($courseResults),
             'total_students_count' => $totalAllStudents,
+            'academic_period'      => config('academic.current_period', '2025/2026 Genap'),
         ];
     }
 

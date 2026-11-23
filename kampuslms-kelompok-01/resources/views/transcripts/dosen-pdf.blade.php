@@ -162,7 +162,7 @@
     <tr>
         <td>Tahun Akademik</td>
         <td>:</td>
-        <td>2025/2026 Genap</td>
+        <td>{{ $academic_period ?? config('academic.current_period', '2025/2026 Genap') }}</td>
         <td>Tanggal Cetak</td>
         <td>:</td>
         <td>{{ $currentDate }}</td>

@@ -117,7 +117,8 @@
             </p>
         </div>
         <div style="display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap;">
-            @if($role === 'dosen')
+            {{-- Perbaikan Temuan 1 (review A09): Gunakan @can viewGradebook --}}
+            @can('viewGradebook', $course)
                 <a href="{{ route('dosen.courses.grades.rekap', $course) }}" class="btn" style="padding: 0.6rem 1.25rem; font-size: 0.88rem; font-weight: 700; background: #1d4ed8; color: #ffffff; border: 1px solid #1e40af; border-radius: 0.5rem; text-decoration: none; box-shadow: 0 2px 4px rgba(29, 78, 216, 0.25); display: inline-flex; align-items: center; gap: 0.35rem; transition: all 0.2s ease;"
                    onmouseover="this.style.background='#1e40af'; this.style.borderColor='#1e3a8a'; this.style.transform='translateY(-1px)'; this.style.boxShadow='0 4px 10px rgba(29, 78, 216, 0.35)';"
                    onmouseout="this.style.background='#1d4ed8'; this.style.borderColor='#1e40af'; this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 4px rgba(29, 78, 216, 0.25)';">
@@ -126,7 +127,9 @@
                 <a href="{{ route('dosen.transcript.index') }}" class="btn" style="padding: 0.6rem 1.25rem; font-size: 0.88rem; font-weight: 700; background: var(--card-bg); color: var(--text-main); border: 1px solid var(--card-border); border-radius: 0.5rem; text-decoration: none; box-shadow: var(--card-shadow); display: inline-flex; align-items: center; gap: 0.35rem; transition: all 0.2s ease;">
                     📋 Laporan Transkrip (PDF)
                 </a>
-            @else
+            @endcan
+
+            @if($role === 'mahasiswa')
                 <a href="{{ route('mahasiswa.courses.grades.index', $course) }}" class="btn" style="padding: 0.6rem 1.25rem; font-size: 0.88rem; font-weight: 700; background: #1d4ed8; color: #ffffff; border: 1px solid #1e40af; border-radius: 0.5rem; text-decoration: none; box-shadow: 0 2px 4px rgba(29, 78, 216, 0.25); display: inline-flex; align-items: center; gap: 0.35rem; transition: all 0.2s ease;"
                    onmouseover="this.style.background='#1e40af'; this.style.borderColor='#1e3a8a'; this.style.transform='translateY(-1px)'; this.style.boxShadow='0 4px 10px rgba(29, 78, 216, 0.35)';"
                    onmouseout="this.style.background='#1d4ed8'; this.style.borderColor='#1e40af'; this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 4px rgba(29, 78, 216, 0.25)';">
