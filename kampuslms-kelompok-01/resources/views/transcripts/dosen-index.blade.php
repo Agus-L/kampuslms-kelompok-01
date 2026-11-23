@@ -1,4 +1,4 @@
-<x-layout :title="'Laporan Transkrip Pengampu — Kampus LMS'">
+x-layout :title="'Laporan Transkrip Pengampu — Kampus LMS'">
     <div class="page-container">
         {{-- Breadcrumb --}}
         <nav class="breadcrumb" style="margin-bottom: 1rem;">
@@ -45,7 +45,7 @@
             <div style="background: var(--card-bg, #1e293b); border: 1px solid var(--card-border, #334155); border-radius: 0.75rem; padding: 1.25rem; text-align: center;">
                 <div style="font-size: 0.78rem; color: var(--text-muted, #94a3b8); font-weight: 600; text-transform: uppercase;">Total Mahasiswa</div>
                 <div style="font-size: 1.6rem; font-weight: 800; color: #38bdf8; margin-top: 0.25rem;">
-                    {{ collect($courses)->sum('total_students') }}
+                    {{ $total_students_count }} 
                 </div>
             </div>
         </div>

@@ -39,7 +39,7 @@ class TranscriptController extends Controller
         $data = $this->transcriptService->getLecturerCoursesData($lecturer);
 
         if ($request->wantsJson()) {
-            return response()->json($data);
+            return response()->json($data);// bug temuan kel 9
         }
 
         return view('transcripts.dosen-index', $data);
