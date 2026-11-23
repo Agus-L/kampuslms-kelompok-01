@@ -94,7 +94,8 @@ class GradeController extends Controller
      */
     public function rekap(Course $course)
     {
-        Gate::authorize('view', $course);
+        // Perbaikan Temuan 1 (review A09): Pisahkan ability viewGradebook
+        Gate::authorize('viewGradebook', $course);
 
         // Optimisasi Minggu 11 (Penyebab #2): Ambil HANYA kolom yang dibutuhkan (hindari SELECT *)
         // Menghemat alokasi memori Eloquent, bandwidth DB, dan tidak memuat kolom sensitif/teks panjang
@@ -104,6 +105,7 @@ class GradeController extends Controller
             ->get();
 
         // Ambil mahasiswa dan relasi bersarang dengan kolom spesifik
+        // Perbaikan Temuan 2 (review A09): Terapkan pagination 20 per halaman
         $students = $course->students()
             ->select(['users.id', 'users.name', 'users.nim_nip', 'users.email'])
             ->with(['submissions' => function ($query) use ($assignments) {
@@ -114,16 +116,41 @@ class GradeController extends Controller
                       }]);
             }])
             ->orderBy('name', 'asc')
-            ->get();
+            ->paginate(20)
+            ->withQueryString();
 
-        // Optimisasi Minggu 11 (Penyebab #1): Raw Aggregate di Database
-        // Menggantikan nested loop PHP in-memory dengan query agregasi database engine
+        // Perbaikan Temuan 3 (review A09): Pindahkan kalkulasi nilai per mahasiswa
+        // dari Blade (@php) ke Controller agar tampilan bersih (Separation of Concerns).
+        $students->each(function ($student) use ($assignments) {
+            $totalScore  = 0;
+            $gradedCount = 0;
+
+            foreach ($assignments as $assignment) {
+                $sub = $student->submissions->firstWhere('assignment_id', $assignment->id);
+                if ($sub && $sub->grade) {
+                    $totalScore  += $sub->grade->score;
+                    $gradedCount++;
+
+                    // Hitung persentase per tugas dan simpan langsung di objek grade
+                    $sub->grade->percentage = $assignment->max_score > 0
+                        ? ($sub->grade->score / $assignment->max_score) * 100
+                        : 0;
+                }
+            }
+
+            // Simpan hasil perhitungan sebagai properti dinamis di objek student
+            $student->graded_count  = $gradedCount;
+            $student->average_score = $gradedCount > 0 ? round($totalScore / $gradedCount, 2) : null;
+        });
+
+        // Optimisasi Minggu 11 (Penyebab #1) & Perbaikan Temuan 2:
+        // Raw Aggregate dihitung dari SELURUH peserta kelas (bukan dari paginator) agar statistik kelas utuh
         $assignmentIds = $assignments->pluck('id');
-        $studentIds    = $students->pluck('id');
+        $allStudentIds = $course->students()->pluck('users.id');
 
-        $aggregate = Grade::whereHas('submission', function ($query) use ($assignmentIds, $studentIds) {
+        $aggregate = Grade::whereHas('submission', function ($query) use ($assignmentIds, $allStudentIds) {
             $query->whereIn('assignment_id', $assignmentIds)
-                  ->whereIn('user_id', $studentIds);
+                  ->whereIn('user_id', $allStudentIds);
         })
         ->selectRaw('AVG(score) as avg_score, MAX(score) as max_score, MIN(score) as min_score, COUNT(score) as graded_count')
         ->first();
@@ -133,7 +160,7 @@ class GradeController extends Controller
             'max'            => ($aggregate && $aggregate->max_score !== null) ? (float) $aggregate->max_score : null,
             'min'            => ($aggregate && $aggregate->min_score !== null) ? (float) $aggregate->min_score : null,
             'graded_count'   => (int) ($aggregate->graded_count ?? 0),
-            'total_students' => $students->count(),
+            'total_students' => $students->total(),
         ];
 
         return view('courses.grades.rekap', compact('course', 'assignments', 'students', 'stats'));
