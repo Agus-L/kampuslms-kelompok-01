@@ -193,5 +193,34 @@ class TranscriptControllerTest extends TestCase
 
         $response->assertStatus(403);
     }
+
+    public function test_admin_cannot_view_transcript_of_non_student(): void
+    {
+        // Admin mencoba membuka transkrip pengguna berstatus dosen -> Ditolak 404
+        $response = $this->actingAs($this->admin)->get(
+            route('admin.users.transcript.show', ['user' => $this->dosen1])
+        );
+
+        $response->assertStatus(404);
+    }
+
+    public function test_admin_cannot_export_transcript_of_non_student(): void
+    {
+        // Admin mencoba mengekspor transkrip pengguna berstatus dosen -> Ditolak 404
+        $response = $this->actingAs($this->admin)->get(
+            route('admin.users.transcript.export.pdf', ['user' => $this->dosen1])
+        );
+
+        $response->assertStatus(404);
+    }
+
+    public function test_dosen_transcript_json_does_not_expose_student_email(): void
+    {
+        $response = $this->actingAs($this->dosen1)->getJson('/dosen/transcript');
+        $response->assertOk();
+        // Memastikan email mahasiswa tidak bocor ke dalam respon JSON laporan
+        $response->assertJsonMissing(['email' => $this->mhs1->email]);
+        $this->assertArrayNotHasKey('email', $response->json('courses.0.students.0') ?? []);
+    }
 }
 
