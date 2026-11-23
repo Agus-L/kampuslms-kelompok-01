@@ -2,7 +2,7 @@ name: CI — KampusLMS
 
 on:
   push:
-    branches: ["dev", "main", "liberty-1708"]
+    branches: ["dev", "main", "liberty-1708", "tasya-1009"]
   pull_request:
     branches: ["dev", "main"]
 
