@@ -269,6 +269,7 @@ class CoreWorkflowFeatureTest extends TestCase
         $this->assertDatabaseMissing('materials', [
             'title' => 'Materi Sabotase Dosen 2',
         ]);
+        Storage::disk('local')->assertMissing('materials/courses/' . $this->course1->id . '/' . $file->hashName());
     }
 
     /* =========================================================================
@@ -364,6 +365,7 @@ class CoreWorkflowFeatureTest extends TestCase
             'assignment_id' => $assignment->id,
             'user_id'       => $this->mhs2->id,
         ]);
+        Storage::disk('local')->assertMissing('submissions/' . $assignment->id . '/' . $file->hashName());
     }
 
     /* =========================================================================
@@ -516,6 +518,33 @@ class CoreWorkflowFeatureTest extends TestCase
 
         // Verifikasi notifikasi terkirim ke mahasiswa 1 yang terdaftar di course 1
         Notification::assertSentTo($this->mhs1, AssignmentPublishedNotification::class);
+
+        // Verifikasi mahasiswa 2 (tidak terdaftar di course 1) TIDAK menerima notifikasi (Boundary Isolation)
+        Notification::assertNotSentTo($this->mhs2, AssignmentPublishedNotification::class);
+    }
+
+    public function test_notifikasi_tidak_terkirim_saat_tugas_masih_berstatus_draft(): void
+    {
+        Notification::fake();
+
+        $payload = [
+            'title'        => 'Tugas Rancangan Belum Rilis',
+            'instructions' => 'Draft instruksi tugas.',
+            'due_at'       => now()->addDays(5)->format('Y-m-d H:i:s'),
+            'max_score'    => 100,
+            'allow_late'   => 1,
+            'status'       => 'draft',
+        ];
+
+        $response = $this->actingAs($this->dosen1)->post(
+            route('dosen.courses.assignments.store', $this->course1),
+            $payload
+        );
+
+        $response->assertRedirect(route('dosen.courses.assignments.index', $this->course1));
+
+        // Verifikasi tidak ada notifikasi yang terkirim saat status tugas masih draft
+        Notification::assertNothingSent();
     }
 
     public function test_notifikasi_terkirim_ke_mahasiswa_saat_nilai_diberikan(): void
@@ -538,6 +567,9 @@ class CoreWorkflowFeatureTest extends TestCase
 
         // Verifikasi notifikasi nilai terkirim khusus ke mahasiswa pemilik submission
         Notification::assertSentTo($this->mhs1, SubmissionGradedNotification::class);
+
+        // Verifikasi mahasiswa lain TIDAK menerima notifikasi nilai ini
+        Notification::assertNotSentTo($this->mhs2, SubmissionGradedNotification::class);
     }
 
     /**
