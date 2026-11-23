@@ -170,14 +170,17 @@ class TranscriptService
             $allSubmissions = $assignments->flatMap(fn ($a) => $a->submissions);
             $students       = $course->students->sortBy('nim_nip')->values();
 
+            // Kelompokkan submission satu kali berdasarkan user_id (O(M)) untuk efisiensi memori & CPU
+            $submissionsByStudent = $allSubmissions->groupBy('user_id');
+
             $studentResults = [];
             $totalFinalScore = 0.0;
             $gradedStudentCount = 0;
             $passedCount = 0;
 
             foreach ($students as $student) {
-                // Filter submission hanya milik mahasiswa ini
-                $studentSubmissions = $allSubmissions->where('user_id', $student->id)->values();
+                // Ambil langsung submission mahasiswa berdasarkan user_id (O(1) lookup)
+                $studentSubmissions = $submissionsByStudent->get($student->id, collect());
 
                 $grade      = $this->calculateCourseGrade($assignments, $studentSubmissions);
                 $attendance = $this->calculateTaskAttendance($assignments, $studentSubmissions);
@@ -239,6 +242,7 @@ class TranscriptService
             ],
             'courses'       => $courseResults,
             'total_courses' => count($courseResults),
+            'academic_period' => config('academic.current_period', '2025/2026 Genap'),
         ];
     }
 
