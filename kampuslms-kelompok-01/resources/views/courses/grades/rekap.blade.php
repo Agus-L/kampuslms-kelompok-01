@@ -93,7 +93,7 @@
             <h2 style="font-size: 1.2rem; font-weight: 700; color: var(--text-main, #f8fafc); margin: 0 0 1.25rem 0;">
                 📋 Tabel Matriks Nilai
                 <span style="font-size: 0.82rem; font-weight: 600; padding: 0.15rem 0.55rem; background: rgba(99, 102, 241, 0.15); color: #818cf8; border-radius: 9999px; margin-left: 0.5rem;">
-                    {{ $students->count() }} Mahasiswa · {{ $assignments->count() }} Tugas
+                    {{ $stats->total_students }} Mahasiswa · {{ $assignments->count() }} Tugas
                 </span>
             </h2>
 
@@ -141,16 +141,12 @@
                         </thead>
                         <tbody>
                             @foreach($students as $index => $student)
-                                @php
-                                    $totalScore  = 0;
-                                    $gradedCount = 0;
-                                @endphp
                                 <tr style="border-bottom: 1px solid var(--card-border, #334155); transition: background 0.15s;"
                                     onmouseover="this.style.background='rgba(99, 102, 241, 0.04)'"
                                     onmouseout="this.style.background='transparent'">
-                                    {{-- Nomor --}}
+                                    {{-- Nomor (Perbaikan Temuan 2: Paginasi) --}}
                                     <td style="padding: 0.85rem 1rem; text-align: center; font-size: 0.85rem; color: var(--text-muted, #94a3b8); font-weight: 600;">
-                                        {{ $index + 1 }}
+                                        {{ $students->firstItem() + $index }}
                                     </td>
 
                                     {{-- Nama & Email --}}
@@ -180,25 +176,19 @@
                                                     Belum Dinilai
                                                 </span>
                                             @else
-                                                {{-- Sudah dinilai --}}
-                                                @php
-                                                    $totalScore  += $sub->grade->score;
-                                                    $gradedCount++;
-                                                    $percentage = $assignment->max_score > 0 ? ($sub->grade->score / $assignment->max_score) * 100 : 0;
-                                                @endphp
-                                                <span style="font-size: 0.9rem; font-weight: 800; color: {{ $percentage >= 75 ? '#10b981' : ($percentage >= 50 ? '#eab308' : '#f87171') }};">
+                                                {{-- Sudah dinilai — persentase dihitung di Controller (fix: review A09 Temuan 3) --}}
+                                                <span style="font-size: 0.9rem; font-weight: 800; color: {{ $sub->grade->percentage >= 75 ? '#10b981' : ($sub->grade->percentage >= 50 ? '#eab308' : '#f87171') }};">
                                                     {{ number_format($sub->grade->score, 0) }}
                                                 </span>
                                             @endif
                                         </td>
                                     @endforeach
 
-                                    {{-- Kolom Rata-rata --}}
+                                    {{-- Kolom Rata-rata — dihitung di Controller (fix: review A09 Temuan 3) --}}
                                     <td style="padding: 0.85rem 1rem; text-align: center; background: rgba(99, 102, 241, 0.05);">
-                                        @if($gradedCount > 0)
-                                            @php $avg = round($totalScore / $gradedCount, 2); @endphp
+                                        @if($student->average_score !== null)
                                             <span style="font-size: 1rem; font-weight: 800; color: #818cf8;">
-                                                {{ number_format($avg, 2) }}
+                                                {{ number_format($student->average_score, 2) }}
                                             </span>
                                         @else
                                             <span style="font-size: 0.85rem; color: var(--text-muted, #64748b);">—</span>
@@ -216,6 +206,13 @@
                         </tbody>
                     </table>
                 </div>
+
+                {{-- Paginasi (Perbaikan Temuan 2: Pagination 20) --}}
+                @if($students->hasPages())
+                    <div style="margin-top: 1.25rem; display: flex; justify-content: center;">
+                        {{ $students->links() }}
+                    </div>
+                @endif
 
                 {{-- Legenda --}}
                 <div style="display: flex; gap: 1.5rem; flex-wrap: wrap; margin-top: 1.25rem; padding-top: 1rem; border-top: 1px solid var(--card-border, #334155);">
